@@ -26,26 +26,47 @@ const copiar = (x) => JSON.parse(JSON.stringify(x))
 
 /**
  * opciones: { semilla, modo: 'operacion' | 'vacio', extension }
- * `extension` es una fábrica (config) => { inicializar, pasoRapido, maneja,
- * validar, comando, instantanea } que agrega capas sobre el proceso (el
- * control, en src/control) sin que el simulador dependa de ellas. Corre en
- * cada paso rápido, antes de los equipos, y guarda su estado en estado.control.
+ * `extension` es una fábrica (o una lista de fábricas) (config) => { clave,
+ * inicializar, pasoRapido, maneja, validar, comando, instantanea } que agrega
+ * capas sobre el proceso (el control en src/control, el director de
+ * escenarios y misiones en src/escenarios) sin que el simulador dependa de
+ * ellas. Cada una guarda su estado en estado[clave] y corre en cada paso
+ * rápido, en el orden de la lista, antes de los equipos.
  */
 export function crearPlanta(config, opciones = {}) {
   let modelo = construirModelo(config)
   let estado = crearEstadoInicial(modelo, opciones)
   let cola = [] // comandos pendientes
   let pendiente = 0 // segundos solicitados aún no simulados
-  let ext = opciones.extension ? opciones.extension(modelo.config) : null
+  const fabricas = [opciones.extension ?? []].flat()
+  let exts = []
+  const extPara = (cmd) => exts.find((e) => e.maneja(cmd))
   const ctx = () => ({
     modelo,
     estado,
     dt: modelo.dtR,
     aplicar: (cmd) => aplicarComando(modelo, estado, cmd, true),
     validar: (cmd) => validarComando(modelo, estado, cmd),
+    /** Ejecuta cualquier comando (del proceso o de una extensión) desde una extensión. */
+    ejecutar(cmd) {
+      const e = extPara(cmd)
+      if (e) {
+        e.validar(ctx(), cmd)
+        e.comando(ctx(), cmd)
+      } else {
+        validarComando(modelo, estado, cmd)
+        aplicarComando(modelo, estado, cmd, true)
+      }
+    },
+    /** Instantánea de otra extensión (p. ej. 'control'). */
+    leer: (clave, op) => exts.find((e) => e.clave === clave)?.instantanea(ctx(), op ?? {}) ?? null,
     evento: (tipo, datos) => registrarEvento(modelo, estado, tipo, datos),
   })
-  if (ext) ext.inicializar(ctx())
+  function crearExtensiones() {
+    exts = fabricas.map((f) => f(modelo.config))
+    for (const e of exts) if (!estado[e.clave]) e.inicializar(ctx())
+  }
+  crearExtensiones()
 
   function avanzar(segundos) {
     pendiente += segundos
@@ -58,21 +79,23 @@ export function crearPlanta(config, opciones = {}) {
   function pasoRapido() {
     if (cola.length > 0) {
       for (const cmd of cola) {
-        if (ext?.maneja(cmd)) {
-          ext.comando(ctx(), cmd)
+        const e = extPara(cmd)
+        if (e) {
+          e.comando(ctx(), cmd)
           anotarComando(estado, cmd)
         } else aplicarComando(modelo, estado, cmd)
       }
       cola = []
     }
-    if (ext) ext.pasoRapido(ctx())
+    for (const e of exts) e.pasoRapido(ctx())
     pasoRapidoEquipos(modelo, estado, modelo.dtR)
     estado.paso += 1
     if (estado.paso % modelo.pasosPorLento === 0) pasoLento(modelo, estado)
   }
 
   function enviarComando(cmd) {
-    if (ext?.maneja(cmd)) ext.validar(ctx(), cmd)
+    const e = extPara(cmd)
+    if (e) e.validar(ctx(), cmd)
     else validarComando(modelo, estado, cmd)
     cola.push(copiar(cmd))
   }
@@ -82,9 +105,9 @@ export function crearPlanta(config, opciones = {}) {
     enviarComando,
     leerEstado: (op) => {
       // soloControl: solo la instantánea del control (más liviana: tendencias).
-      if (op?.soloControl) return { t: estado.paso * modelo.dtR, control: ext ? ext.instantanea(ctx(), op) : null }
+      if (op?.soloControl) return { t: estado.paso * modelo.dtR, control: ctx().leer('control', op) }
       const s = instantanea(modelo, estado, op)
-      if (ext) s.control = ext.instantanea(ctx(), op)
+      for (const e of exts) s[e.clave] = e.instantanea(ctx(), op ?? {})
       return s
     },
     balances: () => cierreBalances(modelo, estado),
@@ -97,10 +120,7 @@ export function crearPlanta(config, opciones = {}) {
       estado = datos.estado
       cola = datos.cola ?? []
       pendiente = datos.pendiente ?? 0
-      if (opciones.extension) {
-        ext = opciones.extension(modelo.config)
-        if (!estado.control) ext.inicializar(ctx())
-      }
+      crearExtensiones()
     },
     /** Acceso de solo lectura al modelo (geometría, corrientes) para herramientas y pruebas. */
     modelo: () => modelo,
@@ -136,6 +156,8 @@ function anotarComando(estado, cmd) {
  *   { tipo: 'perturbar', id: 'colgamiento', vaso, valor: altura (m) } · { id: 'soltar_columna', vaso }
  *   { tipo: 'perturbar', id: 'friccion', vaso, valor } · { id: 'finos', valor }  (multiplicadores)
  *   { tipo: 'perturbar', id: 'incrustacion', equipo: calentador, valor }  (factor f de la unidad activa)
+ *   { tipo: 'perturbar', id: 'canalizacion', vaso, valor }  (fracción 0–0,9 del contacto licor-astilla que se pierde)
+ *   { tipo: 'perturbar', id: 'taponamiento', malla, valor }  (aumento de la resistencia por finos, en R0)
  * En las astillas, 'caudalMadera' fija la velocidad del medidor para ese caudal con la densidad actual.
  */
 function validarComando(modelo, estado, cmd) {
@@ -179,10 +201,12 @@ function validarComando(modelo, estado, cmd) {
     if (!modelo.mallas[cmd.id]) throw new Error(`Mallas desconocidas: ${cmd.id}`)
     if (!['retrolavar', 'conmutacion_on', 'conmutacion_off', 'lavado_acido'].includes(cmd.accion)) throw new Error('Acción de mallas inválida')
   } else if (cmd.tipo === 'perturbar') {
-    if (['colgamiento', 'soltar_columna', 'friccion'].includes(cmd.id)) {
+    if (['colgamiento', 'soltar_columna', 'friccion', 'canalizacion'].includes(cmd.id)) {
       if (!modelo.vasoPorId[cmd.vaso]) throw new Error(`Vaso desconocido: ${cmd.vaso}`)
     } else if (cmd.id === 'incrustacion') {
       if (!modelo.equipos.calentadores[cmd.equipo]) throw new Error(`Calentador desconocido: ${cmd.equipo}`)
+    } else if (cmd.id === 'taponamiento') {
+      if (!modelo.mallas[cmd.malla]) throw new Error(`Mallas desconocidas: ${cmd.malla}`)
     } else if (cmd.id !== 'finos') throw new Error(`Perturbación desconocida: ${cmd.id}`)
     if (cmd.id !== 'soltar_columna') numero()
   } else throw new Error(`Comando desconocido: ${cmd.tipo}`)
@@ -218,6 +242,8 @@ function aplicarComando(modelo, estado, cmd, interno = false) {
     if (cmd.id === 'colgamiento') colgarColumna(modelo, estado, v, cmd.valor)
     else if (cmd.id === 'soltar_columna') soltarColumna(modelo, estado, v)
     else if (cmd.id === 'friccion') estado.vasos[v.id].friccion = Math.max(0.01, cmd.valor)
+    else if (cmd.id === 'canalizacion') estado.vasos[v.id].canalizacion = Math.min(0.9, Math.max(0, cmd.valor))
+    else if (cmd.id === 'taponamiento') estado.mallas[cmd.malla].rf += Math.max(0, cmd.valor)
     else if (cmd.id === 'incrustacion') {
       const c = estado.equipos.calentadores[cmd.equipo]
       c.incrustacion[c.activo] = Math.max(0, cmd.valor)

@@ -42,7 +42,7 @@ export function pOpcional(objeto, clave, defecto) {
 // Archivos de configuración del sistema de control: usan un formato compacto
 // (sin "valor/unidad/origen" por número; todos supuestos, declarado en su
 // "_descripcion") y los valida src/control al construir el control.
-export const ARCHIVOS_FORMATO_COMPACTO = ['instrumentos', 'lazos', 'enclavamientos', 'alarmas']
+export const ARCHIVOS_FORMATO_COMPACTO = ['instrumentos', 'lazos', 'enclavamientos', 'alarmas', 'eventos', 'campana']
 
 /**
  * Recorre toda la configuración y devuelve la lista de errores encontrados en

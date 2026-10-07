@@ -1,0 +1,676 @@
+{
+ "_descripcion": "Catálogo de eventos (perturbaciones y fallas). acciones: rampa de un objetivo (comando sin valor) hasta un valor (en 'unidad' si se indica) o por un factor del valor actual, en 'rampa' segundos; o un comando directo. duracion en s (null: permanente hasta que el operador lo resuelva). revertir: al terminar vuelve a los valores iniciales con la misma rampa. alTerminar: comandos al terminar. opciones: valores posibles de $parametros (el generador elige uno). peso: frecuencia relativa en el generador; dificultad: nivel mínimo (1–3). Todo supuesto; síntomas y respuesta en docs/EVENTOS.md.",
+ "generador": {
+  "intervalo_medio": {
+   "1": 21600,
+   "2": 10800,
+   "3": 5400
+  },
+  "aviso_previo": {
+   "1": true,
+   "2": true,
+   "3": false
+  }
+ },
+ "eventos": [
+  {
+   "id": "lluvia",
+   "nombre": "Lluvia: astillas más húmedas",
+   "categoria": "madera",
+   "acciones": [
+    {
+     "objetivo": {
+      "tipo": "fuente",
+      "id": "astillas",
+      "campo": "humedad"
+     },
+     "rampa": 3600,
+     "hasta": 53,
+     "unidad": "%"
+    }
+   ],
+   "duracion": 21600,
+   "revertir": true,
+   "peso": 3,
+   "dificultad": 1,
+   "causa": "Llueve sobre la pila de astillas del patio.",
+   "sintomas": "Sube la relación licor/madera (LW-117) con el mismo licor; el álcali se diluye: baja el álcali residual de las extracciones (AI-504) y, 3 a 5 h después, sube el kappa.",
+   "respuesta": "Pedir humedad de astillas al laboratorio, actualizar la humedad en FFC-117 (relación licor/madera) y, si el kappa sube, aumentar levemente la carga de álcali en FFC-110."
+  },
+  {
+   "id": "lluvia_fuerte",
+   "nombre": "Temporal: astillas muy húmedas",
+   "categoria": "madera",
+   "acciones": [
+    {
+     "objetivo": {
+      "tipo": "fuente",
+      "id": "astillas",
+      "campo": "humedad"
+     },
+     "rampa": 3600,
+     "hasta": 56,
+     "unidad": "%"
+    }
+   ],
+   "duracion": 43200,
+   "revertir": true,
+   "peso": 1,
+   "dificultad": 2,
+   "causa": "Temporal sobre la pila de astillas: la madera llega muy mojada.",
+   "sintomas": "Sube la relación licor/madera (LW-117) con el mismo licor; el álcali se diluye: baja el álcali residual de las extracciones (AI-504) y, 3 a 5 h después, sube el kappa.",
+   "respuesta": "Pedir humedad de astillas al laboratorio, actualizar la humedad en FFC-117 (relación licor/madera) y, si el kappa sube, aumentar levemente la carga de álcali en FFC-110."
+  },
+  {
+   "id": "densidad_baja",
+   "nombre": "Madera más liviana",
+   "categoria": "madera",
+   "acciones": [
+    {
+     "objetivo": {
+      "tipo": "fuente",
+      "id": "astillas",
+      "campo": "densidad"
+     },
+     "rampa": 1800,
+     "hasta": 440
+    }
+   ],
+   "duracion": 28800,
+   "revertir": true,
+   "peso": 2,
+   "dificultad": 1,
+   "causa": "Llega un lote de nitens de menor densidad básica.",
+   "sintomas": "El medidor calcula la madera con la densidad nominal: entra menos madera de la que indica WI-101. La carga real de álcali sube: sube el álcali residual y baja el kappa; baja la producción real (QI-702).",
+   "respuesta": "Pedir densidad al laboratorio; subir la velocidad del medidor para recuperar la producción y corregir la carga de álcali según el kappa."
+  },
+  {
+   "id": "densidad_alta",
+   "nombre": "Madera más densa",
+   "categoria": "madera",
+   "acciones": [
+    {
+     "objetivo": {
+      "tipo": "fuente",
+      "id": "astillas",
+      "campo": "densidad"
+     },
+     "rampa": 1800,
+     "hasta": 520
+    }
+   ],
+   "duracion": 28800,
+   "revertir": true,
+   "peso": 2,
+   "dificultad": 1,
+   "causa": "Llega un lote de mayor densidad básica.",
+   "sintomas": "Entra más madera de la indicada: baja el álcali residual, sube el kappa y la producción real.",
+   "respuesta": "Pedir densidad al laboratorio; aumentar la carga de álcali o bajar la velocidad del medidor."
+  },
+  {
+   "id": "sobre_espesor",
+   "nombre": "Astillas con sobre espesor",
+   "categoria": "madera",
+   "acciones": [
+    {
+     "objetivo": {
+      "tipo": "fuente",
+      "id": "astillas",
+      "campo": "impregnabilidad"
+     },
+     "rampa": 600,
+     "hasta": 0.55
+    }
+   ],
+   "duracion": 14400,
+   "revertir": true,
+   "peso": 2,
+   "dificultad": 2,
+   "causa": "Falla del astillador: más astillas gruesas.",
+   "sintomas": "La impregnación es más lenta: suben los rechazos (laboratorio) y algo el kappa, horas después.",
+   "respuesta": "Pedir granulometría y rechazos; aumentar la temperatura y el tiempo de impregnación, o la carga de álcali a la alimentación; avisar al patio."
+  },
+  {
+   "id": "finos",
+   "nombre": "Exceso de finos",
+   "categoria": "madera",
+   "acciones": [
+    {
+     "objetivo": {
+      "tipo": "perturbar",
+      "id": "finos"
+     },
+     "rampa": 600,
+     "hasta": 2.5
+    }
+   ],
+   "duracion": 21600,
+   "revertir": true,
+   "peso": 2,
+   "dificultad": 2,
+   "causa": "Astillas sobre astilladas o recicladas.",
+   "sintomas": "Las mallas se tapan más rápido: sube su ΔP (PDI-52x) y baja el caudal que pueden extraer.",
+   "respuesta": "Mantener la conmutación de mallas activa, retrolavar las que se acerquen al límite y bajar la extracción si es necesario."
+  },
+  {
+   "id": "envejecidas",
+   "nombre": "Astillas envejecidas",
+   "categoria": "madera",
+   "acciones": [
+    {
+     "objetivo": {
+      "tipo": "fuente",
+      "id": "astillas",
+      "campo": "reactividad"
+     },
+     "rampa": 1800,
+     "factor": 0.88
+    }
+   ],
+   "duracion": 28800,
+   "revertir": true,
+   "peso": 1,
+   "dificultad": 2,
+   "causa": "Astillas almacenadas mucho tiempo en la pila.",
+   "sintomas": "La madera es menos reactiva: sube el kappa varias horas después sin otra causa visible.",
+   "respuesta": "Confirmar con el kappa del laboratorio; subir el factor H (temperatura) o la carga de álcali."
+  },
+  {
+   "id": "licor_debil",
+   "nombre": "Licor blanco débil",
+   "categoria": "licor",
+   "acciones": [
+    {
+     "objetivo": {
+      "tipo": "fuente",
+      "id": "licor_blanco",
+      "campo": "OH"
+     },
+     "rampa": 3600,
+     "hasta": 106,
+     "unidad": "g/L NaOH"
+    }
+   ],
+   "duracion": 28800,
+   "revertir": true,
+   "peso": 2,
+   "dificultad": 1,
+   "causa": "La caustificación entrega licor con menos álcali efectivo.",
+   "sintomas": "El caudal de licor blanco no cambia, pero la carga real baja: cae el álcali residual de las extracciones y sube el kappa horas después.",
+   "respuesta": "Pedir EA del licor blanco al laboratorio: el bloque FFC-110 lo toma y compensa el caudal. Vigilar que haya licor suficiente."
+  },
+  {
+   "id": "sulfidez_baja",
+   "nombre": "Baja la sulfidez del licor blanco",
+   "categoria": "licor",
+   "acciones": [
+    {
+     "objetivo": {
+      "tipo": "fuente",
+      "id": "licor_blanco",
+      "campo": "HS"
+     },
+     "rampa": 3600,
+     "factor": 0.8
+    }
+   ],
+   "duracion": 28800,
+   "revertir": true,
+   "peso": 1,
+   "dificultad": 2,
+   "causa": "Pérdidas de azufre en el ciclo de recuperación.",
+   "sintomas": "Deslignificación algo más lenta: sube el kappa; la viscosidad baja.",
+   "respuesta": "Pedir sulfidez al laboratorio; compensar con temperatura o carga y avisar a recuperación."
+  },
+  {
+   "id": "falta_licor",
+   "nombre": "Falta de licor blanco",
+   "categoria": "licor",
+   "acciones": [
+    {
+     "objetivo": {
+      "tipo": "servicio",
+      "id": "licorBlancoMax"
+     },
+     "rampa": 600,
+     "hasta": 220,
+     "unidad": "m3/h"
+    }
+   ],
+   "duracion": 7200,
+   "revertir": true,
+   "peso": 1,
+   "dificultad": 2,
+   "causa": "Problema en la caustificación: hay menos licor blanco disponible.",
+   "sintomas": "Los caudales de licor blanco (FI-111 a FI-114) quedan bajo su consigna aunque las válvulas abran: la carga real cae y el kappa sube horas después.",
+   "respuesta": "Bajar el ritmo de producción para que la carga se mantenga con el licor disponible, o aceptar kappa alto por un periodo corto."
+  },
+  {
+   "id": "vapor_bajo",
+   "nombre": "Caída de presión del vapor de media",
+   "categoria": "servicios",
+   "acciones": [
+    {
+     "objetivo": {
+      "tipo": "servicio",
+      "id": "presionVaporMP"
+     },
+     "rampa": 300,
+     "hasta": 8.5,
+     "unidad": "bar(g)"
+    }
+   ],
+   "duracion": 3600,
+   "revertir": true,
+   "peso": 2,
+   "dificultad": 1,
+   "causa": "Problema en la caldera de poder o alto consumo en otra área.",
+   "sintomas": "Las válvulas de vapor de los TIC abren al máximo y las temperaturas de las circulaciones caen; baja el factor H.",
+   "respuesta": "Si no se recupera, bajar el ritmo para mantener el factor H; avisar a energía."
+  },
+  {
+   "id": "filtrado_caliente",
+   "nombre": "Filtrado de lavado más caliente",
+   "categoria": "servicios",
+   "acciones": [
+    {
+     "objetivo": {
+      "tipo": "fuente",
+      "id": "filtrado",
+      "campo": "T"
+     },
+     "rampa": 1800,
+     "hasta": 88
+    }
+   ],
+   "duracion": 14400,
+   "revertir": true,
+   "peso": 1,
+   "dificultad": 2,
+   "causa": "El lavado envía filtrado más caliente.",
+   "sintomas": "Sube la temperatura del fondo y del soplado (TI-604) y el riesgo de vaporización en el estanque.",
+   "respuesta": "Aumentar el filtrado de lavado (factor de dilución) o pasar FIC-601 al control de temperatura de soplado (TIC-604)."
+  },
+  {
+   "id": "filtrado_sucio",
+   "nombre": "Filtrado de lavado sucio",
+   "categoria": "servicios",
+   "acciones": [
+    {
+     "objetivo": {
+      "tipo": "fuente",
+      "id": "filtrado",
+      "campo": "LD"
+     },
+     "rampa": 1800,
+     "hasta": 35
+    }
+   ],
+   "duracion": 14400,
+   "revertir": true,
+   "peso": 1,
+   "dificultad": 2,
+   "causa": "El lavado opera con baja eficiencia.",
+   "sintomas": "Suben los sólidos disueltos en el fondo y en la cocción inferior; consume álcali; baja la viscosidad.",
+   "respuesta": "Aumentar el factor de dilución y la extracción final; avisar al lavado."
+  },
+  {
+   "id": "evaporadores_limitados",
+   "nombre": "Evaporadores limitan la recepción de licor",
+   "categoria": "servicios",
+   "acciones": [
+    {
+     "objetivo": {
+      "tipo": "servicio",
+      "id": "limiteEvaporadores"
+     },
+     "rampa": 300,
+     "hasta": 800,
+     "unidad": "m3/h"
+    }
+   ],
+   "duracion": 7200,
+   "revertir": true,
+   "peso": 1,
+   "dificultad": 2,
+   "causa": "Problema en la planta de evaporadores.",
+   "sintomas": "Los ciclones flash se llenan (LI-510/511 altos), la extracción principal queda limitada y la presión del digestor sube en segundos.",
+   "respuesta": "Bajar la extracción y el ritmo antes de que suba la presión; vigilar PI-301 y la válvula de alivio."
+  },
+  {
+   "id": "bomba_circ_sup",
+   "nombre": "Caída de la bomba de circulación superior",
+   "categoria": "equipos",
+   "acciones": [
+    {
+     "comando": {
+      "tipo": "bomba",
+      "id": "bomba_circ_sup",
+      "accion": "detener"
+     }
+    }
+   ],
+   "duracion": null,
+   "revertir": false,
+   "peso": 2,
+   "dificultad": 2,
+   "causa": "Disparo eléctrico de la bomba.",
+   "sintomas": "FI-401 cae a cero, el enclavamiento I-03 cierra el vapor, la temperatura de cocción superior baja; el balance de licor cambia y la presión puede subir.",
+   "respuesta": "Volver a partir la bomba, rearmar I-03 y devolver TIC-402 a automático; vigilar la presión mientras tanto."
+  },
+  {
+   "id": "bomba_transferencia",
+   "nombre": "Caída de la bomba de transferencia",
+   "categoria": "equipos",
+   "acciones": [
+    {
+     "comando": {
+      "tipo": "bomba",
+      "id": "bomba_transferencia",
+      "accion": "detener"
+     }
+    }
+   ],
+   "duracion": null,
+   "revertir": false,
+   "peso": 1,
+   "dificultad": 3,
+   "causa": "Disparo de la bomba de transferencia.",
+   "sintomas": "Se detiene la transferencia de astillas al digestor: sube el nivel del impregnador, baja el del digestor, cae FI-211 y I-05 cierra el vapor de la transferencia.",
+   "respuesta": "Partir la bomba de inmediato; si no se puede, bajar la alimentación de astillas para no llenar el impregnador."
+  },
+  {
+   "id": "bombas_astillas",
+   "nombre": "Caída de las bombas de astillas",
+   "categoria": "equipos",
+   "acciones": [
+    {
+     "comando": {
+      "tipo": "bomba",
+      "id": "bombas_astillas",
+      "accion": "detener"
+     }
+    }
+   ],
+   "duracion": 600,
+   "revertir": false,
+   "peso": 1,
+   "dificultad": 2,
+   "causa": "Disparo de las bombas de astillas.",
+   "sintomas": "Se corta la alimentación al impregnador: baja su nivel y, más tarde, el del digestor.",
+   "respuesta": "Partir las bombas; mientras tanto bajar el soplado para mantener el nivel del digestor.",
+   "alTerminar": [
+    {
+     "tipo": "bomba",
+     "id": "bombas_astillas",
+     "accion": "partir"
+    }
+   ]
+  },
+  {
+   "id": "raspador_imp",
+   "nombre": "Falla del raspador del impregnador",
+   "categoria": "equipos",
+   "acciones": [
+    {
+     "objetivo": {
+      "tipo": "perturbar",
+      "id": "friccion",
+      "vaso": "imp"
+     },
+     "rampa": 300,
+     "hasta": 1.8
+    }
+   ],
+   "duracion": 7200,
+   "revertir": true,
+   "peso": 1,
+   "dificultad": 2,
+   "causa": "Problema mecánico en el raspador de fondo del impregnador.",
+   "sintomas": "Sube la corriente del raspador (II-205), la descarga se vuelve irregular y el nivel del impregnador oscila.",
+   "respuesta": "Bajar la alimentación, avisar a mantención y vigilar la corriente para no disparar el motor."
+  },
+  {
+   "id": "mallas_principales",
+   "nombre": "Taponamiento de las mallas de extracción principal",
+   "categoria": "equipos",
+   "acciones": [
+    {
+     "comando": {
+      "tipo": "perturbar",
+      "id": "taponamiento",
+      "malla": "mallas_principal",
+      "valor": 1.5
+     }
+    },
+    {
+     "objetivo": {
+      "tipo": "perturbar",
+      "id": "finos"
+     },
+     "rampa": 300,
+     "hasta": 2
+    }
+   ],
+   "duracion": 14400,
+   "revertir": true,
+   "peso": 2,
+   "dificultad": 2,
+   "causa": "Finos y depósitos tapan las mallas.",
+   "sintomas": "Sube PDI-525 hacia su máximo; la extracción principal no alcanza su caudal y sube la presión.",
+   "respuesta": "Retrolavar las mallas, mantener la conmutación y repartir la extracción hacia las otras mallas."
+  },
+  {
+   "id": "calentador_incrustado",
+   "nombre": "Calentador incrustado",
+   "categoria": "equipos",
+   "acciones": [
+    {
+     "comando": {
+      "tipo": "perturbar",
+      "id": "incrustacion",
+      "equipo": "circ_inf",
+      "valor": 1.6
+     }
+    }
+   ],
+   "duracion": null,
+   "revertir": false,
+   "peso": 1,
+   "dificultad": 2,
+   "causa": "Depósitos de carbonato de calcio en el calentador inferior.",
+   "sintomas": "La válvula de vapor de TIC-404 abre cada vez más y la temperatura no alcanza la consigna.",
+   "respuesta": "Conmutar al calentador de respaldo y lavar con ácido el incrustado."
+  },
+  {
+   "id": "valvula_pegada",
+   "nombre": "Válvula pegada",
+   "categoria": "equipos",
+   "acciones": [
+    {
+     "comando": {
+      "tipo": "actuador",
+      "id": "$lazo",
+      "falla": "pegado"
+     }
+    }
+   ],
+   "duracion": 7200,
+   "revertir": false,
+   "peso": 1,
+   "dificultad": 3,
+   "causa": "Falla del actuador de una válvula de control.",
+   "sintomas": "La salida del lazo cambia pero el caudal o la temperatura no responden; el lazo se satura.",
+   "respuesta": "Reconocer la falla en la tendencia (salida que se mueve, PV que no), pasar a manual y operar con los otros lazos; avisar a instrumentación.",
+   "alTerminar": [
+    {
+     "tipo": "actuador",
+     "id": "$lazo",
+     "falla": null
+    }
+   ],
+   "opciones": {
+    "lazo": [
+     "FIC-401",
+     "FIC-403",
+     "FIC-503",
+     "TIC-402",
+     "FIC-601"
+    ]
+   }
+  },
+  {
+   "id": "colgamiento",
+   "nombre": "Columna colgada en el digestor",
+   "categoria": "columna",
+   "acciones": [
+    {
+     "comando": {
+      "tipo": "perturbar",
+      "id": "colgamiento",
+      "vaso": "dig",
+      "valor": 30
+     }
+    }
+   ],
+   "duracion": null,
+   "revertir": false,
+   "peso": 1,
+   "dificultad": 3,
+   "causa": "La columna de astillas se apoya en la pared y deja de bajar.",
+   "sintomas": "Baja la corriente del raspador, el nivel de astillas medido no baja aunque se sople, la consistencia de soplado cae y luego la columna cae de golpe.",
+   "respuesta": "Bajar el soplado, aumentar la dilución del fondo y la circulación para mover la columna; no forzar el raspador."
+  },
+  {
+   "id": "canalizacion",
+   "nombre": "Canalización en el digestor",
+   "categoria": "columna",
+   "acciones": [
+    {
+     "objetivo": {
+      "tipo": "perturbar",
+      "id": "canalizacion",
+      "vaso": "dig"
+     },
+     "rampa": 600,
+     "hasta": 0.4
+    }
+   ],
+   "duracion": 14400,
+   "revertir": true,
+   "peso": 1,
+   "dificultad": 3,
+   "causa": "El licor encuentra caminos preferentes en la columna (finos, compactación irregular).",
+   "sintomas": "El álcali residual de las extracciones sube (se consume menos) mientras el kappa también sube; la temperatura de la zona es menos uniforme.",
+   "respuesta": "Reducir las extracciones y aumentar la circulación; cambios suaves de ritmo para recompactar la columna."
+  },
+  {
+   "id": "lavado_lento",
+   "nombre": "El lavado recibe menos pulpa",
+   "categoria": "aguas_abajo",
+   "acciones": [
+    {
+     "objetivo": {
+      "tipo": "servicio",
+      "id": "lavado"
+     },
+     "rampa": 300,
+     "factor": 0.7
+    }
+   ],
+   "duracion": 10800,
+   "revertir": true,
+   "peso": 1,
+   "dificultad": 1,
+   "causa": "Restricción en la línea de lavado.",
+   "sintomas": "Sube el nivel del estanque de soplado (LI-606).",
+   "respuesta": "Bajar el ritmo antes de que el estanque llegue a su alarma alta."
+  },
+  {
+   "id": "parada_lavado",
+   "nombre": "Parada del lavado",
+   "categoria": "aguas_abajo",
+   "acciones": [
+    {
+     "comando": {
+      "tipo": "servicio",
+      "id": "lavado",
+      "valor": 0
+     }
+    }
+   ],
+   "duracion": 3600,
+   "revertir": true,
+   "peso": 1,
+   "dificultad": 2,
+   "causa": "El lavado se detiene por una falla.",
+   "sintomas": "El estanque de soplado se llena rápidamente: alarma LI-606 alta y luego el enclavamiento I-08 corta el soplado.",
+   "respuesta": "Bajar el soplado y la alimentación de inmediato (parada corta) y mantener el digestor caliente."
+  },
+  {
+   "id": "analizador_kappa",
+   "nombre": "Falla del analizador de kappa",
+   "categoria": "instrumentos",
+   "acciones": [
+    {
+     "comando": {
+      "tipo": "instrumento",
+      "id": "AI-701",
+      "falla": "congelado"
+     }
+    }
+   ],
+   "duracion": 10800,
+   "revertir": false,
+   "peso": 2,
+   "dificultad": 1,
+   "causa": "El analizador de kappa deja de actualizar.",
+   "sintomas": "AI-701 muestra el mismo valor por más de un periodo de muestreo.",
+   "respuesta": "Notar que no cambia, pedir kappa al laboratorio y no usar el control de kappa mientras tanto.",
+   "alTerminar": [
+    {
+     "tipo": "instrumento",
+     "id": "AI-701",
+     "falla": null
+    }
+   ]
+  },
+  {
+   "id": "transmisor_congelado",
+   "nombre": "Transmisor congelado",
+   "categoria": "instrumentos",
+   "acciones": [
+    {
+     "comando": {
+      "tipo": "instrumento",
+      "id": "$tag",
+      "falla": "congelado"
+     }
+    }
+   ],
+   "duracion": 7200,
+   "revertir": false,
+   "peso": 1,
+   "dificultad": 2,
+   "causa": "Falla de un transmisor: la señal queda fija.",
+   "sintomas": "El valor no cambia mientras las variables relacionadas sí; el lazo que lo usa deja de corregir.",
+   "respuesta": "Comparar con variables relacionadas, pasar el lazo a manual y avisar a instrumentación.",
+   "alTerminar": [
+    {
+     "tipo": "instrumento",
+     "id": "$tag",
+     "falla": null
+    }
+   ],
+   "opciones": {
+    "tag": [
+     "TI-304",
+     "LI-302",
+     "FI-401",
+     "PI-201",
+     "TI-212"
+    ]
+   }
+  }
+ ]
+}

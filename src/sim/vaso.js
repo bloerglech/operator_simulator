@@ -156,7 +156,8 @@ export function pasoVaso(v, est, ent, dt) {
   })
 
   // 7. Intercambio libre ↔ retenido, celda por celda.
-  intercambiar(v, est.parcelas, col.solapes, hid.vNueva, T, c, dt, iOH)
+  // Canalización: parte del licor pasa sin tocar las astillas (contacto reducido).
+  intercambiar(v, est.parcelas, col.solapes, hid.vNueva, T, c, dt, iOH, 1 - Math.min(0.9, est.canalizacion ?? 0))
 
   // 8. Pérdidas al ambiente (solo licor libre; el calor de las astillas se
   //    equilibra con él en el intercambio).
@@ -200,7 +201,7 @@ export function pasoVaso(v, est, ent, dt) {
  * Es la misma solución implícita de intercambioEstrella(), escrita en línea
  * con arreglos numéricos porque es el cálculo más frecuente del simulador.
  */
-function intercambiar(v, parcelas, solapes, vf, T, c, dt, iOH) {
+function intercambiar(v, parcelas, solapes, vf, T, c, dt, iOH, contacto = 1) {
   const { fis, dif } = v
   const n = vf.length
   const nEsp = c.length
@@ -211,7 +212,7 @@ function intercambiar(v, parcelas, solapes, vf, T, c, dt, iOH) {
   for (let i = 0; i < nP; i++) {
     const par = parcelas[i]
     capP[i] = capacidadParcela(par, fis)
-    kdP[i] = constanteDifusion(dif, par.T, par.cr[iOH], 1)
+    kdP[i] = constanteDifusion(dif, par.T, par.cr[iOH], 1) * contacto
   }
   // Porciones agrupadas por celda (solo celdas con licor libre).
   const inicio = new Int32Array(n + 1)
@@ -225,7 +226,7 @@ function intercambiar(v, parcelas, solapes, vf, T, c, dt, iOH) {
   const fMojada = new Float64Array(nP)
   const accT = new Float64Array(nP)
   const accC = new Float64Array(nP * nEsp)
-  const aT = v.kCalor * dt
+  const aT = v.kCalor * dt * contacto
   const wT = aT / (1 + aT)
 
   for (let j = 0; j < n; j++) {

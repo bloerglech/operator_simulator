@@ -31,6 +31,12 @@ export function factorCorriente(modelo, estado, c) {
     for (const id of m.corrientes) if (!modelo.corrientePorId[id].valvula) pedido += estado.ajustes[id].caudal
     f *= factorMalla(m, estado.mallas[c.malla], pedido)
   }
+  // Suministro limitado de licor blanco (caustificación): se reparte en proporción.
+  if (c.origen.fuente === 'licor_blanco' && estado.servicios.licorBlancoMax !== undefined) {
+    let pedido = 0
+    for (const x of modelo.corrientes) if (x.origen.fuente === 'licor_blanco') pedido += estado.ajustes[x.id].caudal
+    if (pedido > estado.servicios.licorBlancoMax) f *= estado.servicios.licorBlancoMax / pedido
+  }
   const destino = c.destino.vaso ?? modelo.corrientePorId[c.destino.unir]?.destino.vaso
   for (const id of c.bombas) {
     const b = modelo.bombas[id]

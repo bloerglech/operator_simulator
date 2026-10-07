@@ -214,7 +214,7 @@
    "Ti": 40,
    "Td": 0,
    "accion": "directa",
-   "sp": 6.0,
+   "sp": 6.1,
    "modo": "AUTO",
    "prueba": {
     "escalon": -0.3,
@@ -240,7 +240,7 @@
    "Ti": 1800,
    "Td": 0,
    "accion": "directa",
-   "sp": 21.5,
+   "sp": 22.1,
    "modo": "AUTO",
    "prueba": {
     "escalon": -0.5,
@@ -268,7 +268,6 @@
    "accion": "inversa",
    "sp": "pv",
    "modo": "AUTO",
-   "escala_ritmo": true,
    "prueba": {
     "escalon": 50,
     "duracion": 600,
@@ -371,7 +370,6 @@
    "accion": "inversa",
    "sp": "pv",
    "modo": "AUTO",
-   "escala_ritmo": true,
    "prueba": {
     "escalon": 50,
     "duracion": 600,
@@ -422,7 +420,6 @@
    "accion": "inversa",
    "sp": "pv",
    "modo": "AUTO",
-   "escala_ritmo": true,
    "prueba": {
     "escalon": 50,
     "duracion": 600,
@@ -821,7 +818,7 @@
     "tiempo_superior": 1.0,
     "tiempo_inferior": 1.2,
     "H_resto": 60,
-    "ganancia": 0.004,
+    "ganancia": 0.0015,
     "bias_max": 8
    },
    "nota": "tiempos de residencia a ritmo nominal en h; ganancia en °C por (unidad de H · min)"

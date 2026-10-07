@@ -11,14 +11,16 @@ const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const PERMITIDO = {
   sim: ['src/sim'],
   control: ['src/sim', 'src/control'],
-  puente: ['src/puente', 'src/sim', 'src/control', 'config'],
+  escenarios: ['src/escenarios', 'src/sim', 'src/control', 'src/misiones'],
+  misiones: ['src/misiones', 'src/sim', 'src/escenarios'],
+  puente: ['src/puente', 'src/sim', 'src/control', 'src/escenarios', 'src/misiones', 'config'],
   hmi: ['src/hmi', 'src/ui'],
   ui: ['src/ui', 'src/hmi'],
   mundo3d: ['src/mundo3d', 'src/hmi'],
 }
 // Paquetes externos permitidos por capa (sim y control no usan ninguno).
 const EXTERNOS = { mundo3d: ['three'] }
-const SIN_NAVEGADOR = ['sim', 'control']
+const SIN_NAVEGADOR = ['sim', 'control', 'escenarios', 'misiones']
 const PROHIBIDO_TEXTO = [/\bwindow\b/, /\bdocument\b/, /Math\.random/, /Date\.now/, /\bperformance\b/, /localStorage/, /\bfetch\(/]
 
 function archivos(dir) {

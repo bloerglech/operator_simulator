@@ -14,11 +14,13 @@ import instrumentos from '../../config/instrumentos.json'
 import lazos from '../../config/lazos.json'
 import enclavamientos from '../../config/enclavamientos.json'
 import alarmas from '../../config/alarmas.json'
+import eventos from '../../config/eventos.json'
+import campana from '../../config/campana.json'
 
 /** Copia independiente de la configuración completa. */
 export function configuracion() {
   return JSON.parse(JSON.stringify({
     simulacion, topologia, equipos, madera, licores, hidraulica, energia, cinetica,
-    caso_base: casoBase, instrumentos, lazos, enclavamientos, alarmas,
+    caso_base: casoBase, instrumentos, lazos, enclavamientos, alarmas, eventos, campana,
   }))
 }

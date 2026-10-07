@@ -1,0 +1,45 @@
+{
+ "_descripcion": "Campaña, especificación de calidad y economía del turno (supuestos). orden: misiones de la campaña (src/misiones/); cada misión superada desbloquea la siguiente y su escenario en operación libre. economia: precios para el resumen del turno.",
+ "orden": [
+  "tutorial",
+  "turno_noche",
+  "mas_toneladas",
+  "licor_debil"
+ ],
+ "especificacion": {
+  "kappa": [
+   16,
+   18
+  ],
+  "rechazos_max": 1.0
+ },
+ "economia": {
+  "moneda": "USD",
+  "precio_pulpa": 600,
+  "madera_m3": 45,
+  "alcali_t_NaOH": 450,
+  "vapor_GJ": 9
+ },
+ "dificultades": {
+  "1": {
+   "nombre": "Aprendiz",
+   "generador": 1,
+   "pistas": true
+  },
+  "2": {
+   "nombre": "Operador",
+   "generador": 2,
+   "pistas": true
+  },
+  "3": {
+   "nombre": "Experto",
+   "generador": 3,
+   "pistas": false
+  }
+ },
+ "medallas": {
+  "oro": 0.9,
+  "plata": 0.7,
+  "bronce": 0.5
+ }
+}

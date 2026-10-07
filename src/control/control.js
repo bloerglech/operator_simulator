@@ -55,6 +55,7 @@ export function extensionControl(config) {
   }
 
   return {
+    clave: 'control',
     inicializar(ctx) {
       const { inst, lz, enc, al } = construir(ctx.modelo)
       const ce = estadoInstrumentos(inst, ctx.modelo, ctx.estado)

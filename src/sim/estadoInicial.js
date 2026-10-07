@@ -65,6 +65,7 @@ export function fuentesIniciales(modelo) {
     humedad: p(cb.astillas, 'humedad', 'caso_base.astillas.humedad'),
     densidad: modelo.densidadBasica,
     reactividad: modelo.cin.reactividad,
+    impregnabilidad: 1, // < 1: astillas con sobre espesor o compactadas (impregnan más lento)
     vaporizacion: 0.95, // la calcula el silo en cada paso
     marca: 0,
   }
@@ -86,7 +87,7 @@ export function parcelaFresca(modelo, astillas, m) {
     H: 0,
     edad: 0,
     marca: astillas.marca,
-    ...camposCineticos(modelo.cin, m, { reactividad: astillas.reactividad, vaporizacion: astillas.vaporizacion }),
+    ...camposCineticos(modelo.cin, m, { reactividad: astillas.reactividad, vaporizacion: astillas.vaporizacion * (astillas.impregnabilidad ?? 1) }),
   }
 }
 

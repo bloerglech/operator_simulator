@@ -16,7 +16,7 @@ simulador, para que describa lo que realmente está implementado.
 | [4. Cinética de cocción y calibración](04-cinetica-y-calibracion.md) | Deslignificación, carbohidratos, HexA, viscosidad, álcali, impregnación, calibración | Fase 1b |
 | [5. Presión, equipos y estados de operación](05-presion-equipos-estados.md) | Presión del vaso hidráulico, válvulas y seguridad, calentadores, flash, silo, mallas, compactación, colgamiento | Fase 1c |
 | [6. Control, enclavamientos y alarmas](06-control-enclavamientos-alarmas.md) | Instrumentos, PID, sintonía, cascadas y relaciones, control avanzado, enclavamientos, alarmas | Fase 2 |
-| 7. Operación y perturbaciones | Respuesta a eventos, procedimientos | Fases 5–6 (pendiente) |
+| [7. Operación y perturbaciones](07-operacion-y-perturbaciones.md) | Tiempo muerto, balance de un vaso lleno de líquido, respuesta a cada perturbación de la campaña, paradas, partida y apagón | Fases 5–7 |
 | [Anexo A. Tabla de parámetros](anexo-a-parametros.md) | Valor, unidad, origen y fuente de cada parámetro (generado) | Se completa en cada fase |
 | [Anexo B. Referencias](anexo-b-referencias.md) | Bibliografía, con el estado de verificación de cada dato | Se completa en cada fase |
 

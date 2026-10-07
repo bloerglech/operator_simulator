@@ -34,7 +34,7 @@ export function factorCorriente(modelo, estado, c) {
   // Suministro limitado de licor blanco (caustificación): se reparte en proporción.
   if (c.origen.fuente === 'licor_blanco' && estado.servicios.licorBlancoMax !== undefined) {
     let pedido = 0
-    for (const x of modelo.corrientes) if (x.origen.fuente === 'licor_blanco') pedido += estado.ajustes[x.id].caudal
+    for (const x of corrientesLicorBlanco(modelo)) pedido += estado.ajustes[x.id].caudal
     if (pedido > estado.servicios.licorBlancoMax) f *= estado.servicios.licorBlancoMax / pedido
   }
   const destino = c.destino.vaso ?? modelo.corrientePorId[c.destino.unir]?.destino.vaso
@@ -46,6 +46,12 @@ export function factorCorriente(modelo, estado, c) {
     }
   }
   return f
+}
+
+/** Corrientes que toman licor blanco (se calcula una vez por modelo). */
+function corrientesLicorBlanco(modelo) {
+  if (!modelo._licorBlanco) Object.defineProperty(modelo, '_licorBlanco', { value: modelo.corrientes.filter((x) => x.origen.fuente === 'licor_blanco'), enumerable: false })
+  return modelo._licorBlanco
 }
 
 /**

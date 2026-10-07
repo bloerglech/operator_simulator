@@ -10,6 +10,7 @@ import { crearHistorial } from './historial.js'
 export const VELOCIDADES = [0, 1, 10, 60, 300]
 const MAX_TROZO = 5 // s simulados por llamada a avanzar (muestreo del historial)
 const MAX_PUNTOS = 6 // puntos de control guardados en memoria
+const MAX_PREPARADAS = 3 // preparaciones en memoria (repetir una misión no vuelve a simularla)
 
 export function crearMotor(config) {
   let sistema = null
@@ -20,6 +21,7 @@ export function crearMotor(config) {
   let puntos = [] // puntos de control (guardados completos)
   let vistos = { mensaje: 0, alarma: -1 } // para volver a ×1 ante novedades
   const historial = crearHistorial()
+  const preparadas = new Map() // clave de preparación → guardado del estado inicial
 
   function estado() {
     const s = sistema.leerEstado({ perfiles })
@@ -79,7 +81,17 @@ export function crearMotor(config) {
         inicioPartida = guardado.inicioPartida ?? 0
         guardarPunto() // con una misión en curso, el punto de carga sirve para reintentar
       } else {
-        sistema = prepararJuego(config, { semilla, horasPrevias, mision, progreso })
+        // La preparación es determinista: si ya se hizo en esta sesión, se carga.
+        const clave = JSON.stringify([semilla, horasPrevias, mision])
+        if (preparadas.has(clave)) {
+          sistema = crearJuego(config, { semilla })
+          sistema.cargar(preparadas.get(clave))
+          progreso(1)
+        } else {
+          sistema = prepararJuego(config, { semilla, horasPrevias, mision, progreso })
+          preparadas.set(clave, sistema.guardar())
+          if (preparadas.size > MAX_PREPARADAS) preparadas.delete(preparadas.keys().next().value)
+        }
         // Lo ocurrido durante la preparación (sin operador) no se muestra como evento de la partida.
         inicioPartida = sistema.tiempo()
         if (generador?.activo) sistema.enviarComando({ tipo: 'generador', activo: true, dificultad: generador.dificultad ?? 1 })

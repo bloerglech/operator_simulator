@@ -73,7 +73,8 @@ export function construirLazos(config, inst) {
   }
   // Orden de ejecución: maestros antes que esclavos.
   const orden = Object.values(lazos).sort((a, b) => (a.salida.tipo === 'lazo' ? 0 : 1) - (b.salida.tipo === 'lazo' ? 0 : 1))
-  return { lazos, bloques, orden }
+  const escalados = Object.values(lazos).filter((l) => l.escala_ritmo) // los que escala la coordinación de ritmo
+  return { lazos, bloques, orden, escalados }
 }
 
 // ---------------------------------------------------------------------------
@@ -343,8 +344,9 @@ function renovarBaseRitmo(lz, ce, sb) {
   // Con la planta detenida o partiendo (menos de la mitad de la madera de la
   // base) se conserva la base: al activar RC-700 escala desde un estado coherente.
   if (!(W > 1) || (sb.base && W < 0.5 * sb.base.W)) return
-  sb.base = { W, sps: {} }
-  for (const l of Object.values(lz.lazos)) if (l.escala_ritmo) sb.base.sps[l.tag] = ce.lazos[l.tag].sp
+  sb.base ??= { W, sps: {} }
+  sb.base.W = W
+  for (const l of lz.escalados) sb.base.sps[l.tag] = ce.lazos[l.tag].sp
 }
 
 function pasoRitmo(lz, ctx, ce, b, sb, dt) {

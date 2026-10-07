@@ -21,6 +21,7 @@ Cómo se juega con las pantallas en 2D (Fase 3). Se abren con `npm run dev`
 | Reconocer | Reconoce todas las alarmas |
 | Partida | Guardar en el navegador, exportar a archivo, volver al menú |
 | Instructor | Panel para provocar fallas y perturbaciones |
+| Ajustes | Dificultad (ruido de instrumentos, pistas, vista de perfiles, eventos), volumen |
 
 Bajo la barra, el **banner** muestra la alarma más importante sin reconocer.
 
@@ -62,6 +63,8 @@ En los bloques de lazo, el modo MAN aparece en azul y CAS en verde.
    se puede ocultar (modo realista).
 
 ## Operar un lazo (carátula)
+
+Cada carátula tiene un bloque plegable «¿Qué es…?» con la ayuda de la variable: qué mide, por qué importa y qué significa que suba o baje. El manual de la barra termina con el glosario de todas las variables.
 
 Clic en un bloque de lazo o en un valor que sea el PV de un lazo. La
 carátula muestra PV, SP y salida con barras, el modo, la posición del

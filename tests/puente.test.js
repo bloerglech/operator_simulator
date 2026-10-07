@@ -94,4 +94,19 @@ describe('motor del puente con misiones', () => {
     expect(m.tiempo()).toBeLessThan(t + 1)
     expect(m.estado().escenario.mision.terminada).toBe(false)
   })
+
+  it('repetir una misión carga la preparación guardada y continúa igual', () => {
+    const m = crearMotor(config())
+    const avances = []
+    m.iniciar({ semilla: 5, horasPrevias: 1, mision: 'turno_noche', progreso: (f) => avances.push(f) })
+    const pasos1 = avances.length
+    m.fijarVelocidad(300)
+    m.tic(2, 1e6)
+    const a = JSON.stringify(m.estado().control.transmisores['AI-504'])
+    m.iniciar({ semilla: 5, horasPrevias: 1, mision: 'turno_noche', progreso: (f) => avances.push(f) })
+    expect(avances.length - pasos1).toBe(1) // sin volver a simular la preparación
+    m.fijarVelocidad(300)
+    m.tic(2, 1e6)
+    expect(JSON.stringify(m.estado().control.transmisores['AI-504'])).toBe(a)
+  })
 })

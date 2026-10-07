@@ -223,7 +223,7 @@ Subdividida para poder revisar avances:
   récord; `docs/PROCEDIMIENTOS.md` consultable en el juego.
 - **Aceptación:** igual que la Fase 5 para todas las misiones.
 
-### Fase 7 — Guardado, rendimiento y pulido
+### Fase 7 — Guardado, rendimiento y pulido (terminada)
 - Guardado en localStorage y exportar/importar JSON en la interfaz,
   perfilado, ajustes de dificultad, ayuda contextual.
 
@@ -489,3 +489,25 @@ eventos instructor) pero no las implementa.
   puntos de control, plazo y «durante», medallas e incidentes del turno).
 - Pendiente: sonidos; la pulpa detenida en paradas sale con kappa más bajo
   que en la práctica (L-13).
+
+### Fase 7 — terminada
+- Ayuda contextual (`config/ayuda.json`): qué mide cada uno de los 58
+  transmisores, por qué importa y qué significa que suba o baje, en las
+  carátulas, en los botones del laboratorio y como glosario en el manual.
+- Dificultad completa: frecuencia de eventos, ruido de los instrumentos
+  (×0,5 / ×1 / ×1,5), pistas y vista de perfiles; elegida en el menú y en el
+  panel «Ajustes» (también volumen), guardada en el navegador.
+- Sonidos sintetizados con Web Audio (alarmas, teléfono, radio, alivio,
+  bombas, golpes, corte de energía, zumbido de la planta) e iluminación de
+  emergencia en la sala durante un apagón.
+- Turno completo de 8 y 12 horas con eventos aleatorios y meta; autoguardado
+  cada 5 minutos y al salir de la pestaña; la preparación de una misión se
+  conserva en memoria (repetir no vuelve a simularla).
+- Rendimiento: ≈ 2 500 veces el tiempo real en Node con control; ×300 sin
+  bloquear la interfaz (60 cuadros/s en la prueba e2e de escritorio).
+- Revisión independiente de la Fase 6: 11 hallazgos corregidos (partidas
+  antiguas, pila de eventos, transportador en apagón, base de RC-700,
+  histéresis de habilitación, errores del motor, entre otros).
+- Manual: capítulo 7 «Operación y perturbaciones».
+- Pendiente: medir los cuadros por segundo en un celular real (la prueba e2e
+  usa render por software).

@@ -35,8 +35,19 @@ export function abrirCaratula(app, tag) {
   const outInput = h('input', { type: 'number', step: 'any', min: 0, max: 100, class: 'num', style: 'width: 90px' })
   const span = l0.rango[1] - l0.rango[0]
   const pasoSP = span / 100
-  const enviarSP = (v) => ejecutar({ tipo: 'lazo', id: tag, accion: 'consigna', valor: v })
-  const enviarOut = (v) => ejecutar({ tipo: 'lazo', id: tag, accion: 'salida', valor: Math.min(100, Math.max(0, v)) })
+  // Una entrada que el operador está editando no se sobrescribe con el estado.
+  const sucias = new Set()
+  const marcar = (input) => {
+    input.addEventListener('input', () => sucias.add(input))
+    input.addEventListener('keydown', (e) => { if (e.key === 'Escape') { sucias.delete(input); input.blur() } })
+  }
+  const leerEntrada = (input) => {
+    if (input.value.trim() === '') return null
+    const v = Number(input.value)
+    return Number.isFinite(v) ? v : null
+  }
+  const enviarSP = (v) => { if (v === null) return; sucias.delete(spInput); ejecutar({ tipo: 'lazo', id: tag, accion: 'consigna', valor: v }) }
+  const enviarOut = (v) => { if (v === null) return; sucias.delete(outInput); ejecutar({ tipo: 'lazo', id: tag, accion: 'salida', valor: Math.min(100, Math.max(0, v)) }) }
 
   const kc = h('input', { type: 'number', step: 'any', class: 'num', style: 'width: 70px', value: l0.Kc })
   const ti = h('input', { type: 'number', step: 'any', class: 'num', style: 'width: 70px', value: l0.Ti })
@@ -71,14 +82,14 @@ export function abrirCaratula(app, tag) {
       h('button', { onclick: () => enviarSP((app.estado().control.lazos[tag].sp) - pasoSP) }, '−'),
       spInput,
       h('button', { onclick: () => enviarSP((app.estado().control.lazos[tag].sp) + pasoSP) }, '+'),
-      h('button', { onclick: () => { const v = Number(spInput.value); if (spInput.value !== '' && Number.isFinite(v)) enviarSP(v) } }, 'Fijar SP')),
+      h('button', { onclick: () => enviarSP(leerEntrada(spInput)) }, 'Fijar SP')),
     h('div', { class: 'fila' }, 'Salida', outEl, '%', posEl),
     h('div', { class: 'barra-pv salida' }, barraOut),
     h('div', { class: 'fila' },
       h('button', { onclick: () => enviarOut(app.estado().control.lazos[tag].salida - 1) }, '−1 %'),
       outInput,
       h('button', { onclick: () => enviarOut(app.estado().control.lazos[tag].salida + 1) }, '+1 %'),
-      h('button', { onclick: () => { const v = Number(outInput.value); if (outInput.value !== '' && Number.isFinite(v)) enviarOut(v) } }, 'Fijar')),
+      h('button', { onclick: () => enviarOut(leerEntrada(outInput)) }, 'Fijar')),
     h('div', { class: 'fila' }, botonesModo),
     maestros,
     error,
@@ -90,11 +101,17 @@ export function abrirCaratula(app, tag) {
     h('details', {},
       h('summary', {}, 'Sintonía'),
       h('div', { class: 'fila' }, 'Kc', kc, 'Ti (s)', ti, 'Td (s)', td),
-      h('button', { onclick: () => ejecutar({ tipo: 'lazo', id: tag, accion: 'sintonia', Kc: Number(kc.value), Ti: Number(ti.value), Td: Number(td.value) }) }, 'Aplicar sintonía'),
+      h('button', { onclick: () => {
+        const [Kc, Ti, Td] = [kc, ti, td].map(leerEntrada)
+        if ([Kc, Ti, Td].includes(null)) { error.textContent = 'Complete Kc, Ti y Td'; return }
+        for (const x of [kc, ti, td]) sucias.delete(x)
+        ejecutar({ tipo: 'lazo', id: tag, accion: 'sintonia', Kc, Ti, Td })
+      } }, 'Aplicar sintonía'),
       h('div', { class: 'suave' }, `Rango del PV ${num(l0.rango[0], d)}–${num(l0.rango[1], d)} ${l0.unidad}`)))
 
-  spInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') enviarSP(Number(spInput.value)) })
-  outInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') enviarOut(Number(outInput.value)) })
+  spInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') enviarSP(leerEntrada(spInput)) })
+  outInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') enviarOut(leerEntrada(outInput)) })
+  for (const x of [spInput, outInput, kc, ti, td]) marcar(x)
 
   function actualizar(estado) {
     const l = estado.control.lazos[tag]
@@ -107,8 +124,12 @@ export function abrirCaratula(app, tag) {
     spEl.textContent = num(l.sp, d)
     outEl.textContent = num(l.salida, 1)
     posEl.textContent = l.posicion !== null && l.posicion !== undefined ? `actuador ${num(l.posicion, 1)} %${l.pegado ? ' (PEGADO)' : ''}` : ''
-    if (document.activeElement !== spInput) spInput.value = Number(l.sp.toFixed(Math.max(d, 1)))
-    if (document.activeElement !== outInput) outInput.value = Number(l.salida.toFixed(1))
+    const refrescar = (input, v) => { if (!sucias.has(input) && document.activeElement !== input) input.value = v }
+    refrescar(spInput, Number(l.sp.toFixed(Math.max(d, 1))))
+    refrescar(outInput, Number(l.salida.toFixed(1)))
+    refrescar(kc, l.Kc)
+    refrescar(ti, l.Ti)
+    refrescar(td, l.Td)
     outInput.disabled = l.modo !== 'MAN' || !!l.forzado
     for (const b of botonesModo) {
       b.classList.toggle('activo', b.textContent === l.modo)

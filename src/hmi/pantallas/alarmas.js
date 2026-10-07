@@ -33,21 +33,29 @@ export function crearAlarmas(app) {
     actualizar(estado) {
       const c = estado.control
       // Se redibuja solo si algo cambió (los botones no se recrean bajo el dedo).
-      const nueva = JSON.stringify([c.alarmas.lista.map((a) => [a.id, a.activa, a.reconocida, a.valor?.toFixed?.(1)]),
+      const nueva = JSON.stringify([c.alarmas.lista.map((a) => [a.id, a.activa, a.reconocida]),
         Object.values(c.enclavamientos).map((e) => [e.disparado, e.presente, e.puenteado]), c.alarmas.registro.length, estado.eventos.length, estado.eventos.at(-1)?.n])
-      if (nueva === firma) return
+      const valorAlarma = (a) => (typeof a.valor === 'number' ? `${num(a.valor, 2)} ${a.unidad ?? ''}` : '')
+      if (nueva === firma) {
+        // Solo cambian los valores: se actualizan en su lugar (los botones no se recrean).
+        for (const a of c.alarmas.lista) {
+          const td = activas.querySelector(`td[data-valor="${a.id}"]`)
+          if (td) td.textContent = valorAlarma(a)
+        }
+        return
+      }
       firma = nueva
       reemplazar(activas, c.alarmas.lista.map((a) => h('tr', { class: `p${a.prioridad}${a.reconocida ? '' : ' sin-reconocer'}` },
         h('td', {}, h('span', { class: `etiqueta-prioridad p${a.prioridad}${a.reconocida ? '' : ' parpadea'}` }, a.prioridad)),
         h('td', { class: 'num' }, hora(a.t)),
         h('td', { class: 'num' }, a.id),
         h('td', {}, a.mensaje),
-        h('td', { class: 'num' }, a.valor === null || a.valor === undefined || typeof a.valor !== 'number' ? '' : `${num(a.valor, 2)} ${a.unidad ?? ''}`),
+        h('td', { class: 'num', 'data-valor': a.id }, valorAlarma(a)),
         h('td', {}, `${a.activa ? 'activa' : 'retornó'}${a.reconocida ? ', reconocida' : ''}`),
         h('td', {},
           a.reconocida ? null : h('button', { onclick: () => app.comando({ tipo: 'alarma', id: a.id, accion: 'reconocer' }).catch(() => {}) }, 'Reconocer'),
           a.prioridad > 1 ? h('button', { onclick: () => app.comando({ tipo: 'alarma', id: a.id, accion: 'archivar', duracion: 3600 }).catch(() => {}) }, 'Archivar 1 h') : null,
-          a.tag ? h('button', { onclick: () => (c.lazos[a.tag] ? app.abrirLazo(a.tag) : app.abrirTag(a.tag)) }, 'Ver') : null))))
+          a.tag && (c.lazos[a.tag] || c.transmisores[a.tag]) ? h('button', { onclick: () => (c.lazos[a.tag] ? app.abrirLazo(a.tag) : app.abrirTag(a.tag)) }, 'Ver') : null))))
       if (c.alarmas.lista.length === 0) reemplazar(activas, h('tr', {}, h('td', { colspan: 7, class: 'suave' }, 'Sin alarmas activas')))
       reemplazar(archivadas, c.alarmas.archivadas.length
         ? ['Archivadas: ', c.alarmas.archivadas.map((x) => `${x.id} (hasta ${hora(x.hasta)})`).join(', '), ' ',

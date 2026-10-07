@@ -60,7 +60,7 @@ export function crearPlanta(config, opciones = {}) {
       for (const cmd of cola) {
         if (ext?.maneja(cmd)) {
           ext.comando(ctx(), cmd)
-          estado.registro.push({ paso: estado.paso, ...cmd })
+          anotarComando(estado, cmd)
         } else aplicarComando(modelo, estado, cmd)
       }
       cola = []
@@ -81,6 +81,8 @@ export function crearPlanta(config, opciones = {}) {
     avanzar,
     enviarComando,
     leerEstado: (op) => {
+      // soloControl: solo la instantánea del control (más liviana: tendencias).
+      if (op?.soloControl) return { t: estado.paso * modelo.dtR, control: ext ? ext.instantanea(ctx(), op) : null }
       const s = instantanea(modelo, estado, op)
       if (ext) s.control = ext.instantanea(ctx(), op)
       return s
@@ -111,6 +113,12 @@ export function crearPlanta(config, opciones = {}) {
 // Comandos
 
 const CAMPOS_CORRIENTE = ['caudal', 'caudalMadera', 'T_salida', 'velocidad']
+const MAX_REGISTRO = 5000 // comandos del operador que se conservan (para repetir una partida)
+
+function anotarComando(estado, cmd) {
+  estado.registro.push({ paso: estado.paso, ...cmd })
+  if (estado.registro.length > MAX_REGISTRO) estado.registro.splice(0, estado.registro.length - MAX_REGISTRO)
+}
 
 /**
  * Comandos:
@@ -230,7 +238,7 @@ function aplicarComando(modelo, estado, cmd, interno = false) {
     pr.venteo = cmd.accion === 'abrir'
     if (!pr.venteo) pr.Pref = pr.P // al cerrar, el vaso queda a la presión del momento
   }
-  if (!interno) estado.registro.push({ paso: estado.paso, ...cmd })
+  if (!interno) anotarComando(estado, cmd)
 }
 
 // ---------------------------------------------------------------------------

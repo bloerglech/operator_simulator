@@ -137,7 +137,7 @@ export function crearApp(raiz, cliente, opciones = {}) {
           m.remove()
           menuAbierto = null
           if (o.confirmar && !confirm(o.confirmar)) return
-          Promise.resolve(o.accion?.()).catch(() => {})
+          Promise.resolve(o.accion?.()).catch((e) => { if (e?.message) avisar(e.message) })
         },
       }, o.texto)))
     document.body.append(m)
@@ -194,16 +194,17 @@ export function crearApp(raiz, cliente, opciones = {}) {
     lateral?.actualizar(estado)
   }
 
+  let inicial = 'digestor'
+  try { inicial = localStorage.getItem('digestor:pantalla') ?? inicial } catch { /* sin almacenamiento */ }
   cliente.suscribir((e) => {
     estado = e
+    // La primera pantalla se arma con el primer estado (algunas lo necesitan para construirse).
+    if (!pantalla) ir(inicial)
     if (!pendienteDibujo) {
       pendienteDibujo = true
       requestAnimationFrame(dibujar)
     }
   })
 
-  let inicial = 'digestor'
-  try { inicial = localStorage.getItem('digestor:pantalla') ?? inicial } catch { /* sin almacenamiento */ }
-  ir(inicial)
   return app
 }

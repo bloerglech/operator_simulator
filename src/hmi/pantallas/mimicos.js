@@ -23,7 +23,7 @@ const valor = (tag, x, y, etiqueta, w) => ({ tipo: 'valor', tag, x, y, etiqueta,
 const IMP = { x: 480, y: 70, w: 110, h: 500 } // 23 m
 const yImp = (z) => IMP.y + (z / 23) * IMP.h
 
-export const alimentacion = pantallaMimico({
+const DEF_alimentacion = ({
   ancho: 1100,
   alto: 690,
   elementos: [
@@ -80,7 +80,7 @@ const DIG = { x: 380, y: 60, esc: 11.2 } // px por m
 const yDig = (z) => DIG.y + z * DIG.esc
 const xPared = (z) => (z < 30 ? 538 : 546)
 
-export const digestor = pantallaMimico({
+const DEF_digestor = ({
   ancho: 1100,
   alto: 770,
   elementos: [
@@ -151,7 +151,7 @@ function columnaCirculacion(x, d) {
   ].filter(Boolean)
 }
 
-export const circulaciones = pantallaMimico({
+const DEF_circulaciones = ({
   ancho: 1100,
   alto: 640,
   elementos: [
@@ -167,7 +167,7 @@ export const circulaciones = pantallaMimico({
 // ---------------------------------------------------------------------------
 // 4. Extracciones, ciclones flash y licor a evaporadores
 
-export const extracciones = pantallaMimico({
+const DEF_extracciones = ({
   ancho: 1100,
   alto: 620,
   elementos: [
@@ -204,7 +204,7 @@ export const extracciones = pantallaMimico({
 // ---------------------------------------------------------------------------
 // 5. Fondo, lavado y soplado
 
-export const fondo = pantallaMimico({
+const DEF_fondo = ({
   ancho: 1120,
   alto: 640,
   elementos: [
@@ -234,3 +234,12 @@ export const fondo = pantallaMimico({
     tubo([[1050, 520], [1110, 520]]), T(1054, 512, 'al lavado', 'suave'),
   ],
 })
+
+/** Definiciones de los mímicos (también se dibujan como textura en la sala 3D). */
+export const DEFINICIONES = { alimentacion: DEF_alimentacion, digestor: DEF_digestor, circulaciones: DEF_circulaciones, extracciones: DEF_extracciones, fondo: DEF_fondo }
+
+export const alimentacion = pantallaMimico(DEF_alimentacion)
+export const digestor = pantallaMimico(DEF_digestor)
+export const circulaciones = pantallaMimico(DEF_circulaciones)
+export const extracciones = pantallaMimico(DEF_extracciones)
+export const fondo = pantallaMimico(DEF_fondo)

@@ -4,7 +4,7 @@
 import { h, reemplazar } from '../dom.js'
 import { num, hora } from '../formato.js'
 
-const INDICADORES = [
+export const INDICADORES = [
   ['AI-701', 'Kappa (analizador)', '16–18'],
   ['HI-703', 'Factor H en el soplado', '350–500'],
   ['QI-702', 'Producción', '≈ 3 000'],

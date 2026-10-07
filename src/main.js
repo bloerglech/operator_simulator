@@ -8,17 +8,19 @@ import { avisar } from './hmi/dom.js'
 
 async function iniciar() {
   const cliente = crearCliente()
-  const op = await mostrarMenu()
-  const cerrar = mostrarCarga(cliente)
-  try {
-    await cliente.perfiles(true)
-    await cliente.iniciar({ ...op, velocidad: 1 })
-  } catch (e) {
-    cerrar()
-    avisar(`No se pudo iniciar: ${e.message}`, 10000)
-    return
+  for (;;) {
+    const op = await mostrarMenu()
+    const cerrar = mostrarCarga(cliente)
+    try {
+      await cliente.perfiles(true)
+      await cliente.iniciar({ ...op, velocidad: 1 })
+      cerrar()
+      break
+    } catch (e) {
+      cerrar()
+      avisar(`No se pudo iniciar: ${e.message}`, 10000) // se vuelve al menú
+    }
   }
-  cerrar()
   window.__app = crearApp(document.getElementById('raiz'), cliente)
 }
 

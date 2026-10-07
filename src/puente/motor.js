@@ -47,7 +47,7 @@ export function crearMotor(config) {
       // Lo ocurrido durante la preparación (sin operador) no se muestra como evento de la partida.
       if (!guardado) inicioPartida = sistema.tiempo()
       sistema.avanzar(10) // el control arranca en el primer paso lento
-      historial.muestrear(sistema.tiempo(), sistema.leerEstado().control)
+      historial.muestrear(sistema.tiempo(), sistema.leerEstado({ soloControl: true }).control)
     },
 
     listo: () => sistema !== null,
@@ -75,7 +75,7 @@ export function crearMotor(config) {
         sistema.avanzar(trozo)
         deuda -= trozo
         avanzado += trozo
-        if (historial.toca(sistema.tiempo())) historial.muestrear(sistema.tiempo(), sistema.leerEstado().control)
+        if (historial.toca(sistema.tiempo())) historial.muestrear(sistema.tiempo(), sistema.leerEstado({ soloControl: true }).control)
         if (ahora() - inicio > presupuestoMs) break
       }
       return avanzado

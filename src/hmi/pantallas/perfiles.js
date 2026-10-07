@@ -62,17 +62,26 @@ export function crearPerfiles(app) {
   const aviso = h('div', { class: 'panel' })
   const elemento = h('div', {}, aviso, contenido)
   let ultimo = -Infinity
+  let modoAviso = null
   return {
     elemento,
     actualizar(estado) {
+      // El aviso (con su botón) se rehace solo cuando cambia el modo.
+      if (modoAviso !== app.ajustes.perfiles) {
+        modoAviso = app.ajustes.perfiles
+        ultimo = -Infinity
+        if (!modoAviso) {
+          reemplazar(aviso, 'Perfiles ocultos (modo realista: en planta no se ven). ',
+            h('button', { onclick: () => { app.ajustes.perfiles = true; app.cliente.perfiles(true) } }, 'Mostrar (modo didáctico)'))
+        } else {
+          reemplazar(aviso, h('span', { class: 'suave' }, 'Ayuda didáctica: perfiles por altura, impregnador (línea discontinua) y digestor (continua), de arriba hacia abajo. '),
+            h('button', { onclick: () => { app.ajustes.perfiles = false; app.cliente.perfiles(false) } }, 'Ocultar (modo realista)'))
+        }
+      }
       if (!app.ajustes.perfiles) {
-        reemplazar(aviso, 'Perfiles ocultos (modo realista: en planta no se ven). ',
-          h('button', { onclick: () => { app.ajustes.perfiles = true; app.cliente.perfiles(true) } }, 'Mostrar (modo didáctico)'))
         contenido.replaceChildren()
         return
       }
-      reemplazar(aviso, h('span', { class: 'suave' }, 'Ayuda didáctica: perfiles por altura, impregnador (línea discontinua) y digestor (continua), de arriba hacia abajo. '),
-        h('button', { onclick: () => { app.ajustes.perfiles = false; app.cliente.perfiles(false) } }, 'Ocultar (modo realista)'))
       if (estado.t - ultimo < 15 && contenido.childElementCount) return
       ultimo = estado.t
       const perfiles = { imp: estado.vasos.imp?.perfil, dig: estado.vasos.dig?.perfil }

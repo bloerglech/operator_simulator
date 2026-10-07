@@ -73,8 +73,9 @@ export function crearTendencias(app) {
   function dibujar() {
     const estado = app.estado()
     if (!datos || !estado) return
-    const series = memoria.series.map((n, i) => {
-      const valores = datos.datos[n] ?? []
+    // Cada serie conserva el color de su selector (aunque haya selectores vacíos).
+    const series = selects.map((sel, i) => [sel.value, i]).filter(([n]) => n && datos.datos[n]).map(([n, i]) => {
+      const valores = datos.datos[n]
       const r = rangoDe(n, estado)
       const [min, max] = memoria.auto ? autoescala(valores, r) : r
       return { nombre: n, valores, color: COLORES[i], min, max, discontinua: n.endsWith('.sp') }

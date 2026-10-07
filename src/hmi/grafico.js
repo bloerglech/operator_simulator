@@ -10,18 +10,33 @@ export const COLORES = ['#1d1d1d', '#1f5fbf', '#b03a2e', '#2e7d32', '#8e44ad', '
  * series: [{ nombre, valores: [], color, min, max, trazo }]; t: tiempos (s).
  * ventana: [t0, t1] en s simulados.
  */
-export function dibujarTendencia(canvas, t, series, ventana) {
-  const dpr = window.devicePixelRatio || 1
-  const W = canvas.clientWidth
-  const H = canvas.clientHeight
-  if (W === 0 || H === 0) return
-  if (canvas.width !== Math.round(W * dpr) || canvas.height !== Math.round(H * dpr)) {
-    canvas.width = Math.round(W * dpr)
-    canvas.height = Math.round(H * dpr)
+export function dibujarTendencia(canvas, t, series, ventana, area = null) {
+  // area { x, y, w, h, escala }: dibujar en una parte de un lienzo fuera de
+  // pantalla (texturas de la sala 3D). Sin area, ocupa el canvas visible.
+  let g
+  let W
+  let H
+  if (area) {
+    g = canvas.getContext('2d')
+    g.save()
+    g.setTransform(area.escala ?? 1, 0, 0, area.escala ?? 1, area.x, area.y)
+    W = area.w / (area.escala ?? 1)
+    H = area.h / (area.escala ?? 1)
+    g.fillStyle = '#ececec'
+    g.fillRect(0, 0, W, H)
+  } else {
+    const dpr = window.devicePixelRatio || 1
+    W = canvas.clientWidth
+    H = canvas.clientHeight
+    if (W === 0 || H === 0) return
+    if (canvas.width !== Math.round(W * dpr) || canvas.height !== Math.round(H * dpr)) {
+      canvas.width = Math.round(W * dpr)
+      canvas.height = Math.round(H * dpr)
+    }
+    g = canvas.getContext('2d')
+    g.setTransform(dpr, 0, 0, dpr, 0, 0)
+    g.clearRect(0, 0, W, H)
   }
-  const g = canvas.getContext('2d')
-  g.setTransform(dpr, 0, 0, dpr, 0, 0)
-  g.clearRect(0, 0, W, H)
   const m = { iz: 46, de: 46, ar: 8, ab: 20 }
   const w = W - m.iz - m.de
   const hh = H - m.ar - m.ab
@@ -80,6 +95,7 @@ export function dibujarTendencia(canvas, t, series, ventana) {
   g.setLineDash([])
   g.strokeStyle = '#8d8d8d'
   g.strokeRect(m.iz, m.ar, w, hh)
+  if (area) g.restore()
 }
 
 function elegirPaso(span) {

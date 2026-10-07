@@ -73,10 +73,13 @@ export function abrirInstructor(app) {
         h('button', { onclick: () => enviar({ tipo: 'perturbar', id: 'incrustacion', equipo: selCal.value, valor: Number(incr.value) }) }, 'Aplicar'))),
     seccion('Enclavamientos (puentes)', enclav))
 
+  let firma = ''
   return {
     elemento,
     actualizar(estado) {
-      if (enclav.contains(document.activeElement)) return
+      const nueva = JSON.stringify(Object.values(estado.control.enclavamientos).map((e) => [e.puenteado, e.disparado]))
+      if (nueva === firma) return
+      firma = nueva
       reemplazar(enclav, h('table', {}, Object.entries(estado.control.enclavamientos).map(([id, en]) => h('tr', {},
         h('td', { class: 'num' }, id),
         h('td', {}, en.puenteado ? 'PUENTEADO' : en.disparado ? 'disparado' : 'normal'),

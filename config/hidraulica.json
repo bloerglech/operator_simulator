@@ -1,18 +1,84 @@
 {
   "_descripcion": "Columna de astillas, penetración y transferencia libre-retenido. Todos supuestos; la compactación variable llega en la Fase 1c.",
-  "fraccion_astillas_columna": { "valor": 40, "unidad": "%", "origen": "supuesto", "nota": "volumen de astillas (con poros) / volumen del vaso" },
+  "fraccion_astillas_columna": {
+    "valor": 40,
+    "unidad": "%",
+    "origen": "supuesto",
+    "nota": "volumen de astillas (con poros) / volumen del vaso"
+  },
   "penetracion": {
-    "k_ref": { "valor": 0.2, "unidad": "1/s", "origen": "supuesto", "nota": "≈ 5 s de constante de tiempo a T_ref" },
-    "T_ref": { "valor": 100, "unidad": "°C", "origen": "supuesto" },
-    "E": { "valor": 15, "unidad": "kJ/mol", "origen": "supuesto" }
+    "k_ref": {
+      "valor": 0.2,
+      "unidad": "1/s",
+      "origen": "supuesto",
+      "nota": "≈ 5 s de constante de tiempo a T_ref"
+    },
+    "T_ref": {
+      "valor": 100,
+      "unidad": "°C",
+      "origen": "supuesto"
+    },
+    "E": {
+      "valor": 15,
+      "unidad": "kJ/mol",
+      "origen": "supuesto"
+    }
   },
   "difusion": {
-    "D_ref": { "valor": 2.5e-9, "unidad": "m2/s", "origen": "supuesto", "nota": "≈ 9 min de constante de tiempo a 150 °C con 4 mm (Fase 1b: con 20 min el interior de la astilla quedaba sin álcali)" },
-    "T_ref": { "valor": 150, "unidad": "°C", "origen": "supuesto" },
-    "E": { "valor": 20, "unidad": "kJ/mol", "origen": "supuesto" },
-    "eccsa_min": { "valor": 0.3, "unidad": "-", "origen": "supuesto" },
-    "eccsa_max": { "valor": 1.0, "unidad": "-", "origen": "supuesto" },
-    "K_e": { "valor": 0.1, "unidad": "mol/L", "origen": "supuesto" }
+    "D_ref": {
+      "valor": 2.5e-09,
+      "unidad": "m2/s",
+      "origen": "supuesto",
+      "nota": "≈ 9 min de constante de tiempo a 150 °C con 4 mm (Fase 1b: con 20 min el interior de la astilla quedaba sin álcali)"
+    },
+    "T_ref": {
+      "valor": 150,
+      "unidad": "°C",
+      "origen": "supuesto"
+    },
+    "E": {
+      "valor": 20,
+      "unidad": "kJ/mol",
+      "origen": "supuesto"
+    },
+    "eccsa_min": {
+      "valor": 0.3,
+      "unidad": "-",
+      "origen": "supuesto"
+    },
+    "eccsa_max": {
+      "valor": 1.0,
+      "unidad": "-",
+      "origen": "supuesto"
+    },
+    "K_e": {
+      "valor": 0.1,
+      "unidad": "mol/L",
+      "origen": "supuesto"
+    }
   },
-  "k_calor": { "valor": 0.09, "unidad": "1/s", "origen": "supuesto", "nota": "calentamiento de astillas de 4 mm, ≈ 11 s" }
+  "k_calor": {
+    "valor": 0.09,
+    "unidad": "1/s",
+    "origen": "supuesto",
+    "nota": "calentamiento de astillas de 4 mm, ≈ 11 s"
+  },
+  "compresibilidad_licor": {
+    "valor": 4.6e-10,
+    "unidad": "1/Pa",
+    "origen": "literatura",
+    "nota": "agua a 25-150 °C, orden de magnitud"
+  },
+  "compresibilidad_vaso": {
+    "valor": 5e-10,
+    "unidad": "1/Pa",
+    "origen": "supuesto",
+    "nota": "elasticidad del manto; ajusta la rapidez de las presurizaciones"
+  },
+  "margen_ebullicion": {
+    "valor": 0.0,
+    "unidad": "bar",
+    "origen": "supuesto",
+    "nota": "margen sobre la presión de saturación para declarar vaporización súbita"
+  }
 }

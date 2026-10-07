@@ -6,7 +6,6 @@
       "nombre": "Impregnador",
       "tipo": "hidraulico",
       "celdas": 20,
-      "corriente_cierre": "imp_exceso",
       "zonas": [
         {
           "id": "impregnacion",
@@ -29,7 +28,6 @@
       "nombre": "Digestor",
       "tipo": "hidraulico",
       "celdas": 60,
-      "corriente_cierre": "ext_principal",
       "zonas": [
         {
           "id": "tope",

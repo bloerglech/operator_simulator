@@ -24,6 +24,14 @@ export function instantanea(modelo, estado, op = {}) {
       nivelAstillas: d.nivelAstillas ?? null,
       lleno: d.lleno ?? null,
       zonas: Object.fromEntries(v.zonas.map((z) => [z.id, resumenZona(modelo, ev, z)])),
+      presion: {
+        P: ev.presion.P, // Pa absolutos (tope)
+        Psaturacion: ev.presion.Ppiso, // piso de ebullición (Pa abs)
+        venteo: ev.presion.venteo,
+        alivio: ev.presion.alivioAbierto,
+        seguridad: ev.presion.seguridadAbierta,
+        ebullicion: ev.presion.ebullicion,
+      },
     }
     if (op.perfiles) salida.vasos[v.id].perfil = perfil(modelo, v, ev, d)
   }
@@ -37,6 +45,14 @@ export function instantanea(modelo, estado, op = {}) {
       calor: ec.calor ?? 0,
     }
   }
+  salida.valvulas = Object.fromEntries(Object.keys(modelo.valvulas).map((id) => [id, {
+    apertura: estado.valvulas[id].x,
+    comando: estado.valvulas[id].comando,
+    caudal: estado.corrientes[id].caudalReal,
+  }]))
+  salida.bombas = Object.fromEntries(Object.keys(modelo.bombas).map((id) => [id, { ...estado.bombas[id] }]))
+  salida.eventos = estado.eventos.slice(-50)
+  salida.incidentes = { ...estado.incidentes }
   if (op.balances) salida.balances = cierreBalances(modelo, estado)
   return JSON.parse(JSON.stringify(salida))
 }

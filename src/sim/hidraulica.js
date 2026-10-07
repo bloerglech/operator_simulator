@@ -2,8 +2,9 @@
 //
 // El licor libre ocupa el espacio entre astillas (y todo el volumen sobre la
 // columna). Se llena desde el fondo: si el vaso no está lleno hay un espacio
-// de gas arriba. Con el vaso lleno, el exceso sale por la corriente de cierre
-// (en la Fase 1c esto lo reemplaza el balance de presión).
+// de gas o vapor arriba. Con el vaso cerrado y lleno (`compresible`), el
+// exceso queda dentro del vaso como líquido comprimido y define la presión
+// (presion.js). Con el venteo abierto, el exceso rebalsa por el tope.
 // Con los volúmenes nuevos de cada celda se calcula el caudal a través de cada
 // cara (positivo hacia abajo): así el sentido del flujo en cada zona
 // (cocorriente o contracorriente) resulta del balance y no se impone.
@@ -18,11 +19,12 @@ const EPS = 1e-12
  *   extr        [{ j, v }] extracciones solicitadas (m³ en el paso)
  *   pen[j]      licor que penetra las astillas en cada celda (m³ solicitado)
  *   salidaFondo volumen de licor libre solicitado por el fondo (m³)
- *   celdaCierre celda de la corriente de cierre (o null: rebalse por el tope)
+ *   celdaCierre celda por donde sale el exceso si no es compresible (rebalse)
+ *   compresible true si el vaso está cerrado: el exceso se queda comprimido
  *   dt          paso (s)
  * @returns { vNueva, flujo[n+1] (m³/s por cara, 0 = tope), extr[] (m³ reales),
  *            pen[], salidaFondo, cierre, adic[] (redistribuidas), sup (celda que recibe
- *            lo que cae por celdas secas), lleno, residuo }
+ *            lo que cae por celdas secas), lleno, exceso (m³, + comprimido, − falta), residuo }
  */
 export function balanceHidraulico(e) {
   const n = e.cap.length
@@ -50,10 +52,13 @@ export function balanceHidraulico(e) {
   const capTotal = suma(e.cap)
   let cierre = 0
   let lleno = false
+  const exceso = vTotal - capTotal
   if (vTotal >= capTotal - EPS) {
-    cierre = Math.max(0, vTotal - capTotal)
-    vTotal = capTotal
     lleno = true
+    if (!e.compresible) {
+      cierre = Math.max(0, vTotal - capTotal)
+      vTotal = capTotal
+    }
   }
 
   // Llenado desde el fondo.
@@ -64,7 +69,11 @@ export function balanceHidraulico(e) {
     vNueva[j] = v
     resto -= v
   }
-  if (lleno) for (let j = 0; j < n; j++) vNueva[j] = e.cap[j]
+  if (lleno) {
+    // Lleno: cada celda a su capacidad (comprimido en proporción si es cerrado).
+    const r = capTotal > 0 ? vTotal / capTotal : 0
+    for (let j = 0; j < n; j++) vNueva[j] = e.cap[j] * r
+  }
 
   // La corriente de cierre (o el rebalse) sale de su celda.
   const jCierre = e.celdaCierre ?? 0
@@ -91,7 +100,7 @@ export function balanceHidraulico(e) {
   const residuo = flujo[n] - salidaFondo / e.dt
   flujo[n] = salidaFondo / e.dt
 
-  return { vNueva, flujo, extr, pen, salidaFondo, cierre, celdaCierre: jCierre, adic, sup, lleno, residuo }
+  return { vNueva, flujo, extr, pen, salidaFondo, cierre, celdaCierre: jCierre, adic, sup, lleno, exceso, residuo }
 }
 
 function suma(a) {

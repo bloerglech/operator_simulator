@@ -18,6 +18,7 @@ import { sumarPaqueteA, cierreBalances } from './contabilidad.js'
 import { incrementoH } from './factorH.js'
 import { reaccionarParcela, calidadPulpa } from './cinetica.js'
 import { instantanea } from './instantanea.js'
+import { pasoRapidoEquipos, factorCorriente, cerrarPresion, registrarEvento } from './pasoRapido.js'
 
 const copiar = (x) => JSON.parse(JSON.stringify(x))
 
@@ -40,6 +41,7 @@ export function crearPlanta(config, opciones = {}) {
       for (const cmd of cola) aplicarComando(modelo, estado, cmd)
       cola = []
     }
+    pasoRapidoEquipos(modelo, estado, modelo.dtR)
     estado.paso += 1
     if (estado.paso % modelo.pasosPorLento === 0) pasoLento(modelo, estado)
   }
@@ -76,12 +78,24 @@ export function crearPlanta(config, opciones = {}) {
 
 const CAMPOS_CORRIENTE = ['caudal', 'caudalMadera', 'T_salida']
 
+/**
+ * Comandos:
+ *   { tipo: 'ajustar', id: corriente, campo: 'caudal'|'caudalMadera'|'T_salida', valor }
+ *   { tipo: 'fuente', id: fuente, campo, valor }        (composición o propiedad de una fuente)
+ *   { tipo: 'valvula', id, valor }                       (comando de apertura 0–1)
+ *   { tipo: 'bomba', id, accion: 'partir' | 'detener' }
+ *   { tipo: 'venteo', id: vaso, accion: 'abrir' | 'cerrar' }
+ */
 function validarComando(modelo, estado, cmd) {
+  const numero = () => {
+    if (typeof cmd.valor !== 'number' || !Number.isFinite(cmd.valor)) throw new Error('El valor debe ser un número')
+  }
   if (cmd.tipo === 'ajustar') {
     if (!modelo.corrientePorId[cmd.id]) throw new Error(`Corriente desconocida: ${cmd.id}`)
     if (!CAMPOS_CORRIENTE.includes(cmd.campo) || estado.ajustes[cmd.id][cmd.campo] === undefined) {
       throw new Error(`La corriente ${cmd.id} no tiene el campo ajustable "${cmd.campo}"`)
     }
+    numero()
   } else if (cmd.tipo === 'fuente') {
     const f = estado.fuentes[cmd.id]
     if (!f) throw new Error(`Fuente desconocida: ${cmd.id}`)
@@ -89,8 +103,17 @@ function validarComando(modelo, estado, cmd) {
     if (!esEspecie && !(cmd.campo in f && cmd.campo !== 'c')) {
       throw new Error(`La fuente ${cmd.id} no tiene el campo "${cmd.campo}"`)
     }
+    numero()
+  } else if (cmd.tipo === 'valvula') {
+    if (!modelo.valvulas[cmd.id]) throw new Error(`Válvula desconocida: ${cmd.id}`)
+    numero()
+  } else if (cmd.tipo === 'bomba') {
+    if (!modelo.bombas[cmd.id]) throw new Error(`Bomba desconocida: ${cmd.id}`)
+    if (!['partir', 'detener'].includes(cmd.accion)) throw new Error('Acción de bomba: partir o detener')
+  } else if (cmd.tipo === 'venteo') {
+    if (!modelo.vasoPorId[cmd.id]) throw new Error(`Vaso desconocido: ${cmd.id}`)
+    if (!['abrir', 'cerrar'].includes(cmd.accion)) throw new Error('Acción de venteo: abrir o cerrar')
   } else throw new Error(`Comando desconocido: ${cmd.tipo}`)
-  if (typeof cmd.valor !== 'number' || !Number.isFinite(cmd.valor)) throw new Error('El valor debe ser un número')
 }
 
 function aplicarComando(modelo, estado, cmd) {
@@ -101,6 +124,15 @@ function aplicarComando(modelo, estado, cmd) {
     const f = estado.fuentes[cmd.id]
     if (modelo.idx[cmd.campo] !== undefined && f.c) f.c[modelo.idx[cmd.campo]] = Math.max(0, cmd.valor)
     else f[cmd.campo] = cmd.valor
+  } else if (cmd.tipo === 'valvula') {
+    estado.valvulas[cmd.id].comando = Math.min(1, Math.max(0, cmd.valor))
+  } else if (cmd.tipo === 'bomba') {
+    estado.bombas[cmd.id].marcha = cmd.accion === 'partir'
+    registrarEvento(modelo, estado, cmd.accion === 'partir' ? 'partida_bomba' : 'detencion_bomba', { equipo: cmd.id })
+  } else if (cmd.tipo === 'venteo') {
+    const pr = estado.vasos[cmd.id].presion
+    pr.venteo = cmd.accion === 'abrir'
+    if (!pr.venteo) pr.Pref = pr.P // al cerrar, el vaso queda a la presión del momento
   }
   estado.registro.push({ paso: estado.paso, ...cmd })
 }
@@ -118,9 +150,10 @@ function pasoLento(modelo, estado) {
   const paquetes = {}
   for (const c of modelo.corrientes) {
     const a = estado.ajustes[c.id]
+    const fc = factorCorriente(modelo, estado, c)
     if (c.tipo === 'astillas') {
       const paq = paqueteVacio(nEsp)
-      const m = a.caudalMadera * dt
+      const m = a.caudalMadera * dt * fc
       if (m > 0) paq.parcelas.push(parcelaFresca(modelo, estado.fuentes.astillas, m))
       sumarPaqueteA(cont.entra, paq, fis)
       registrarCaudal(estado, c.id, volumenPaquete(paq) / dt, estado.fuentes.astillas.T)
@@ -128,9 +161,9 @@ function pasoLento(modelo, estado) {
     } else if (c.tipo === 'fuente') {
       const f = estado.fuentes[c.origen.fuente]
       const paq = paqueteVacio(nEsp)
-      paq.licor = { v: a.caudal * dt, T: f.T, c: f.c.slice() }
+      paq.licor = { v: a.caudal * dt * fc, T: f.T, c: f.c.slice() }
       sumarPaqueteA(cont.entra, paq, fis)
-      registrarCaudal(estado, c.id, a.caudal, f.T, f.c)
+      registrarCaudal(estado, c.id, a.caudal * fc, f.T, f.c)
       paquetes[c.id] = paq
     } else if (c.volumenTubo > 0) {
       paquetes[c.id] = extraer(estado.tubos[c.id], estado.corrientes[c.id].vUltimo, nEsp)
@@ -167,15 +200,24 @@ function pasoLento(modelo, estado) {
     for (const par of paq.parcelas) e.parcelasTope.push(par)
     if (c.tipo !== 'astillas' && c.tipo !== 'fuente') registrarCaudal(estado, c.id, volumenPaquete(paq) / dt, paq.licor.T, paq.licor.c)
   }
-  // 5. Extracciones y salidas solicitadas.
+  // 5. Extracciones y salidas solicitadas. Las corrientes con válvula sacan lo
+  //    que acumuló el paso rápido según la presión; el alivio y la seguridad
+  //    descargan desde el tope.
+  for (const v of modelo.vasos) {
+    const pr = estado.vasos[v.id].presion
+    const e = entradas[v.id]
+    e.venteo = pr.venteo
+    if (pr.acumulado.alivio > 0) e.extracciones.push({ id: '__alivio', j: 0, v: pr.acumulado.alivio })
+    if (pr.acumulado.seguridad > 0) e.extracciones.push({ id: '__seguridad', j: 0, v: pr.acumulado.seguridad })
+  }
   for (const c of modelo.corrientes) {
     if (!c.origen.vaso) continue
     const e = entradas[c.origen.vaso]
     const a = estado.ajustes[c.id]
-    if (c.tipo === 'fondo') e.fondo = { masa: a.caudalMadera * dt, licor: a.caudal * dt }
-    else if (modelo.vasoPorId[c.origen.vaso].corrienteCierre !== c.id) {
-      e.extracciones.push({ id: c.id, j: c.origen.j, v: a.caudal * dt })
-    }
+    const fc = factorCorriente(modelo, estado, c)
+    if (c.tipo === 'fondo') e.fondo = { masa: a.caudalMadera * dt * fc, licor: a.caudal * dt * fc }
+    else if (c.valvula) e.extracciones.push({ id: c.id, j: c.origen.j, v: estado.vasos[c.origen.vaso].presion.acumulado[c.id] ?? 0 })
+    else e.extracciones.push({ id: c.id, j: c.origen.j, v: a.caudal * dt * fc })
   }
 
   // 6. Vasos.
@@ -183,10 +225,12 @@ function pasoLento(modelo, estado) {
     const res = pasoVaso(v, estado.vasos[v.id], entradas[v.id], dt)
     cont.sale.energia += res.perdidas
     cont.perdidas += res.perdidas
-    for (const [id, licor] of Object.entries(res.extraidos)) salidaCorriente(modelo, estado, id, { licor, parcelas: [] })
-    const idCierre = v.corrienteCierre
-    if (idCierre) salidaCorriente(modelo, estado, idCierre, { licor: res.cierre, parcelas: [] })
-    else if (res.cierre.v > 0) aSumidero(modelo, estado, 'rebalse_' + v.id, { licor: res.cierre, parcelas: [] })
+    for (const [id, licor] of Object.entries(res.extraidos)) {
+      if (id.startsWith('__')) aSumidero(modelo, estado, 'descarga' + id.slice(1), { licor, parcelas: [] })
+      else salidaCorriente(modelo, estado, id, { licor, parcelas: [] })
+    }
+    if (res.cierre.v > 0) aSumidero(modelo, estado, 'rebalse_' + v.id, { licor: res.cierre, parcelas: [] })
+    cerrarPresion(modelo, estado, v, res)
     const cf = modelo.corrientes.find((c) => c.tipo === 'fondo' && c.origen.vaso === v.id)
     if (cf) salidaCorriente(modelo, estado, cf.id, res.fondo)
     estado.diag[v.id] = {

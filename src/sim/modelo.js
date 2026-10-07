@@ -86,9 +86,8 @@ export function construirModelo(config) {
       kCalor: p(hidraulica, 'k_calor', 'hidraulica.k_calor'),
       factorDifusion,
       iOH: idx.OH,
-      corrienteCierre: cv.corriente_cierre ?? null,
-      celdaCierre: null, // se completa con las corrientes
       zonas,
+      presion: leerPresion(equipos.presion?.[cv.id], cv.id, hidraulica),
     }
   })
   const vasoPorId = Object.fromEntries(vasos.map((v) => [v.id, v]))
@@ -150,15 +149,41 @@ export function construirModelo(config) {
       if (!t || !t.destino.vaso) throw new Error(`Corriente "${c.id}": no se puede unir a "${c.destino.unir}"`)
     }
   }
-  for (const v of vasos) {
-    if (v.corrienteCierre) {
-      const c = corrientePorId[v.corrienteCierre]
-      if (!c || c.tipo !== 'extraccion' || c.origen.vaso !== v.id) {
-        throw new Error(`Vaso "${v.id}": la corriente de cierre debe ser una extracción del mismo vaso`)
-      }
-      v.celdaCierre = c.origen.j
+  // Válvulas de control: las corrientes que las tienen dependen de la presión.
+  const valvulas = {}
+  for (const [id, cv] of Object.entries(equipos.valvulas ?? {})) {
+    if (id.startsWith('_')) continue
+    const c = corrientePorId[id]
+    if (!c || c.tipo !== 'extraccion') throw new Error(`equipos.valvulas.${id}: debe ser una extracción de un vaso`)
+    const ruta = `equipos.valvulas.${id}`
+    valvulas[id] = {
+      Kv: p(cv, 'Kv', `${ruta}.Kv`),
+      tipo: cv.caracteristica ?? 'lineal',
+      R: cv.rangeabilidad ?? 50,
+      tau: p(cv, 'tau', `${ruta}.tau`),
+      carrera: p(cv, 'carrera', `${ruta}.carrera`),
+      Pdest: p(cv, 'P_destino', `${ruta}.P_destino`),
+    }
+    c.valvula = valvulas[id]
+  }
+  // Bombas: cada corriente sabe qué bombas la mueven.
+  const bombas = {}
+  for (const [id, cb] of Object.entries(equipos.bombas ?? {})) {
+    if (id.startsWith('_')) continue
+    const ruta = `equipos.bombas.${id}`
+    bombas[id] = {
+      corrientes: cb.corrientes,
+      tau: p(cb, 'tau', `${ruta}.tau`),
+      Pcierre: cb.P_cierre ? p(cb, 'P_cierre', `${ruta}.P_cierre`) : null,
+      margen: cb.margen ? p(cb, 'margen', `${ruta}.margen`) : null,
+    }
+    for (const cid of cb.corrientes) {
+      const c = corrientePorId[cid]
+      if (!c) throw new Error(`${ruta}: corriente desconocida "${cid}"`)
+      c.bombas = [...(c.bombas ?? []), id]
     }
   }
+  for (const c of corrientes) c.bombas ??= []
 
   const cin = construirCinetica(config)
 
@@ -177,6 +202,32 @@ export function construirModelo(config) {
     vasoPorId,
     corrientes,
     corrientePorId,
+    valvulas,
+    bombas,
     config,
+  }
+}
+
+/** Datos de presión y elementos de seguridad de un vaso. */
+function leerPresion(cp, id, hidraulica) {
+  if (!cp) throw new Error(`Faltan los datos de presión del vaso "${id}" en equipos.presion`)
+  const r = `equipos.presion.${id}`
+  return {
+    Pdis: p(cp, 'P_diseno', `${r}.P_diseno`),
+    beta: p(hidraulica, 'compresibilidad_licor', 'hidraulica.compresibilidad_licor') +
+      p(hidraulica, 'compresibilidad_vaso', 'hidraulica.compresibilidad_vaso'),
+    margenEbullicion: p(hidraulica, 'margen_ebullicion', 'hidraulica.margen_ebullicion'),
+    alivio: {
+      Pset: p(cp.alivio, 'P_ajuste', `${r}.alivio.P_ajuste`),
+      dP: p(cp.alivio, 'sobrepresion', `${r}.alivio.sobrepresion`),
+      Kv: p(cp.alivio, 'Kv', `${r}.alivio.Kv`),
+      Pdest: p(cp.alivio, 'P_destino', `${r}.alivio.P_destino`),
+    },
+    seguridad: {
+      Pset: p(cp.seguridad, 'P_ajuste', `${r}.seguridad.P_ajuste`),
+      purga: p(cp.seguridad, 'purga', `${r}.seguridad.purga`),
+      Kv: p(cp.seguridad, 'Kv', `${r}.seguridad.Kv`),
+      Pdest: p(cp.seguridad, 'P_destino', `${r}.seguridad.P_destino`),
+    },
   }
 }

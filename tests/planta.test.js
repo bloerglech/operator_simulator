@@ -139,11 +139,12 @@ describe('estabilidad en condiciones extremas', () => {
 
   it('llenado desde vacío con licor y luego astillas (vaso parcialmente lleno)', () => {
     const planta = crearPlanta(config(), { modo: 'vacio' })
+    for (const id of ['bomba_lavado', 'bomba_licor_blanco', 'bombas_astillas']) planta.enviarComando({ tipo: 'bomba', id, accion: 'partir' })
     planta.enviarComando({ tipo: 'ajustar', id: 'fil_fondo', campo: 'caudal', valor: 0.3 })
     planta.enviarComando({ tipo: 'ajustar', id: 'lb_alim', campo: 'caudal', valor: 0.05 })
     planta.avanzar(HORA)
     const v1 = planta.leerEstado({ perfiles: true }).vasos.dig.perfil.licorLibre.reduce((a, b) => a + b, 0)
-    expect(v1).toBeCloseTo(0.3 * HORA, 0)
+    expect(v1).toBeCloseTo(0.3 * HORA, -1) // la bomba tarda unos segundos en partir
     planta.enviarComando({ tipo: 'ajustar', id: 'astillas', campo: 'caudalMadera', valor: 20 })
     planta.avanzar(2 * HORA)
     const s = planta.leerEstado({ perfiles: true, balances: true })

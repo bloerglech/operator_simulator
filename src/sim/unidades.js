@@ -3,6 +3,7 @@
 // Unidades internas del simulador:
 //   tiempo s · longitud m · volumen m³ · caudal m³/s · masa kg · caudal másico kg/s
 //   temperatura °C (se convierte a K solo dentro de las expresiones de Arrhenius)
+//   presión Pa absolutos (diferencias en Pa)
 //   energía kJ · potencia kW · coeficientes kW/K · capacidad calorífica kJ/(kg·K)
 //   concentraciones: mol/L para iones (OH⁻, HS⁻) y kg/m³ (= g/L) para sólidos
 //   fracciones adimensionales (0–1)
@@ -58,6 +59,15 @@ const UNIDADES = {
   'kJ/mol': { f: 1 },
   // transporte
   'm2/s': { f: 1 },
+  // presión (interna en Pa absolutos; las diferencias en Pa)
+  'Pa': { f: 1 },
+  'kPa': { f: 1e3 },
+  'MPa': { f: 1e6 },
+  'bar(a)': { f: 1e5 },
+  'bar(g)': { f: 1e5, d: 101325 },
+  'bar': { f: 1e5 }, // diferencia de presión
+  '1/Pa': { f: 1 },
+  'm3/h/bar^0.5': { f: 1 / 3600 }, // Kv: m³/h con 1 bar de caída → m³/s por bar^0,5
   // cinética y calidad
   'mol/kg': { f: 1 }, // mol por kg (de madera, lignina o carbohidrato)
   'mmol/kg': { f: 1e-3 },

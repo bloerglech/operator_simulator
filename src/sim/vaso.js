@@ -48,8 +48,9 @@ export function constanteDifusion(dif, tC, oh, factorEspecie) {
  *   parcelasTope: [parcela]
  *   extracciones: [{ id, j, v }]          (m³ solicitados en el paso)
  *   fondo: { masa (kg), licor (m³) }      (solicitado)
- * @returns { extraidos: {id: licor}, cierre: licor, fondo: {licor, parcelas},
- *            perdidas (kJ), nivelAstillas, lleno, rebalseColumna, residuoHidraulico }
+ *   venteo: true si el vaso está abierto a la atmósfera
+ * @returns { extraidos: {id: licor}, cierre: licor (rebalse por el venteo), fondo: {licor, parcelas},
+ *            perdidas (kJ), nivelAstillas, lleno, exceso, tasas para la presión, … }
  */
 export function pasoVaso(v, est, ent, dt) {
   const { geom, fis } = v
@@ -93,7 +94,8 @@ export function pasoVaso(v, est, ent, dt) {
     extr: ent.extracciones.map((x) => ({ j: x.j, v: x.v })),
     pen,
     salidaFondo: ent.fondo.licor,
-    celdaCierre: v.celdaCierre,
+    celdaCierre: 0, // con el venteo abierto, el exceso rebalsa por el tope
+    compresible: !ent.venteo,
     dt,
   })
   // Lo que cae por celdas secas llega a la superficie con su contenido.
@@ -170,6 +172,10 @@ export function pasoVaso(v, est, ent, dt) {
     residuoHidraulico: hid.residuo,
     flujo: hid.flujo,
     solapes: col.solapes,
+    exceso: hid.exceso,
+    // Tasas para la integración rápida de la presión (m³/s).
+    tasaPenetracion: hid.pen.reduce((s, x) => s + x, 0) / dt,
+    volumenLiquido: hid.vNueva.reduce((s, x) => s + x, 0) + est.parcelas.reduce((s, q) => s + q.vr, 0),
   }
 }
 

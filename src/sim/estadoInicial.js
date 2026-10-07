@@ -10,7 +10,11 @@ import { crearTubo } from './tubo.js'
 import { ubicarColumna } from './columna.js'
 import { cantidadesVacias, inventario } from './contabilidad.js'
 import { estadoInicial as estadoAleatorio } from './aleatorio.js'
-import { camposCineticos } from './cinetica.js'
+import { camposCineticos, reaccionarParcela } from './cinetica.js'
+import { incrementoH } from './factorH.js'
+import { P_ATM, G } from './agua.js'
+import { caracteristica, aperturaPara } from './valvulas.js'
+import { pisoEbullicion } from './presion.js'
 
 /** Caudal de madera seca (kg/s) para una producción (ADt/d) y un rendimiento. */
 export function maderaDesdeProduccion(produccion, rendimiento) {
@@ -105,9 +109,15 @@ export function crearEstadoInicial(modelo, { modo = 'operacion', semilla } = {})
     },
     diag: {},
     registro: [], // comandos aplicados, con el paso en que se aplicaron
+    eventos: [], // incidentes y maniobras (apertura de alivio, vaporización súbita…)
+    incidentes: {}, // contador por tipo de evento
+    valvulas: {},
+    bombas: {},
   }
+  for (const id of Object.keys(modelo.bombas)) estado.bombas[id] = { marcha: modo === 'operacion', f: modo === 'operacion' ? 1 : 0 }
 
   const licorInicial = {}
+  let edadAcumulada = 0 // edad de las astillas al entrar a cada vaso (en operación)
   for (const v of modelo.vasos) {
     const ev = estadoVasoVacio(v.geom.n, nEsp, modelo.tAmb)
     if (modo === 'operacion') {
@@ -117,6 +127,13 @@ export function crearEstadoInicial(modelo, { modo = 'operacion', semilla } = {})
       if (!c) throw new Error(`caso_base.estado_inicial.${v.id}.licor: fuente desconocida "${ci.licor}"`)
       licorInicial[v.id] = { T, c }
       llenarColumna(modelo, v, ev, p(ci, 'nivel_astillas', `caso_base.estado_inicial.${v.id}.nivel_astillas`), T, c)
+      const W = ajustes.astillas?.caudalMadera ?? 0
+      edadAcumulada = precocinar(modelo, ev, T, c, edadAcumulada, W)
+      // El vaso que recibe astillas frescas además llena el aire de sus poros.
+      if (modelo.corrientes.some((k) => k.tipo === 'astillas' && k.destino.vaso === v.id)) {
+        const fresca = parcelaFresca(modelo, fuentes.astillas, 1)
+        ev.tasaPenetracionInicial += W * (fresca.vp - fresca.vr)
+      }
       const col = ubicarColumna(ev.parcelas, v.geom, v.sCol)
       for (let j = 0; j < v.geom.n; j++) {
         ev.vf[j] = Math.max(0, v.geom.V[j] - col.volAstilla[j])
@@ -125,6 +142,20 @@ export function crearEstadoInicial(modelo, { modo = 'operacion', semilla } = {})
       }
     }
     estado.vasos[v.id] = ev
+    inicializarPresion(modelo, v, ev, modo)
+  }
+  // Válvulas: apertura para el caudal de diseño a la presión de diseño.
+  for (const [id, cfg] of Object.entries(modelo.valvulas)) {
+    const c = modelo.corrientePorId[id]
+    let x = 0
+    if (modo === 'operacion') {
+      const v = modelo.vasoPorId[c.origen.vaso]
+      const Pm = v.presion.Pdis + modelo.fis.densidadLicor * G * (c.origen.j + 0.5) * v.geom.dz
+      const q = ajustes[id].caudal
+      const frac = q / (cfg.Kv * Math.sqrt(Math.max(Pm - cfg.Pdest, 1) / 1e5))
+      x = frac >= 1 ? 1 : aperturaPara(frac, cfg.tipo, cfg.R)
+    }
+    estado.valvulas[id] = { x, comando: x, pegada: false }
   }
 
   for (const c of modelo.corrientes) {
@@ -182,4 +213,87 @@ function llenarColumna(modelo, v, ev, nivel, T, c) {
     ev.parcelas.push(par)
     vol += par.vol / v.sCol
   }
+}
+
+/**
+ * Estado de presión inicial de un vaso. En operación: cerrado, a la presión de
+ * diseño (el líquido de las celdas se comprime lo necesario). Vacío: venteo
+ * abierto, presión atmosférica.
+ */
+function inicializarPresion(modelo, v, ev, modo) {
+  const volLiq = ev.vf.reduce((a, x) => a + x, 0) + ev.parcelas.reduce((a, q) => a + q.vr, 0)
+  const C = Math.max(volLiq, 1e-6) * v.presion.beta
+  const piso = pisoEbullicion(v, ev, modelo.fis.densidadLicor)
+  const pr = {
+    venteo: modo !== 'operacion',
+    Pref: P_ATM,
+    E: 0,
+    C,
+    P: P_ATM,
+    Ppiso: piso.piso,
+    celdaPiso: piso.celda,
+    seguridadAbierta: false,
+    alivioAbierto: false,
+    ebullicion: false,
+    tasaPenetracion: 0,
+    acumulado: {},
+  }
+  if (modo === 'operacion') {
+    // Penetración esperada en el primer paso (después la mide el paso lento).
+    pr.tasaPenetracion = ev.tasaPenetracionInicial ?? 0
+    delete ev.tasaPenetracionInicial
+    pr.E = C * (v.presion.Pdis - P_ATM)
+    pr.P = v.presion.Pdis
+    // El exceso comprimido se reparte en las celdas (llenas).
+    const cap = ev.vf.reduce((a, x) => a + x, 0)
+    if (cap > 0) ev.vf = ev.vf.map((x) => x * (1 + pr.E / cap))
+  } else {
+    const cap = v.geom.volumenTotal
+    pr.E = -cap
+  }
+  ev.presion = pr
+}
+
+/**
+ * Precocina las parcelas iniciales de un vaso según la edad que tendrían en su
+ * posición (flujo pistón desde el tope), a la temperatura inicial del vaso y
+ * con un licor de cocción típico. Evita que el arranque sintético tenga todo
+ * el digestor lleno de madera fresca a temperatura de cocción, que se
+ * disolvería de golpe. Devuelve la edad de las astillas al salir del vaso.
+ */
+function precocinar(modelo, ev, T, cIni, edadEntrada, W) {
+  if (W <= 0 || ev.parcelas.length === 0) return edadEntrada
+  const { idx, cin } = modelo
+  const nEsp = modelo.especies.length
+  const dt = 60
+  let masaArriba = 0
+  let disueltaPorSegundo = 0
+  for (let i = ev.parcelas.length - 1; i >= 0; i--) {
+    const par = ev.parcelas[i]
+    const edadVaso = (masaArriba + par.m0 / 2) / W
+    masaArriba += par.m0
+    const edad = edadEntrada + edadVaso
+    const tipico = new Array(nEsp).fill(0)
+    tipico[idx.OH] = 0.45
+    tipico[idx.HS] = 0.2
+    par.cr = tipico
+    let t = 0
+    const m0 = par.m
+    while (t < edad) {
+      const paso = Math.min(dt, edad - t)
+      // Solo la parte final de la historia ocurre a la temperatura del vaso.
+      reaccionarParcela(par, cin, paso, idx, nEsp, modelo.densidadPared, modelo.fis.cpMadera)
+      par.cr[idx.OH] = 0.45
+      par.cr[idx.HS] = 0.2
+      par.H += incrementoH(T, paso)
+      t += paso
+    }
+    par.edad = edad
+    par.vr = par.vp
+    par.cr = cIni.slice()
+    disueltaPorSegundo += (m0 - par.m) / Math.max(edad, 1)
+  }
+  // Penetración inicial ≈ volumen que deja la madera que se disuelve.
+  ev.tasaPenetracionInicial = disueltaPorSegundo / modelo.densidadPared
+  return edadEntrada + masaArriba / W
 }

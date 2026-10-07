@@ -42,8 +42,10 @@ for (const [id, e] of Object.entries(k.extracciones)) {
   console.log(`  Extracción ${id.padEnd(22)} ${f(e.caudal * 3600, 0)} m³/h  EA ${f(e.alcali * 40, 1)} g/L  sólidos ${f(e.solidos, 0)} g/L (orgánicos ${f(e.solidosOrganicos, 0)})`)
 }
 for (const [id, v] of Object.entries(s.vasos)) {
-  console.log(`  Nivel de astillas ${v.nombre.padEnd(16)} ${f(v.nivelAstillas, 2)} m   ${v.lleno ? 'lleno' : 'NO lleno'}`)
+  console.log(`  ${v.nombre.padEnd(16)} nivel de astillas ${f(v.nivelAstillas, 2)} m   ${v.lleno ? 'lleno' : 'NO lleno'}   presión ${f((v.presion.P - 101325) / 1e5, 2)} bar(g)   (saturación ${f((v.presion.Psaturacion - 101325) / 1e5, 2)} bar(g))`)
 }
+for (const [id, v] of Object.entries(s.valvulas)) console.log(`  Válvula ${id.padEnd(18)} apertura ${f(v.apertura * 100, 1)} %   ${f(v.caudal * 3600, 0)} m³/h`)
+console.log(`  Incidentes: ${Object.keys(s.incidentes).length ? JSON.stringify(s.incidentes) : 'ninguno'}`)
 
 linea()
 console.log('ZONAS (licor libre)')

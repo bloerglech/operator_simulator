@@ -1,26 +1,389 @@
 {
-  "_descripcion": "Dimensiones de equipos. Provisionales (preguntas P1, P2, P15 de docs/PLAN.md), dimensionadas para que la residencia del caso base quede en 4-6 h.",
+  "_descripcion": "Dimensiones y datos de diseño de equipos. Provisionales (preguntas P1-P9, P15 de docs/PLAN.md).",
   "vasos": {
     "imp": {
       "tramos": [
-        { "altura": { "valor": 23, "unidad": "m", "origen": "supuesto" },
-          "diametro": { "valor": 7.5, "unidad": "m", "origen": "supuesto" } }
+        {
+          "altura": {
+            "valor": 23,
+            "unidad": "m",
+            "origen": "supuesto"
+          },
+          "diametro": {
+            "valor": 7.5,
+            "unidad": "m",
+            "origen": "supuesto"
+          }
+        }
       ]
     },
     "dig": {
       "tramos": [
-        { "altura": { "valor": 30, "unidad": "m", "origen": "supuesto" },
-          "diametro": { "valor": 9.0, "unidad": "m", "origen": "supuesto" } },
-        { "altura": { "valor": 27, "unidad": "m", "origen": "supuesto" },
-          "diametro": { "valor": 10.0, "unidad": "m", "origen": "supuesto" } }
+        {
+          "altura": {
+            "valor": 30,
+            "unidad": "m",
+            "origen": "supuesto"
+          },
+          "diametro": {
+            "valor": 9.0,
+            "unidad": "m",
+            "origen": "supuesto"
+          }
+        },
+        {
+          "altura": {
+            "valor": 27,
+            "unidad": "m",
+            "origen": "supuesto"
+          },
+          "diametro": {
+            "valor": 10.0,
+            "unidad": "m",
+            "origen": "supuesto"
+          }
+        }
       ]
     }
   },
   "tubos": {
-    "circ_tope_imp": { "valor": 10, "unidad": "m3", "origen": "supuesto" },
-    "transferencia": { "valor": 12, "unidad": "m3", "origen": "supuesto", "nota": "≈ 30 s a caudal nominal" },
-    "retorno_transf": { "valor": 15, "unidad": "m3", "origen": "supuesto" },
-    "circ_sup": { "valor": 15, "unidad": "m3", "origen": "supuesto" },
-    "circ_inf": { "valor": 15, "unidad": "m3", "origen": "supuesto" }
+    "circ_tope_imp": {
+      "valor": 10,
+      "unidad": "m3",
+      "origen": "supuesto"
+    },
+    "transferencia": {
+      "valor": 12,
+      "unidad": "m3",
+      "origen": "supuesto",
+      "nota": "≈ 30 s a caudal nominal"
+    },
+    "retorno_transf": {
+      "valor": 15,
+      "unidad": "m3",
+      "origen": "supuesto"
+    },
+    "circ_sup": {
+      "valor": 15,
+      "unidad": "m3",
+      "origen": "supuesto"
+    },
+    "circ_inf": {
+      "valor": 15,
+      "unidad": "m3",
+      "origen": "supuesto"
+    }
+  },
+  "presion": {
+    "_descripcion": "Presión de diseño (tope) y elementos de seguridad de cada vaso hidráulico (P4, P6).",
+    "imp": {
+      "P_diseno": {
+        "valor": 6,
+        "unidad": "bar(g)",
+        "origen": "supuesto"
+      },
+      "alivio": {
+        "P_ajuste": {
+          "valor": 7.5,
+          "unidad": "bar(g)",
+          "origen": "supuesto"
+        },
+        "sobrepresion": {
+          "valor": 0.5,
+          "unidad": "bar",
+          "origen": "supuesto",
+          "nota": "aumento sobre el ajuste para apertura total"
+        },
+        "Kv": {
+          "valor": 800,
+          "unidad": "m3/h/bar^0.5",
+          "origen": "supuesto"
+        },
+        "P_destino": {
+          "valor": 0,
+          "unidad": "bar(g)",
+          "origen": "supuesto"
+        }
+      },
+      "seguridad": {
+        "P_ajuste": {
+          "valor": 9,
+          "unidad": "bar(g)",
+          "origen": "supuesto"
+        },
+        "purga": {
+          "valor": 0.7,
+          "unidad": "bar",
+          "origen": "supuesto",
+          "nota": "cierra bajo P_ajuste − purga"
+        },
+        "Kv": {
+          "valor": 3000,
+          "unidad": "m3/h/bar^0.5",
+          "origen": "supuesto"
+        },
+        "P_destino": {
+          "valor": 0,
+          "unidad": "bar(g)",
+          "origen": "supuesto"
+        }
+      }
+    },
+    "dig": {
+      "P_diseno": {
+        "valor": 5.5,
+        "unidad": "bar(g)",
+        "origen": "supuesto"
+      },
+      "alivio": {
+        "P_ajuste": {
+          "valor": 7.5,
+          "unidad": "bar(g)",
+          "origen": "supuesto"
+        },
+        "sobrepresion": {
+          "valor": 0.5,
+          "unidad": "bar",
+          "origen": "supuesto"
+        },
+        "Kv": {
+          "valor": 800,
+          "unidad": "m3/h/bar^0.5",
+          "origen": "supuesto"
+        },
+        "P_destino": {
+          "valor": 0,
+          "unidad": "bar(g)",
+          "origen": "supuesto"
+        }
+      },
+      "seguridad": {
+        "P_ajuste": {
+          "valor": 9,
+          "unidad": "bar(g)",
+          "origen": "supuesto"
+        },
+        "purga": {
+          "valor": 0.7,
+          "unidad": "bar",
+          "origen": "supuesto"
+        },
+        "Kv": {
+          "valor": 3000,
+          "unidad": "m3/h/bar^0.5",
+          "origen": "supuesto"
+        },
+        "P_destino": {
+          "valor": 0,
+          "unidad": "bar(g)",
+          "origen": "supuesto"
+        }
+      }
+    }
+  },
+  "valvulas": {
+    "_descripcion": "Válvulas de control de las corrientes que no son de caudal fijo. Kv en m³/h con 1 bar de caída a apertura total. La apertura inicial se calcula para el caudal de diseño a la presión de diseño.",
+    "imp_exceso": {
+      "Kv": {
+        "valor": 400,
+        "unidad": "m3/h/bar^0.5",
+        "origen": "supuesto"
+      },
+      "caracteristica": "igual_porcentaje",
+      "rangeabilidad": 50,
+      "tau": {
+        "valor": 2,
+        "unidad": "s",
+        "origen": "supuesto"
+      },
+      "carrera": {
+        "valor": 20,
+        "unidad": "s",
+        "origen": "supuesto"
+      },
+      "P_destino": {
+        "valor": 0,
+        "unidad": "bar(g)",
+        "origen": "supuesto",
+        "nota": "estanque de licor de nivel"
+      }
+    },
+    "ext_principal": {
+      "Kv": {
+        "valor": 500,
+        "unidad": "m3/h/bar^0.5",
+        "origen": "supuesto"
+      },
+      "caracteristica": "igual_porcentaje",
+      "rangeabilidad": 50,
+      "tau": {
+        "valor": 2,
+        "unidad": "s",
+        "origen": "supuesto"
+      },
+      "carrera": {
+        "valor": 20,
+        "unidad": "s",
+        "origen": "supuesto"
+      },
+      "P_destino": {
+        "valor": 2.5,
+        "unidad": "bar(a)",
+        "origen": "supuesto",
+        "nota": "ciclón flash 1 (P9)"
+      }
+    }
+  },
+  "bombas": {
+    "_descripcion": "Bombas y las corrientes que mueven. P_cierre: presión de descarga a la que el caudal se anula; margen: caída de presión en que el caudal baja de 100 % a 0.",
+    "bombas_astillas": {
+      "corrientes": [
+        "astillas",
+        "lb_alim",
+        "licor_imp",
+        "circ_tope_imp"
+      ],
+      "P_cierre": {
+        "valor": 12,
+        "unidad": "bar(g)",
+        "origen": "supuesto"
+      },
+      "margen": {
+        "valor": 3,
+        "unidad": "bar",
+        "origen": "supuesto"
+      },
+      "tau": {
+        "valor": 3,
+        "unidad": "s",
+        "origen": "supuesto"
+      }
+    },
+    "bomba_transferencia": {
+      "corrientes": [
+        "transferencia",
+        "retorno_transf"
+      ],
+      "P_cierre": {
+        "valor": 11,
+        "unidad": "bar(g)",
+        "origen": "supuesto"
+      },
+      "margen": {
+        "valor": 3,
+        "unidad": "bar",
+        "origen": "supuesto"
+      },
+      "tau": {
+        "valor": 3,
+        "unidad": "s",
+        "origen": "supuesto"
+      }
+    },
+    "bomba_circ_sup": {
+      "corrientes": [
+        "circ_sup"
+      ],
+      "tau": {
+        "valor": 3,
+        "unidad": "s",
+        "origen": "supuesto"
+      }
+    },
+    "bomba_circ_inf": {
+      "corrientes": [
+        "circ_inf"
+      ],
+      "tau": {
+        "valor": 3,
+        "unidad": "s",
+        "origen": "supuesto"
+      }
+    },
+    "bomba_licor_blanco": {
+      "corrientes": [
+        "lb_alim",
+        "lb_transf",
+        "lb_sup",
+        "lb_inf"
+      ],
+      "P_cierre": {
+        "valor": 13,
+        "unidad": "bar(g)",
+        "origen": "supuesto"
+      },
+      "margen": {
+        "valor": 3,
+        "unidad": "bar",
+        "origen": "supuesto"
+      },
+      "tau": {
+        "valor": 2,
+        "unidad": "s",
+        "origen": "supuesto"
+      }
+    },
+    "bomba_filtrado": {
+      "corrientes": [
+        "fil_sup",
+        "fil_inf"
+      ],
+      "P_cierre": {
+        "valor": 12,
+        "unidad": "bar(g)",
+        "origen": "supuesto"
+      },
+      "margen": {
+        "valor": 3,
+        "unidad": "bar",
+        "origen": "supuesto"
+      },
+      "tau": {
+        "valor": 2,
+        "unidad": "s",
+        "origen": "supuesto"
+      }
+    },
+    "bomba_lavado": {
+      "corrientes": [
+        "fil_fondo",
+        "dilucion"
+      ],
+      "P_cierre": {
+        "valor": 12,
+        "unidad": "bar(g)",
+        "origen": "supuesto"
+      },
+      "margen": {
+        "valor": 3,
+        "unidad": "bar",
+        "origen": "supuesto"
+      },
+      "tau": {
+        "valor": 2,
+        "unidad": "s",
+        "origen": "supuesto"
+      }
+    },
+    "bomba_extraccion_superior": {
+      "corrientes": [
+        "ext_superior"
+      ],
+      "tau": {
+        "valor": 2,
+        "unidad": "s",
+        "origen": "supuesto"
+      }
+    },
+    "bomba_extraccion_final": {
+      "corrientes": [
+        "ext_final"
+      ],
+      "tau": {
+        "valor": 2,
+        "unidad": "s",
+        "origen": "supuesto"
+      }
+    }
   }
 }

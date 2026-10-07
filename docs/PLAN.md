@@ -218,7 +218,7 @@ Subdividida para poder revisar avances:
 - **Aceptación:** cada misión con prueba que la supera y prueba sin
   acciones que la falla.
 
-### Fase 6 — Misiones 4–11 y estados completos
+### Fase 6 — Misiones 4–11 y estados completos (terminada)
 - Presurización, colgamiento, paradas, arranque en frío, apagón, turno
   récord; `docs/PROCEDIMIENTOS.md` consultable en el juego.
 - **Aceptación:** igual que la Fase 5 para todas las misiones.
@@ -462,3 +462,30 @@ eventos instructor) pero no las implementa.
   completo en el navegador hasta el informe) y las pruebas de Vitest.
 - Pendiente: ayuda contextual por variable, sonidos, modo turno completo de
   8–12 h con meta (Fase 6/7), capítulos 4 a 11 (Fase 6).
+
+### Fase 6 — terminada
+- Capítulos 4 a 11 en `src/misiones/campana.js`: Mallas, Primera
+  presurización, Columna colgada, Parada corta, Parada general, Puesta en
+  marcha (desde el estado que deja la parada general, preparado por etapas),
+  Apagón y Récord (12 h con perturbaciones encadenadas). Cada uno calibrado
+  con un jugador simulado (`tests/planes/`, `tests/campana.test.js`): no
+  hacer nada falla y la respuesta ideal aprueba (oro salvo el Récord).
+- `docs/PROCEDIMIENTOS.md` reescrito con los procedimientos validados en el
+  simulador (presión alta, mallas, colgamiento, paradas, partida, apagón).
+- Motor de misiones: objetivos evitables y anticipables; condiciones de
+  comando con alcance desde que se muestra el objetivo; condiciones de mallas,
+  bombas e incidentes desde un paso del guion; preparación por etapas.
+- Simulador y control (hallazgos al calibrar, corregidos): habilitación de
+  lazos (FDC-607, TIC-604 y CIC-605 se retienen sin soplado); colgamiento
+  soltable (S-46); estanque de soplado que descarga también solo licor
+  (S-47); alivio y seguridad desde el licor libre más alto (S-48, la presión
+  del impregnador divergía con el tope lleno de astillas); base persistente
+  de RC-700 (S-49); energía eléctrica como servicio (S-50); venteos en los
+  mímicos; enclavamiento I-11; eventos que no pueden aplicar un comando ya no
+  detienen la simulación. Limitaciones nuevas L-15 y L-16.
+- Revisión independiente de la Fase 5: 9 hallazgos corregidos (eventos
+  superpuestos, parada del lavado, acciones del jugador al reintentar,
+  alcance de las condiciones de comando, madera en m³, cola de comandos,
+  puntos de control, plazo y «durante», medallas e incidentes del turno).
+- Pendiente: sonidos; la pulpa detenida en paradas sale con kappa más bajo
+  que en la práctica (L-13).

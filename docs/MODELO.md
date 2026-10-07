@@ -941,6 +941,7 @@ mínimas).
 | Nivel de licor del tubo de astillas | Pendiente (L-11) |
 | Eventos (27), generador aleatorio, director, indicadores del turno | Fase 5 ✔ |
 | Motor de misiones, tutorial y capítulos 1 a 3 | Fase 5 ✔ |
+| Capítulos 4 a 11, paradas, partida desde frío y apagón | Fase 6 ✔ |
 
 ## 18. Referencias (a verificar al implementar)
 

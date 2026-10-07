@@ -6,6 +6,7 @@ import { planParadaCorta } from './planes/paradaCorta.js'
 import { planParadaGeneral } from './planes/paradaGeneral.js'
 import { planRecord } from './planes/record.js'
 import { planApagon } from './planes/apagon.js'
+import { planPuestaEnMarcha } from './planes/puestaEnMarcha.js'
 
 describe('capítulo 4: mallas', () => {
   const MALLAS = ['mallas_circ_sup', 'mallas_circ_inf']
@@ -120,6 +121,17 @@ describe('capítulo 8: parada general', () => {
     }, 2)
     expect(r.resultado.exito).toBe(false)
     expect(r.fallida).toMatch(/110 °C/)
+  })
+})
+
+describe('capítulo 9: puesta en marcha', () => {
+  it('desde el digestor frío y venteado: llenar, presurizar, calentar y partir en escalones aprueba', () => {
+    const r = jugar('puesta_en_marcha', planPuestaEnMarcha(), 21)
+    expect(r.resultado.exito).toBe(true)
+    expect(r.resultado.medalla).toBe('oro')
+  })
+  it('sin hacer nada la misión falla', () => {
+    expect(jugar('puesta_en_marcha', {}, 21).resultado.exito).toBe(false)
   })
 })
 

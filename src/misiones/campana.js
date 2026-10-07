@@ -525,12 +525,10 @@ const lazo = (id, accion, valor) => ({ tipo: 'lazo', id, accion, valor })
 /** La parada general del capítulo 8 como preparación: digestor lleno de astillas, frío y venteado. */
 const PARADA_GENERAL = {
   etapas: [
+    // (Ritmo bajado con WIC-101 y no con RC-700: los caudales escalados quedan en su valor nominal.)
+    { comandos: [lazo('WIC-101', 'consigna', 130)], horas: 1.5 },
     { comandos: [
-      { tipo: 'bloque', id: 'RC-700', accion: 'parametro', campo: 'produccion', valor: 1750 },
-      { tipo: 'bloque', id: 'RC-700', accion: 'parametro', campo: 'rampa', valor: 600 },
-      { tipo: 'bloque', id: 'RC-700', accion: 'activar' }], horas: 1.5 },
-    { comandos: [
-      { tipo: 'bloque', id: 'RC-700', accion: 'desactivar' }, lazo('WIC-101', 'consigna', 0), lazo('FIC-115', 'modo', 'AUTO'), lazo('FIC-601', 'modo', 'AUTO'),
+      lazo('WIC-101', 'consigna', 0), lazo('FIC-115', 'modo', 'AUTO'), lazo('FIC-601', 'modo', 'AUTO'),
       ...['LIC-202', 'LIC-302', 'TIC-402', 'TIC-404', 'TIC-212'].map((id) => lazo(id, 'modo', 'MAN'))], horas: 0 },
     { comandos: [...['LIC-202', 'LIC-302', 'TIC-402', 'TIC-404', 'TIC-212'].map((id) => lazo(id, 'salida', 0)), lazo('FIC-601', 'consigna', 600)], horas: 13.5 },
     { comandos: [lazo('FIC-601', 'consigna', 0), lazo('PIC-301', 'consigna', 1), lazo('PIC-201', 'consigna', 1.5)], horas: 0.2 },
@@ -542,22 +540,48 @@ const puestaEnMarcha = {
   id: 'puesta_en_marcha',
   capitulo: 'Capítulo 9',
   titulo: 'Puesta en marcha',
-  resumen: 'Arranque después de la parada general: el digestor está lleno de astillas, frío y sin presión.',
-  ensena: 'El orden de una partida: cerrar venteos y presurizar, calentar en rampa con las circulaciones andando, partir soplado y madera en escalones, y llegar a kappa en banda y ritmo nominal.',
+  resumen: 'Arranque después de la parada general: el digestor está lleno de astillas, frío y venteado.',
+  ensena: 'El orden de una partida: cerrar venteos y llenar (el impregnador también), presurizar, calentar en rampa con las circulaciones andando, partir madera, soplado y lavado juntos en escalones y esperar el kappa: lo que estuvo detenido sale fuera de especificación por horas.',
   inicio: { horasPrevias: 8, preparacion: PARADA_GENERAL },
   guion: [
     { id: 'entrega', cuando: { tiempo: 0 }, acciones: [
-      jefa('Mantención terminó. El digestor está lleno de astillas, frío y venteado. Hay que partir: cierra venteos, presuriza con filtrado, calienta de a poco y después parte soplado y madera. Quiero ritmo completo y kappa en banda antes del fin del turno.')] },
-    { id: 'relevo', cuando: { tiempo: 12 * H }, acciones: [jefa('Fin del turno de partida. Revisemos.'), { terminar: true }] },
+      jefa('Mantención terminó. El digestor está lleno de astillas, frío y venteado. Hay que partir: cierra los venteos, llena y presuriza, calienta de a poco y después parte madera y soplado. Quiero ritmo completo y kappa en banda para mañana.')] },
+    { id: 'presion', cuando: { objetivo: 'presurizar' }, acciones: [
+      radio('Sala, los dos vasos con presión y sin fugas en terreno. Puedes calentar.', { puntoControl: true })] },
+    { id: 'caliente', cuando: { objetivo: 'calentar' }, acciones: [
+      jefa('Temperaturas de cocción arriba. Parte la madera de a poco, con el soplado y el lavado en la misma proporción.', { puntoControl: true })] },
+    { id: 'relevo', cuando: { tiempo: 20 * H }, acciones: [jefa('Veinte horas de partida. Revisemos cómo quedó.'), { terminar: true }] },
   ],
   objetivos: [
-    { id: 'presurizar', tipo: 'principal', texto: 'Cerrar los venteos y presurizar el digestor (PI-301 sobre 5 bar)',
-      condicion: { tag: 'PI-301', op: '>=', valor: 5 } },
+    { id: 'presurizar', tipo: 'principal', texto: 'Cerrar los venteos, llenar el impregnador y presurizar ambos vasos (PI-301 y PI-201 sobre 5 bar)',
+      condicion: { y: [{ tag: 'PI-301', op: '>=', valor: 5 }, { tag: 'PI-201', op: '>=', valor: 5 }] },
+      pistas: [pista(15 * MIN, 'Cierra los venteos del digestor y del impregnador y vuelve las consignas de PIC-301 (5,5) y PIC-201 (6,1). Para presurizar tiene que entrar líquido: filtrado de lavado (FIC-601 unos 300 m³/h) y licor negro al impregnador (FIC-115 unos 400).', 'PIC-301', 'ayuda'),
+        pista(40 * MIN, 'Si PI-201 no sube, el impregnador no está lleno: sube FIC-115 hasta que la presión suba y después vuelve a unos 260 m³/h.', 'FIC-115', 'ayuda')] },
+    { id: 'calentar', tipo: 'principal', texto: 'Calentar en rampa hasta la temperatura de cocción (TI-304 sobre 148 °C)', desde: { objetivo: 'presurizar' },
+      condicion: { tag: 'TI-304', op: '>=', valor: 148 },
+      pistas: [pista(20 * MIN, 'TIC-402, TIC-404 y TIC-212 a AUTO con la consigna en la temperatura actual, y súbelas unos 15 °C cada media hora hasta 156, 155 y 140 °C.', 'TIC-402', 'ayuda')] },
+    { id: 'ritmo', tipo: 'principal', texto: 'Llegar al ritmo nominal (WI-101 sobre 200 t/h) con soplado y lavado en proporción', desde: { objetivo: 'calentar' },
+      condicion: { tag: 'WI-101', op: '>=', valor: 200 },
+      pistas: [pista(20 * MIN, 'Escalones de unas 25 t/h cada 15 minutos en WIC-101; la salida de LIC-302 y la consigna de FIC-601 en la misma proporción.', 'WIC-101', 'ayuda')] },
+    { id: 'modos', tipo: 'secundario', texto: 'Dejar los lazos en su modo normal (LIC-302, LIC-202 y TIC-604 en AUTO; FIC-601 y FIC-115 en CAS)', desde: { objetivo: 'ritmo' },
+      condicion: { y: [{ lazo: 'LIC-302', modo: 'AUTO' }, { lazo: 'LIC-202', modo: 'AUTO' }, { lazo: 'TIC-604', modo: 'AUTO' }, { lazo: 'FIC-601', modo: 'CAS' }, { lazo: 'FIC-115', modo: 'CAS' }] },
+      pistas: [pista(40 * MIN, 'Con el ritmo completo y estable, fija la consigna de LIC-302 en el nivel actual y pásalo a AUTO; FIC-601 y FIC-115 a CAS.', 'LIC-302', 'ayuda')] },
+    { id: 'kappa_final', tipo: 'principal', final: true, texto: 'Terminar con kappa entre 16 y 18', condicion: { kpi: 'kappa', entre: [16, 18] } },
+    { id: 'presion_final', tipo: 'principal', final: true, texto: 'Terminar con la presión del digestor entre 5 y 6 bar', condicion: { tag: 'PI-301', entre: [5, 6] } },
   ],
-  fallas: [],
+  fallas: [
+    { condicion: { incidente: 'apertura_seguridad' }, mensaje: 'Abrió la válvula de seguridad del digestor.' },
+    { condicion: { enclavamiento: 'I-02' }, mensaje: 'El nivel de astillas del digestor llegó al enclavamiento.' },
+    { condicion: { enclavamiento: 'I-08' }, mensaje: 'El estanque de soplado se llenó.' },
+    { condicion: { enclavamiento: 'I-11' }, mensaje: 'El impregnador se llenó de astillas: enclavamiento I-11.' },
+  ],
   fin: { paso: 'relevo' },
-  evaluacion: [],
-  respuestaIdeal: '',
+  evaluacion: [
+    { texto: 'A lo más 40 aperturas del alivio en la partida', condicion: { incidente: 'apertura_alivio', op: '<=', valor: 40 }, puntos: 1 },
+    { texto: 'Menos de 10 horas de pulpa fuera de especificación', condicion: { indicador: 'tiempoFueraEspec', op: '<', valor: 10 * H }, puntos: 2 },
+    { texto: 'Sin enclavamientos disparados', condicion: { no: { incidente: 'enclavamiento' } }, puntos: 1 },
+  ],
+  respuestaIdeal: 'Partir es el camino inverso de la parada, en orden: (1) cerrar los venteos y llenar: filtrado de lavado al fondo (FIC-601, ≈ 300 m³/h) y licor negro al impregnador (FIC-115 en AUTO, ≈ 400 m³/h hasta que PI-201 suba): un vaso que no está lleno de líquido no toma presión y su circulación de tope no anda; (2) calentar en rampa con los tres TIC en AUTO, unos 15 °C cada media hora; (3) con la zona de cocción caliente, partir la transferencia (LIC-202 en AUTO) y madera, soplado manual y lavado juntos en escalones; (4) con el ritmo completo, LIC-302 a AUTO con la consigna en el nivel actual y FIC-601 y FIC-115 a CAS. Las astillas que estuvieron detenidas salen sobrecocidas y luego crudas: el kappa entra en banda recién unas 10 horas después de partir.',
 }
 
 // ---------------------------------------------------------------------------
@@ -681,12 +705,13 @@ export const MISIONES = {
   columna_colgada: columnaColgada,
   parada_corta: paradaCorta,
   parada_general: paradaGeneral,
+  puesta_en_marcha: puestaEnMarcha,
   apagon,
   record,
 }
 
-// En preparación (no está en la campaña todavía): capítulo 9.
-export const BORRADORES = { puesta_en_marcha: puestaEnMarcha }
+// En preparación (no están en la campaña todavía).
+export const BORRADORES = {}
 
 /** Definición de una misión de la campaña o en preparación (para pruebas). */
 export function buscarMision(id) {

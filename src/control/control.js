@@ -15,6 +15,7 @@
 //   { tipo: 'lazo', id, accion: 'sintonia', Kc, Ti, Td }
 //   { tipo: 'lazo', id, accion: 'maestro', valor }          (elige entre los "maestros" configurados)
 //   { tipo: 'bloque', id, accion: 'activar' | 'desactivar' }
+//   { tipo: 'ruido', factor }  (dificultad: factor del ruido de los transmisores, 0 a 3)
 //   { tipo: 'bloque', id, accion: 'parametro', campo, valor }
 //   { tipo: 'enclavamiento', id, accion: 'rearmar' | 'puentear' | 'quitar_puente' }
 //   { tipo: 'alarma', id | '*', accion: 'reconocer' | 'archivar' | 'desarchivar', duracion? }
@@ -27,7 +28,7 @@ import { construirLazos, estadoLazos, pasoLazos, cambiarModo } from './lazos.js'
 import { construirEnclavamientos, estadoEnclavamientos, pasoEnclavamientos, comandoEnclavamiento, validarComandoEnclavamiento } from './enclavamientos.js'
 import { construirAlarmas, estadoAlarmas, pasoAlarmas, comandoAlarma, validarComandoAlarma, listaAlarmas } from './alarmas.js'
 
-const TIPOS = new Set(['lazo', 'bloque', 'enclavamiento', 'alarma', 'laboratorio', 'instrumento', 'actuador'])
+const TIPOS = new Set(['lazo', 'bloque', 'enclavamiento', 'alarma', 'laboratorio', 'instrumento', 'actuador', 'ruido'])
 const FALLAS = [null, 'congelado', 'alto', 'bajo', 'deriva']
 const copiar = (x) => JSON.parse(JSON.stringify(x))
 
@@ -141,6 +142,8 @@ export function extensionControl(config) {
       } else if (cmd.tipo === 'instrumento') {
         if (!inst.transmisores[cmd.id]) throw new Error(`Instrumento desconocido: ${cmd.id}`)
         if (!FALLAS.includes(cmd.falla ?? null)) throw new Error(`Falla inválida: ${cmd.falla}`)
+      } else if (cmd.tipo === 'ruido') {
+        if (!(typeof cmd.factor === 'number' && cmd.factor >= 0 && cmd.factor <= 3)) throw new Error('Factor de ruido entre 0 y 3')
       } else if (cmd.tipo === 'actuador') {
         if (!lz.lazos[cmd.id]?.act) throw new Error(`El lazo ${cmd.id} no tiene actuador propio`)
         if (![null, 'pegado'].includes(cmd.falla ?? null)) throw new Error(`Falla inválida: ${cmd.falla}`)
@@ -189,6 +192,8 @@ export function extensionControl(config) {
         s.falla = cmd.falla ?? null
         if (!s.falla) s.deriva = 0
         ctx.evento('falla_instrumento', { tag: cmd.id, falla: s.falla })
+      } else if (cmd.tipo === 'ruido') {
+        ce.factorRuido = cmd.factor // dificultad: escala el ruido de todos los transmisores
       } else if (cmd.tipo === 'actuador') {
         ce.lazos[cmd.id].act.pegado = cmd.falla === 'pegado'
         ctx.evento('falla_actuador', { lazo: cmd.id, falla: cmd.falla ?? null })

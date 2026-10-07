@@ -376,3 +376,22 @@ describe('regresiones de la revisión del control', () => {
     expect(conDeriva - ctl(b).transmisores['AI-504'].valor).toBeGreaterThan(0.8)
   })
 })
+
+describe('dificultad: ruido de los instrumentos', () => {
+  it('el factor de ruido escala la dispersión de las lecturas (0 = sin ruido)', () => {
+    const dispersion = (factor) => {
+      const s = sistema()
+      s.enviarComando({ tipo: 'ruido', factor })
+      const v = []
+      for (let i = 0; i < 60; i++) { s.avanzar(5); v.push(ctl(s).transmisores['PI-301'].valor) }
+      const m = v.reduce((a, x) => a + x, 0) / v.length
+      return Math.sqrt(v.reduce((a, x) => a + (x - m) ** 2, 0) / v.length)
+    }
+    const d0 = dispersion(0)
+    const d1 = dispersion(1)
+    const d2 = dispersion(2)
+    expect(d1).toBeGreaterThan(d0)
+    expect(d2).toBeGreaterThan(d1)
+    expect(() => sistema().enviarComando({ tipo: 'ruido', factor: 9 })).toThrow()
+  })
+})

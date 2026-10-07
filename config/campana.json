@@ -32,17 +32,26 @@
   "1": {
    "nombre": "Aprendiz",
    "generador": 1,
-   "pistas": true
+   "pistas": true,
+   "ruido": 0.5,
+   "perfiles": true,
+   "descripcion": "Eventos espaciados, instrumentos con poco ruido, pistas y vista de perfiles."
   },
   "2": {
    "nombre": "Operador",
    "generador": 2,
-   "pistas": true
+   "pistas": true,
+   "ruido": 1,
+   "perfiles": true,
+   "descripcion": "Eventos normales, ruido normal de los instrumentos, pistas y perfiles."
   },
   "3": {
    "nombre": "Experto",
    "generador": 3,
-   "pistas": false
+   "pistas": false,
+   "ruido": 1.5,
+   "perfiles": false,
+   "descripcion": "Eventos frecuentes, más ruido, sin pistas ni vista de perfiles (como en la planta)."
   }
  },
  "medallas": {

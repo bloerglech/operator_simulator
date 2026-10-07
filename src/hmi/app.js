@@ -8,6 +8,7 @@ import { reloj, num } from './formato.js'
 import { abrirCaratula } from './caratula.js'
 import { abrirTag } from './tag.js'
 import { abrirInstructor } from './instructor.js'
+import { abrirAjustes } from '../ui/ajustes.js'
 import { abrirManual } from './manual.js'
 import { PANTALLAS } from './pantallas/indice.js'
 import { guardarLocal, exportarArchivo } from '../ui/partidas.js'
@@ -50,6 +51,7 @@ export function crearApp(raiz, cliente, opciones = {}) {
     h('button', { onclick: () => app.radio(), title: 'Radio con el operador de terreno' }, 'Radio'),
     h('button', { onclick: () => abrirLateral(abrirManual(app)), title: 'Manual de operación (procedimientos)' }, 'Manual'),
     h('button', { onclick: (ev) => menuPartida(ev) }, 'Partida'),
+    h('button', { onclick: () => abrirLateral(abrirAjustes(app, opciones.dificultades)), title: 'Dificultad, pistas, perfiles y volumen' }, 'Ajustes'),
     h('button', { onclick: () => alternarInstructor(), title: 'Panel del instructor' }, 'Instructor'))
 
   // ---- Banner de la alarma más importante sin reconocer ----
@@ -67,6 +69,14 @@ export function crearApp(raiz, cliente, opciones = {}) {
     ajustes,
     estado: () => estado,
     ir,
+    /** Muestra u oculta la vista didáctica de perfiles (dificultad). */
+    fijarPerfiles(si) {
+      ajustes.perfiles = !!si
+      const b = nav.querySelector('button[data-pantalla="perfiles"]')
+      if (b) b.hidden = !si
+      if (!si && idPantalla === 'perfiles') ir('digestor')
+      cliente.perfiles(!!si).catch(() => {})
+    },
     comando(cmd) {
       return cliente.comando(cmd).catch((e) => {
         avisar(e.message)

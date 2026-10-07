@@ -109,7 +109,7 @@ export function pasoInstrumentos(inst, ce, modelo, estado, dt) {
       s.filtro = t.tau > 0 ? s.filtro + (v - s.filtro) * (1 - Math.exp(-dt / t.tau)) : v
       if (s.falla === 'deriva') s.deriva += ((t.rango[1] - t.rango[0]) * 0.01 * dt) / 3600 // 1 % del rango por hora
       if (s.falla !== 'congelado') {
-        const ruido = t.ruido > 0 ? t.ruido * (t.rango[1] - t.rango[0]) * normal(rng) : 0
+        const ruido = t.ruido > 0 ? t.ruido * (ce.factorRuido ?? 1) * (t.rango[1] - t.rango[0]) * normal(rng) : 0
         s.valor = s.filtro + ruido + s.deriva
       }
     }

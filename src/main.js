@@ -9,6 +9,7 @@ import { mostrarMenu, mostrarCarga } from './ui/menu.js'
 import { crearHUD } from './ui/hud.js'
 import { crearCapaMision } from './ui/mision.js'
 import { avisar } from './hmi/dom.js'
+import { aplicarAjustes } from './ui/ajustes.js'
 
 /** Prepara la planta (caso base, misión u operación libre) con la pantalla de espera. */
 async function arrancar(cliente, op) {
@@ -35,8 +36,12 @@ async function iniciar() {
     }
   }
   const raiz = document.getElementById('raiz')
-  const app = op.modo !== 'sala' ? crearApp(raiz, cliente) : await iniciarSala(raiz, cliente)
+  const dificultades = catalogo?.dificultades
+  const app = op.modo !== 'sala' ? crearApp(raiz, cliente, { dificultades }) : await iniciarSala(raiz, cliente, dificultades)
   window.__app = app
+  // La dificultad (ruido, pistas, perfiles) se aplica a cada partida que parte.
+  const aplicar = () => aplicarAjustes(app, dificultades).catch(() => {})
+  aplicar()
   // Misiones: diálogos, objetivos, pistas e informe; acciones al terminar.
   const misiones = catalogo?.misiones ?? []
   const capa = crearCapaMision(cliente, {
@@ -54,6 +59,7 @@ async function iniciar() {
         }
         capa.reiniciar(accion === 'reintentar')
         app.olvidarJugador()
+        aplicar()
       } catch (e) {
         avisar(e.message, 8000)
       }
@@ -61,7 +67,7 @@ async function iniciar() {
   })
 }
 
-async function iniciarSala(raiz, cliente) {
+async function iniciarSala(raiz, cliente, dificultades) {
   // Three.js se carga solo si se entra a la sala (el modo de pantallas no lo necesita).
   const { crearMundo } = await import('./mundo3d/mundo.js')
   const capaMundo = document.createElement('div')
@@ -72,7 +78,7 @@ async function iniciarSala(raiz, cliente) {
   let calidad = 'medio'
   try { calidad = localStorage.getItem('digestor:calidad') ?? (matchMedia('(pointer: coarse)').matches ? 'bajo' : 'medio') } catch { /* sin almacenamiento */ }
 
-  const app = crearApp(capaDCS, cliente, { alVolver: cerrarDCS })
+  const app = crearApp(capaDCS, cliente, { alVolver: cerrarDCS, dificultades })
   app.mostrar(false)
   window.__app = app
   let mundo = null

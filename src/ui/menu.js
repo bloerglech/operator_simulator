@@ -6,6 +6,7 @@
 import { h } from '../hmi/dom.js'
 import { leerLocal, importarArchivo } from './partidas.js'
 import { leerAvance } from './informe.js'
+import { leerAjustes, guardarAjustes, efectivos } from './ajustes.js'
 
 const MEDALLA = { oro: '🥇', plata: '🥈', bronce: '🥉' }
 
@@ -31,18 +32,29 @@ export function mostrarMenu(catalogo) {
         onclick: () => elegir({ mision: m.id, semilla: 1000 + i }),
       }, h('span', { class: 'cap' }, m.capitulo), ` ${m.titulo} ${MEDALLA[avance[m.id]] ?? ''}`, h('div', { class: 'suave' }, disponible ? m.resumen : 'Se desbloquea al superar la misión anterior'))
     })
-    const dificultad = h('select', {}, Object.entries(catalogo?.dificultades ?? { 1: { nombre: 'Aprendiz' } }).map(([k, d]) => h('option', { value: k }, d.nombre)))
+    // Dificultad global (campaña y operación libre): se recuerda en el navegador.
+    const ajustes = leerAjustes()
+    const dificultades = catalogo?.dificultades ?? { 2: { nombre: 'Operador' } }
+    const descDificultad = h('span', { class: 'suave' }, dificultades[ajustes.dificultad]?.descripcion ?? '')
+    const dificultad = h('select', {
+      onchange: () => {
+        const a = { ...leerAjustes(), dificultad: Number(dificultad.value), pistas: null, perfiles: null }
+        guardarAjustes(a)
+        descDificultad.textContent = dificultades[a.dificultad]?.descripcion ?? ''
+      },
+    }, Object.entries(dificultades).map(([k, d]) => h('option', { value: k, selected: Number(k) === ajustes.dificultad }, d.nombre)))
     const eventos = h('input', { type: 'checkbox', checked: true })
     const velo = h('div', { class: 'velo' }, h('div', { class: 'dialogo menu-inicial' },
       h('h1', {}, 'Sala de control — Digestor continuo Lo-Solids'),
       h('div', { class: 'suave' }, 'Simulador de operador. Fibra de eucalipto (E. nitens), 3 000 ADt/d.'),
       h('div', { class: 'fila', style: 'margin-top: 10px' }, 'Modo:', botonesModo),
+      h('div', { class: 'fila' }, 'Dificultad:', dificultad, descDificultad),
       h('h3', {}, 'Campaña'),
       h('div', { class: 'botones' }, campana),
       h('h3', {}, 'Operación libre'),
-      h('div', { class: 'fila' }, 'Dificultad', dificultad, h('label', {}, eventos, ' eventos aleatorios')),
+      h('div', { class: 'fila' }, h('label', {}, eventos, ' eventos aleatorios (según la dificultad)')),
       h('div', { class: 'botones' },
-        h('button', { onclick: () => elegir({ semilla: Math.floor(Math.random() * 1e9), generador: { activo: eventos.checked, dificultad: Number(dificultad.value) } }) }, 'Turno libre: caso base en operación'),
+        h('button', { onclick: () => elegir({ semilla: Math.floor(Math.random() * 1e9), generador: { activo: eventos.checked, dificultad: efectivos(leerAjustes(), dificultades).generador } }) }, 'Turno libre: caso base en operación'),
         guardada ? h('button', { onclick: () => elegir({ guardado: guardada.datos }) }, `Continuar la partida guardada (${new Date(guardada.fecha).toLocaleString('es-CL')})`) : null,
         h('button', { onclick: async () => {
           try { elegir({ guardado: await importarArchivo() }) } catch (e) { error.textContent = e.message }

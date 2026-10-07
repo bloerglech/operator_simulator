@@ -97,7 +97,9 @@ function ciclo() {
   try {
     paso(ahora, real)
   } catch (e) {
-    // Un error del motor no debe detener el ciclo: se informa y se sigue.
+    // Un error del motor no detiene el ciclo, pero la simulación queda en pausa
+    // (no se repite un paso a medias en cada ciclo) y se avisa a la interfaz.
+    try { if (motor.listo()) motor.fijarVelocidad(0) } catch { /* sin motor */ }
     self.postMessage({ tipo: 'error', error: String(e?.message ?? e) })
   }
   setTimeout(ciclo, TIC_MS)

@@ -141,7 +141,10 @@ function mostrarObjetivo(def, se, id, t, emitir) {
 function ejecutarAccion(a, def, se, ctx, cx, { emitir, evento }) {
   if (a.mensaje) emitir({ tipo: 'dialogo', ...a.mensaje, pararAceleracion: a.mensaje.pararAceleracion ?? true })
   if (a.evento) evento(a.evento, a.parametros ?? {})
-  if (a.comando) ctx.ejecutar(a.comando)
+  if (a.comando) {
+    // Un comando del guion que no se puede aplicar se registra; la misión sigue.
+    try { ctx.ejecutar(a.comando) } catch (err) { ctx.evento('comando_fallido', { mision: def.id, comando: a.comando.tipo, error: String(err?.message ?? err) }) }
+  }
   if (a.mostrar) mostrarObjetivo(def, se, a.mostrar, cx.t, emitir)
   if (a.velocidad1) emitir({ tipo: 'aviso', texto: '', pararAceleracion: true })
   if (a.puntoControl) emitir({ tipo: 'aviso', texto: '', puntoControl: true })

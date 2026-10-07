@@ -48,8 +48,8 @@ export function acumular(ind, ctx, espec, dt) {
   const densidad = estado.fuentes.astillas.densidad
   const rpm = Math.min(estado.ajustes.astillas?.velocidad ?? 0, modelo.equipos.medidor.rpmMax)
   const W = (estado.equipos.silo?.masa ?? 1) > 0 ? rpm * kgPorRevolucion(modelo.equipos, densidad) : 0
+  ind.maderaM3 = (ind.maderaM3 ?? ind.madera / 480) + (W * dt) / densidad // m³ sólidos con la densidad real (partidas antiguas: desde la referencia)
   ind.madera += W * dt
-  ind.maderaM3 = (ind.maderaM3 ?? 0) + (W * dt) / densidad // m³ sólidos con la densidad real
   const iOH = modelo.idx.OH
   for (const c of modelo.corrientes) {
     const ec = estado.corrientes[c.id]

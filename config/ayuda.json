@@ -82,7 +82,7 @@
   "LI-202": {
    "mide": "Nivel de la columna de astillas del impregnador.",
    "importa": "LIC-202 lo controla con la transferencia al digestor. Lleno hasta el tope (23 m), la circulación de tope se queda sin licor.",
-   "sube": "La transferencia no alcanza a sacar lo que entra. Sobre 22,8 m, I-11 corta la madera.",
+   "sube": "La transferencia no alcanza a sacar lo que entra. Sobre 22,9 m, I-11 corta la madera.",
    "baja": "Se transfiere más de lo que entra; muy bajo, se pierde el tiempo de impregnación."
   },
   "TI-203": {

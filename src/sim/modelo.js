@@ -96,7 +96,10 @@ export function construirModelo(config) {
       liberacion: {
         fraccion: p(hidraulica.colgamiento, 'fraccion_liberacion', 'hidraulica.colgamiento.fraccion_liberacion'),
         tiempo: p(hidraulica.colgamiento, 'tiempo_liberacion', 'hidraulica.colgamiento.tiempo_liberacion'),
-        corrientes: (hidraulica.colgamiento.corrientes_liberacion ?? []).filter((id) => topologia.corrientes.some((c) => c.id === id && c.origen?.vaso === cv.id)),
+        corrientes: (hidraulica.colgamiento.corrientes_liberacion ?? []).filter((id) => {
+          if (!topologia.corrientes.some((c) => c.id === id)) throw new Error(`hidraulica.colgamiento.corrientes_liberacion: corriente desconocida "${id}"`)
+          return topologia.corrientes.some((c) => c.id === id && c.origen?.vaso === cv.id)
+        }),
       },
     }
   })

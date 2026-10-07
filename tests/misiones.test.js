@@ -39,6 +39,16 @@ describe('definiciones de las misiones', () => {
       for (const f of def.fallas ?? []) revisar(f.condicion, `${def.id}.falla`)
       for (const c of def.evaluacion ?? []) revisar(c.condicion, `${def.id}.evaluacion`)
       if (def.fin) revisar(def.fin, `${def.id}.fin`)
+      // Los pasos y objetivos nombrados en las condiciones existen.
+      const pasos = new Set(def.guion.map((p) => p.id))
+      const nombres = (c) => (c && typeof c === 'object' ? [
+        ...(c.paso ? [['paso', c.paso]] : []), ...(c.desde && c.incidente ? [['paso', c.desde]] : []), ...(c.objetivo ? [['objetivo', c.objetivo]] : []),
+        ...[...(c.y ?? []), ...(c.o ?? []), ...(c.no ? [c.no] : [])].flatMap(nombres)] : [])
+      const todas = [...def.objetivos.flatMap((o) => [o.condicion, o.desde]), ...def.guion.map((p) => p.cuando), ...(def.fallas ?? []).map((f) => f.condicion), ...(def.evaluacion ?? []).map((c) => c.condicion), def.fin]
+      for (const [tipo, id] of todas.flatMap(nombres)) {
+        if (tipo === 'paso') expect(pasos.has(id), `${def.id}: paso desconocido ${id}`).toBe(true)
+        else expect(ids.includes(id), `${def.id}: objetivo desconocido ${id}`).toBe(true)
+      }
       expect(config().campana.orden).toContain(def.id)
     }
   })
@@ -141,5 +151,14 @@ describe('capítulo 3: licor débil', () => {
       320: [{ tipo: 'bloque', id: 'RC-700', accion: 'parametro', campo: 'produccion', valor: 3000 }],
     })
     expect(r.resultado.exito).toBe(true)
+  })
+})
+
+describe('búsqueda de misiones', () => {
+  it('solo encuentra misiones propias, no nombres heredados de Object', async () => {
+    const { buscarMision } = await import('../src/misiones/campana.js')
+    expect(buscarMision('tutorial')?.id).toBe('tutorial')
+    expect(buscarMision('constructor')).toBe(null)
+    expect(buscarMision('toString')).toBe(null)
   })
 })

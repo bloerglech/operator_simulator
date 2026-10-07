@@ -162,7 +162,7 @@ export function pasoSilo(modelo, estado, dt, factorBombas, crearParcela) {
   const cpW = modelo.fis.cpMadera
 
   // Entrada desde el patio (transportador): madera y agua a temperatura de patio.
-  const mIn = Math.max(0, sv.transportadorSilo) * dt
+  const mIn = (sv.energia ?? 1) > 0 ? Math.max(0, sv.transportadorSilo) * dt : 0 // sin energía el transportador no anda
   const aguaIn = (mIn * as.humedad) / (1 - as.humedad) / 1000
   if (mIn > 0) {
     // El silo se mezcla: su temperatura es el promedio ponderado por capacidad.

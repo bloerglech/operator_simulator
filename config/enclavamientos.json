@@ -195,8 +195,8 @@
    "condicion": {
     "tag": "LI-202",
     "op": ">",
-    "retardo": 30,
-    "limite": 22.8
+    "retardo": 60,
+    "limite": 22.9
    },
    "acciones": [
     {

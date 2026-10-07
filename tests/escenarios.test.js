@@ -69,6 +69,28 @@ describe('eventos superpuestos y comandos que fallan', () => {
     expect(j.leerEstado().escenario.eventosActivos).toEqual([])
     expect(humedad(j)).toBeCloseTo(h0, 4)
   })
+  it('si el evento corto termina primero, la variable sigue el evento largo aún activo', () => {
+    const j = juego()
+    const lavado = j.estadoInterno().servicios.lavado
+    j.enviarComando({ tipo: 'evento', accion: 'iniciar', id: 'parada_lavado_larga' }) // 2,5 h en 0
+    j.avanzar(600)
+    j.enviarComando({ tipo: 'evento', accion: 'iniciar', id: 'apagon' }) // 30 min
+    j.avanzar(2400)
+    expect(j.estadoInterno().servicios.lavado).toBe(0) // el apagón terminó, la parada larga no
+    j.avanzar(3 * H)
+    expect(j.estadoInterno().servicios.lavado).toBeCloseTo(lavado, 6)
+  })
+  it('un evento con factor dentro de otro se aplica sobre el valor base', () => {
+    const j = juego()
+    const lavado = j.estadoInterno().servicios.lavado
+    j.enviarComando({ tipo: 'evento', accion: 'iniciar', id: 'parada_lavado' }) // 1 h en 0
+    j.avanzar(300)
+    j.enviarComando({ tipo: 'evento', accion: 'iniciar', id: 'lavado_lento' }) // 3 h al 70 %
+    j.avanzar(1800)
+    expect(j.estadoInterno().servicios.lavado).toBeCloseTo(lavado * 0.7, 6)
+    j.avanzar(5 * H)
+    expect(j.estadoInterno().servicios.lavado).toBeCloseTo(lavado, 6)
+  })
   it('la parada del lavado devuelve el agua de lavado al terminar', () => {
     const j = juego()
     const lavado = j.estadoInterno().servicios.lavado

@@ -197,7 +197,7 @@ export function pasoLazos(lz, inst, ctx, ce, dt, forzados) {
     }
     // Habilitación: si la condición no se cumple (p. ej. sin soplado no hay
     // factor de dilución que medir), el lazo retiene su salida sin integrar.
-    if (l.habilitacion && s.modo !== 'MAN' && !habilitado(l.habilitacion, lectura(inst, ce, l.habilitacion.tag))) {
+    if (l.habilitacion && s.modo !== 'MAN' && !habilitado(l.habilitacion, lectura(inst, ce, l.habilitacion.tag), s.retenido)) {
       if (!s.retenido) ctx.evento('lazo_retenido', { lazo: l.tag })
       s.retenido = true
       s.integral = s.salida
@@ -230,8 +230,10 @@ export function pasoLazos(lz, inst, ctx, ce, dt, forzados) {
   }
 }
 
-function habilitado(c, v) {
-  return c.op === '>' ? v > c.valor : v < c.valor
+/** Condición de habilitación con histéresis del 10 %: un lazo retenido se libera con margen (el ruido no lo hace oscilar). */
+function habilitado(c, v, retenido) {
+  const margen = retenido ? Math.abs(c.valor) * 0.1 : 0
+  return c.op === '>' ? v > c.valor + margen : v < c.valor - margen
 }
 
 /** Interpreta la salida de un bloque como consigna de un lazo en cascada. */
@@ -338,7 +340,9 @@ function pasoBloques(lz, inst, ctx, ce, dt) {
  */
 function renovarBaseRitmo(lz, ce, sb) {
   const W = ce.lazos['WIC-101'].sp
-  if (!(W > 1)) return
+  // Con la planta detenida o partiendo (menos de la mitad de la madera de la
+  // base) se conserva la base: al activar RC-700 escala desde un estado coherente.
+  if (!(W > 1) || (sb.base && W < 0.5 * sb.base.W)) return
   sb.base = { W, sps: {} }
   for (const l of Object.values(lz.lazos)) if (l.escala_ritmo) sb.base.sps[l.tag] = ce.lazos[l.tag].sp
 }

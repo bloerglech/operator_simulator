@@ -715,5 +715,6 @@ export const BORRADORES = {}
 
 /** Definición de una misión de la campaña o en preparación (para pruebas). */
 export function buscarMision(id) {
-  return MISIONES[id] ?? BORRADORES[id] ?? null
+  if (Object.hasOwn(MISIONES, id)) return MISIONES[id]
+  return Object.hasOwn(BORRADORES, id) ? BORRADORES[id] : null
 }

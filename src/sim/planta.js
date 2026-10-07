@@ -122,7 +122,9 @@ export function crearPlanta(config, opciones = {}) {
     cargar(json) {
       const datos = typeof json === 'string' ? JSON.parse(json) : copiar(json)
       if (datos.formato !== 'simulador-digestor') throw new Error('Archivo de guardado no reconocido')
-      modelo = construirModelo(datos.config)
+      // Una partida guardada con una versión anterior no trae los parámetros
+      // nuevos: se completan con los de la configuración actual.
+      modelo = construirModelo(completarConfig(datos.config, config))
       estado = datos.estado
       cola = datos.cola ?? []
       pendiente = datos.pendiente ?? 0
@@ -133,6 +135,19 @@ export function crearPlanta(config, opciones = {}) {
     /** Estado interno (solo para pruebas y herramientas; las pantallas usan leerEstado). */
     estadoInterno: () => estado,
   }
+}
+
+/**
+ * Agrega a `guardada` las claves de objeto que solo existen en `actual`
+ * (recursivo). Los valores y las listas guardadas se respetan: describen el
+ * estado de esa partida.
+ */
+export function completarConfig(guardada, actual) {
+  if (!guardada || typeof guardada !== 'object' || Array.isArray(guardada)) return guardada
+  if (!actual || typeof actual !== 'object' || Array.isArray(actual)) return guardada
+  const r = { ...guardada }
+  for (const [k, v] of Object.entries(actual)) r[k] = k in r ? completarConfig(r[k], v) : v
+  return r
 }
 
 // ---------------------------------------------------------------------------

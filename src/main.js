@@ -42,6 +42,7 @@ async function iniciar() {
   // La dificultad (ruido, pistas, perfiles) se aplica a cada partida que parte.
   const aplicar = () => aplicarAjustes(app, dificultades).catch(() => {})
   aplicar()
+  cliente.alError((msg) => avisar(`Error del simulador: ${msg}. La simulación quedó en pausa.`, 12000))
   // Misiones: diálogos, objetivos, pistas e informe; acciones al terminar.
   const misiones = catalogo?.misiones ?? []
   const capa = crearCapaMision(cliente, {

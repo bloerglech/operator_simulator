@@ -750,14 +750,6 @@
      },
      "rampa": 0,
      "hasta": 0
-    },
-    {
-     "objetivo": {
-      "tipo": "servicio",
-      "id": "transportadorSilo"
-     },
-     "rampa": 0,
-     "hasta": 0
     }
    ],
    "duracion": 1800,

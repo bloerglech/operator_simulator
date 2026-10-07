@@ -76,12 +76,15 @@ export function iniciarEvento(cat, se, ctx, id, parametros = {}, aviso = null) {
     if (a.comando) ejecutar(ctx, sustituir(a.comando, p), id)
     else {
       const objetivo = sustituir(a.objetivo, p)
-      // Si otro evento activo mueve la misma variable, este toma su rampa y su
-      // valor base: al terminar se vuelve al valor anterior a ambos.
-      const base = tomarRampa(se.eventos, objetivo)
+      const clave = claveObjetivo(objetivo)
+      // Varios eventos sobre la misma variable forman una pila: manda el más
+      // reciente; el valor base es el de antes del primero y los factores se
+      // aplican sobre él.
+      const base = baseDe(se.eventos, clave) ?? leerObjetivo(ctx, objetivo)
+      suspender(se.eventos, clave)
       const desde = leerObjetivo(ctx, objetivo)
-      const hasta = a.hasta !== undefined ? (a.unidad ? aInterno(a.hasta, a.unidad) : a.hasta) : desde * a.factor
-      inst.rampas.push({ objetivo, desde, hasta, t0: t, duracion: a.rampa ?? 0, base: base ?? desde })
+      const hasta = a.hasta !== undefined ? (a.unidad ? aInterno(a.hasta, a.unidad) : a.hasta) : base * a.factor
+      inst.rampas.push({ objetivo, clave, desde, hasta, t0: t, duracion: a.rampa ?? 0, base })
     }
   }
   se.eventos.activos.push(inst)
@@ -96,41 +99,58 @@ function claveObjetivo(o) {
   return JSON.stringify(Object.keys(o).sort().map((k) => [k, o[k]]))
 }
 
-/**
- * Quita a los eventos activos las rampas sobre la misma variable y devuelve el
- * valor base que tenía antes de ellos (o null si ninguno la movía).
- */
-function tomarRampa(ev, objetivo) {
-  const clave = claveObjetivo(objetivo)
-  let base = null
-  for (const inst of ev.activos) {
-    const quedan = []
-    for (const r of inst.rampas) {
-      if (claveObjetivo(r.objetivo) !== clave) { quedan.push(r); continue }
-      // En retorno, la rampa ya apunta al valor base; activa, lo guarda en base.
-      base ??= inst.fase === 'retorno' ? r.hasta : (r.base ?? r.desde)
-    }
-    inst.rampas = quedan
-  }
-  return base
+const claveDe = (r) => r.clave ?? claveObjetivo(r.objetivo) // partidas guardadas antes de la pila
+
+/** Valor base (antes del primer evento) de una variable ya movida por otro evento, o null. */
+function baseDe(ev, clave) {
+  for (const inst of ev.activos) for (const r of inst.rampas) if (claveDe(r) === clave) return r.base ?? (inst.fase === 'retorno' ? r.hasta : r.desde)
+  return null
 }
 
-/** Termina un evento (revierte con rampa si corresponde y ejecuta sus comandos finales). */
+/** Las rampas de otros eventos sobre la variable dejan de mandar (los retornos en curso se descartan). */
+function suspender(ev, clave) {
+  for (const inst of ev.activos) {
+    inst.rampas = inst.rampas.filter((r) => !(claveDe(r) === clave && inst.fase === 'retorno'))
+    for (const r of inst.rampas) if (claveDe(r) === clave) r.suspendida = true
+  }
+}
+
+/** Evento activo más reciente (distinto de `excepto`) con una rampa sobre la variable. */
+function anteriorActivo(ev, clave, excepto) {
+  for (let k = ev.activos.length - 1; k >= 0; k--) {
+    const inst = ev.activos[k]
+    if (inst === excepto || inst.fase !== 'activo') continue
+    const r = inst.rampas.find((x) => claveDe(x) === clave)
+    if (r) return r
+  }
+  return null
+}
+
+/** Termina un evento: su variable vuelve al objetivo del evento anterior aún activo, o a su base. */
 export function terminarEvento(cat, se, ctx, inst) {
   const def = cat.porId[inst.id]
   const t = ctx.estado.paso * ctx.modelo.dtR
   for (const c of def.alTerminar ?? []) ejecutar(ctx, sustituir(c, inst.parametros), inst.id)
-  if (def.revertir && inst.rampas.length) {
-    inst.fase = 'retorno'
-    inst.rampas = inst.rampas.map((r) => ({ objetivo: r.objetivo, desde: leerObjetivo(ctx, r.objetivo), hasta: r.base ?? r.desde, t0: t, duracion: r.duracion }))
-  } else inst.fase = 'terminado'
+  const retornos = []
+  for (const r of inst.rampas) {
+    if (r.suspendida) continue // otro evento más reciente manda en esta variable
+    const otro = anteriorActivo(se.eventos, claveDe(r), inst)
+    if (otro) {
+      // El evento anterior vuelve a mandar: rampa hacia su objetivo.
+      Object.assign(otro, { suspendida: false, hecha: false, desde: leerObjetivo(ctx, r.objetivo), t0: t, duracion: r.duracion })
+    } else if (def.revertir) {
+      retornos.push({ objetivo: r.objetivo, clave: claveDe(r), desde: leerObjetivo(ctx, r.objetivo), hasta: r.base ?? r.desde, t0: t, duracion: r.duracion, base: r.base })
+    }
+  }
+  inst.rampas = retornos
+  inst.fase = retornos.length ? 'retorno' : 'terminado'
   ctx.evento('fin_perturbacion', { evento: inst.id })
 }
 
 function avanzarRampas(ev, ctx, t, forzar = false) {
   for (const inst of ev.activos) {
     for (const r of inst.rampas) {
-      if (r.hecha) continue
+      if (r.hecha || r.suspendida) continue
       const f = r.duracion > 0 ? Math.min(1, (t - r.t0) / r.duracion) : 1
       if (!forzar && f < 1 && Math.round(t / ctx.modelo.dtR) % Math.round(PASO_RAMPA / ctx.modelo.dtR) !== 0) continue
       const v = r.desde + (r.hasta - r.desde) * f

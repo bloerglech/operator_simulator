@@ -12,6 +12,7 @@ export function crearCliente() {
   const pendientes = new Map()
   const suscriptores = new Set()
   const progreso = new Set()
+  const errores = new Set()
   let siguienteId = 1
   let ultimo = null
   let rendimiento = null
@@ -25,7 +26,8 @@ export function crearCliente() {
     } else if (m.tipo === 'progreso') {
       for (const f of progreso) f(m.fraccion)
     } else if (m.tipo === 'error') {
-      console.error('Simulador:', m.error) // el ciclo del worker sigue
+      console.error('Simulador:', m.error) // el worker pausó la simulación
+      for (const f of errores) f(m.error)
     } else if (m.tipo === 'respuesta') {
       const p = pendientes.get(m.id)
       if (!p) return
@@ -60,6 +62,11 @@ export function crearCliente() {
     alProgresar(f) {
       progreso.add(f)
       return () => progreso.delete(f)
+    },
+    /** Error del motor de simulación (la simulación queda en pausa). */
+    alError(f) {
+      errores.add(f)
+      return () => errores.delete(f)
     },
     estado: () => ultimo,
     rendimiento: () => rendimiento,

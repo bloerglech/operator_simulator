@@ -199,6 +199,15 @@ describe('determinismo y guardado', () => {
     expect(JSON.stringify(b.estadoInterno())).toBe(JSON.stringify(a.estadoInterno()))
   })
 
+  it('una partida guardada sin parámetros nuevos se carga con los de la configuración actual', () => {
+    const a = plantaBase()
+    const g = a.guardar()
+    delete g.config.hidraulica.colgamiento.fraccion_liberacion
+    delete g.config.equipos.estanque_soplado.consistencia_descarga
+    const b = crearPlanta(config())
+    expect(() => b.cargar(g)).not.toThrow()
+  })
+
   it('guardar y cargar reproduce exactamente la continuación', () => {
     const a = plantaBase()
     a.avanzar(HORA)

@@ -6,7 +6,16 @@ import { join, resolve, dirname, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const PERMITIDO = { sim: ['src/sim'], control: ['src/sim', 'src/control'] }
+// Capas y lo que cada una puede importar. Las pantallas (hmi, ui) no conocen
+// la simulación: reciben el cliente del puente (la interfaz única).
+const PERMITIDO = {
+  sim: ['src/sim'],
+  control: ['src/sim', 'src/control'],
+  puente: ['src/puente', 'src/sim', 'src/control', 'config'],
+  hmi: ['src/hmi', 'src/ui'],
+  ui: ['src/ui', 'src/hmi'],
+}
+const SIN_NAVEGADOR = ['sim', 'control']
 const PROHIBIDO_TEXTO = [/\bwindow\b/, /\bdocument\b/, /Math\.random/, /Date\.now/, /\bperformance\b/, /localStorage/, /\bfetch\(/]
 
 function archivos(dir) {
@@ -21,7 +30,7 @@ const sinComentarios = (src) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/
 
 describe('independencia de capas', () => {
   for (const [capa, permitidas] of Object.entries(PERMITIDO)) {
-    it(`src/${capa} solo importa ${permitidas.join(' y ')} y no usa APIs del navegador`, () => {
+    it(`src/${capa} solo importa ${permitidas.join(', ')}${SIN_NAVEGADOR.includes(capa) ? ' y no usa APIs del navegador' : ''}`, () => {
       for (const archivo of archivos(join(raiz, 'src', capa))) {
         const src = sinComentarios(readFileSync(archivo, 'utf8'))
         const imports = [...src.matchAll(/(?:import|export)[^'"]*?from\s*['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]\s*\)/g)]
@@ -32,7 +41,7 @@ describe('independencia de capas', () => {
           const ok = permitidas.some((p) => destino.startsWith(p))
           expect(ok, `${archivo}: importa ${destino}`).toBe(true)
         }
-        for (const re of PROHIBIDO_TEXTO) expect(re.test(src), `${archivo}: usa ${re}`).toBe(false)
+        if (SIN_NAVEGADOR.includes(capa)) for (const re of PROHIBIDO_TEXTO) expect(re.test(src), `${archivo}: usa ${re}`).toBe(false)
       }
     })
   }

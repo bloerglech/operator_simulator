@@ -11,7 +11,9 @@ celulosa kraft. Prioridad: fidelidad del modelo de proceso y de la operación.
 
 ```bash
 npm install
+npm run dev            # el juego en el navegador (pantallas DCS en 2D)
 npm test               # pruebas (Vitest)
+npm run e2e            # prueba de las pantallas en Chromium (playwright-core)
 npm run caso-base      # corre el caso base 24 h e imprime KPI, corrientes y perfiles
 npm run caso-base -- 48   # otra duración en horas
 npm run calibrar       # recalibra la cinética al caso base (escribe config/cinetica.json)
@@ -21,6 +23,7 @@ npm run sintonia       # pruebas de escalón de los 29 lazos (escribe docs/SINTO
 ```
 
 Manual de estudio: [`docs/manual/`](docs/manual/README.md).
+Guía de las pantallas: [`docs/GUIA-PANTALLAS.md`](docs/GUIA-PANTALLAS.md).
 
 ## Estructura
 

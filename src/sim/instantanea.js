@@ -56,6 +56,10 @@ export function instantanea(modelo, estado, op = {}) {
   salida.bombas = Object.fromEntries(Object.keys(modelo.bombas).map((id) => [id, { ...estado.bombas[id] }]))
   salida.equipos = equipos(modelo, estado)
   salida.servicios = { ...estado.servicios }
+  // Materia prima y licores externos (lo que el instructor puede cambiar).
+  salida.fuentes = Object.fromEntries(Object.entries(estado.fuentes).map(([id, f]) => [id, {
+    T: f.T ?? null, densidad: f.densidad ?? null, humedad: f.humedad ?? null, OH: f.c ? f.c[modelo.idx.OH] : null,
+  }]))
   salida.mallas = Object.fromEntries(Object.entries(estado.mallas).map(([id, m]) => [id, {
     dP: m.dP, // Pa
     dPmax: modelo.mallas[id].dPmax,

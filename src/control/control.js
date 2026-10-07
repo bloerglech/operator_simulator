@@ -224,7 +224,11 @@ export function extensionControl(config) {
         bloques[b.tag] = { descripcion: b.descripcion, tipo: b.tipo, activo: sb.activo, parametros: copiar(sb.parametros), salida: sb.salida, Hprevisto: sb.Hprevisto ?? null }
       }
       const enclavamientos = {}
-      for (const e of enc.lista) enclavamientos[e.id] = { descripcion: e.descripcion, condicion: e.condicion, ...ce.enclavamientos[e.id] }
+      for (const e of enc.lista) {
+        const se = ce.enclavamientos[e.id]
+        // condicion: la regla configurada; presente: si la condición se cumple ahora.
+        enclavamientos[e.id] = { descripcion: e.descripcion, condicion: e.condicion, presente: se.condicion, disparado: se.disparado, puenteado: se.puenteado, tDisparo: se.tDisparo }
+      }
       return {
         t,
         transmisores,

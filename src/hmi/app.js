@@ -1,0 +1,209 @@
+// Aplicación DCS en 2D: barra superior (reloj, velocidad, alarmas, guardar),
+// banner de la alarma más importante, navegación entre pantallas, área de la
+// pantalla y panel lateral (carátulas de lazo, tags, instructor).
+// Solo habla con la simulación a través del cliente del puente.
+
+import { h, reemplazar, avisar } from './dom.js'
+import { reloj, num } from './formato.js'
+import { abrirCaratula } from './caratula.js'
+import { abrirTag } from './tag.js'
+import { abrirInstructor } from './instructor.js'
+import { PANTALLAS } from './pantallas/indice.js'
+import { guardarLocal, exportarArchivo } from '../ui/partidas.js'
+
+const VELOCIDADES = [[0, '❚❚'], [1, '×1'], [10, '×10'], [60, '×60'], [300, '×300']]
+
+export function crearApp(raiz, cliente, opciones = {}) {
+  const ajustes = { perfiles: opciones.perfiles ?? true, instructor: opciones.instructor ?? false }
+  let estado = null
+  let pantalla = null
+  let idPantalla = null
+  let lateral = null // { actualizar, cerrar }
+  let menuAbierto = null
+  let pendienteDibujo = false
+
+  // ---- Barra superior ----
+  const relojEl = h('span', { class: 'reloj', title: 'Tiempo de planta (día y hora)' }, '—')
+  const botonesVel = VELOCIDADES.map(([v, t]) => h('button', {
+    'data-vel': v, title: v === 0 ? 'Pausa' : `Velocidad ${t}`,
+    onclick: () => cliente.velocidad(v).catch((e) => avisar(e.message)),
+  }, t))
+  const contadores = [1, 2, 3, 4].map((p) => h('span', { class: `p${p}`, title: `Alarmas de prioridad ${p}` }, '0'))
+  const rendimientoEl = h('span', { class: 'suave ocultar-celular' })
+  const barra = h('div', { id: 'barra' },
+    relojEl,
+    h('div', { class: 'grupo' }, botonesVel),
+    rendimientoEl,
+    h('div', { class: 'separador' }),
+    h('div', { class: 'contador-alarmas', onclick: () => ir('alarmas') }, contadores),
+    h('button', { onclick: () => cliente.comando({ tipo: 'alarma', id: '*', accion: 'reconocer' }).catch((e) => avisar(e.message)), title: 'Reconocer todas las alarmas' }, 'Reconocer'),
+    h('button', { onclick: (ev) => menuPartida(ev) }, 'Partida'),
+    h('button', { onclick: () => alternarInstructor(), title: 'Panel del instructor' }, 'Instructor'))
+
+  // ---- Banner de la alarma más importante sin reconocer ----
+  const banner = h('div', { id: 'banner', onclick: () => ir('alarmas') })
+
+  // ---- Navegación ----
+  const nav = h('nav', { id: 'nav' }, PANTALLAS.map((p) => h('button', { 'data-pantalla': p.id, onclick: () => ir(p.id) }, p.nombre)))
+
+  const contenedor = h('div', { id: 'pantalla' })
+  const panelLateral = h('aside', { id: 'lateral' })
+  reemplazar(raiz, h('div', { id: 'app' }, barra, banner, nav, h('div', { id: 'cuerpo' }, contenedor, panelLateral)))
+
+  const app = {
+    cliente,
+    ajustes,
+    estado: () => estado,
+    ir,
+    comando(cmd) {
+      return cliente.comando(cmd).catch((e) => {
+        avisar(e.message)
+        throw e
+      })
+    },
+    abrirLazo(tag) { abrirLateral(abrirCaratula(app, tag)) },
+    abrirTag(tag) {
+      const lazo = estado && Object.entries(estado.control.lazos).find(([, l]) => l.transmisor === tag)
+      if (lazo) app.abrirLazo(lazo[0])
+      else abrirLateral(abrirTag(app, tag))
+    },
+    cerrarLateral,
+    menu,
+    menuBomba(id, ev) {
+      const b = estado?.bombas[id]
+      menu(`Bomba ${id}`, [
+        { texto: b?.marcha ? 'En marcha' : 'Detenida', deshabilitado: true },
+        { texto: 'Partir', accion: () => app.comando({ tipo: 'bomba', id, accion: 'partir' }) },
+        { texto: 'Detener', confirmar: `¿Detener ${id}?`, accion: () => app.comando({ tipo: 'bomba', id, accion: 'detener' }) },
+      ], ev)
+    },
+    menuMalla(id, ev) {
+      const m = estado?.mallas[id]
+      menu(`Mallas ${id}`, [
+        { texto: m ? `ΔP ${num(m.dP / 1e5, 2)} bar (máx. ${num(m.dPmax / 1e5, 2)})` : '', deshabilitado: true },
+        { texto: 'Retrolavar', accion: () => app.comando({ tipo: 'mallas', id, accion: 'retrolavar' }) },
+        { texto: m?.conmutacion ? 'Detener conmutación' : 'Activar conmutación', accion: () => app.comando({ tipo: 'mallas', id, accion: m?.conmutacion ? 'conmutacion_off' : 'conmutacion_on' }) },
+        { texto: 'Lavado ácido', confirmar: 'El lavado ácido requiere la zona fuera de servicio. ¿Continuar?', accion: () => app.comando({ tipo: 'mallas', id, accion: 'lavado_acido' }) },
+      ], ev)
+    },
+    menuCalentador(id, ev) {
+      const c = estado?.equipos.calentadores?.[id]
+      menu(`Calentador ${id}`, [
+        { texto: c ? `Unidad ${c.unidadActiva === 0 ? 'A' : 'B'} · incrustación ${num(c.incrustacion, 2)}${c.saturado ? ' · SATURADO' : ''}` : '', deshabilitado: true },
+        { texto: 'Conmutar a la unidad de respaldo', confirmar: '¿Conmutar el calentador?', accion: () => app.comando({ tipo: 'calentador', id, accion: 'conmutar' }) },
+        { texto: 'Lavado ácido de la unidad en espera', accion: () => app.comando({ tipo: 'calentador', id, accion: 'lavado_acido' }) },
+      ], ev)
+    },
+  }
+
+  function ir(id) {
+    const def = PANTALLAS.find((p) => p.id === id) ?? PANTALLAS[0]
+    pantalla?.destruir?.()
+    idPantalla = def.id
+    pantalla = def.crear(app)
+    reemplazar(contenedor, pantalla.elemento)
+    for (const b of nav.querySelectorAll('button')) b.classList.toggle('activo', b.dataset.pantalla === def.id)
+    if (estado) pantalla.actualizar(estado)
+    try { localStorage.setItem('digestor:pantalla', def.id) } catch { /* sin almacenamiento */ }
+  }
+
+  function abrirLateral(p) {
+    lateral?.cerrar?.()
+    lateral = p
+    reemplazar(panelLateral, p.elemento)
+    panelLateral.classList.add('abierto')
+    if (estado) p.actualizar(estado)
+  }
+
+  function cerrarLateral() {
+    lateral?.cerrar?.()
+    lateral = null
+    panelLateral.classList.remove('abierto')
+    panelLateral.replaceChildren()
+  }
+
+  function alternarInstructor() {
+    ajustes.instructor = true
+    abrirLateral(abrirInstructor(app))
+  }
+
+  /** Menú contextual junto al punto donde se hizo clic. */
+  function menu(titulo, opciones, ev) {
+    menuAbierto?.remove()
+    const m = h('div', { class: 'menu-contextual' }, h('div', { class: 'titulo' }, titulo),
+      opciones.filter((o) => o.texto).map((o) => h('button', {
+        disabled: o.deshabilitado,
+        onclick: () => {
+          m.remove()
+          menuAbierto = null
+          if (o.confirmar && !confirm(o.confirmar)) return
+          Promise.resolve(o.accion?.()).catch(() => {})
+        },
+      }, o.texto)))
+    document.body.append(m)
+    const x = Math.min(ev?.clientX ?? 100, window.innerWidth - m.offsetWidth - 8)
+    const y = Math.min(ev?.clientY ?? 100, window.innerHeight - m.offsetHeight - 8)
+    m.style.left = `${Math.max(4, x)}px`
+    m.style.top = `${Math.max(4, y)}px`
+    menuAbierto = m
+    setTimeout(() => document.addEventListener('pointerdown', function cerrar(e) {
+      if (!m.contains(e.target)) {
+        m.remove()
+        if (menuAbierto === m) menuAbierto = null
+        document.removeEventListener('pointerdown', cerrar)
+      }
+    }), 0)
+  }
+
+  function menuPartida(ev) {
+    menu('Partida', [
+      { texto: 'Guardar en este navegador', accion: async () => { guardarLocal(await cliente.guardar()); avisar('Partida guardada') } },
+      { texto: 'Exportar a archivo (JSON)', accion: async () => exportarArchivo(await cliente.guardar()) },
+      { texto: 'Volver al menú inicial', confirmar: 'Se perderá lo no guardado. ¿Continuar?', accion: () => location.reload() },
+    ], ev)
+  }
+
+  // ---- Actualización con cada instantánea (agrupada por cuadro) ----
+  function dibujar() {
+    pendienteDibujo = false
+    if (!estado) return
+    relojEl.textContent = reloj(estado.t)
+    for (const b of botonesVel) b.classList.toggle('activo', Number(b.dataset.vel) === estado.velocidad)
+    const r = cliente.rendimiento()
+    if (r && estado.velocidad >= 10) {
+      // Aviso si el computador no alcanza la velocidad pedida.
+      const real = r.simuladoPorSegundo
+      rendimientoEl.textContent = real < estado.velocidad * 0.85 ? `simulando ×${num(real, 0)}` : ''
+    } else rendimientoEl.textContent = ''
+    const lista = estado.control.alarmas.lista
+    contadores.forEach((c, i) => {
+      const n = lista.filter((a) => a.prioridad === i + 1 && (a.activa || !a.reconocida)).length
+      c.textContent = String(n)
+      c.classList.toggle('hay', n > 0)
+    })
+    const sinRec = lista.filter((a) => !a.reconocida)
+    const top = sinRec[0] ?? lista[0]
+    if (top) {
+      reemplazar(banner,
+        h('span', { class: `marca${top.reconocida ? '' : ' parpadea'}`, estilo: { background: `var(--p${top.prioridad})` } }),
+        h('span', { class: 'num' }, top.id),
+        h('span', {}, top.mensaje),
+        sinRec.length > 1 ? h('span', { class: 'suave' }, `(+${sinRec.length - 1} sin reconocer)`) : null)
+    } else reemplazar(banner, h('span', { class: 'suave' }, 'Sin alarmas activas'))
+    pantalla?.actualizar(estado)
+    lateral?.actualizar(estado)
+  }
+
+  cliente.suscribir((e) => {
+    estado = e
+    if (!pendienteDibujo) {
+      pendienteDibujo = true
+      requestAnimationFrame(dibujar)
+    }
+  })
+
+  let inicial = 'digestor'
+  try { inicial = localStorage.getItem('digestor:pantalla') ?? inicial } catch { /* sin almacenamiento */ }
+  ir(inicial)
+  return app
+}

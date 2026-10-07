@@ -1,7 +1,7 @@
 # PLAN DE TRABAJO
 
 Estado: **aprobado** con los valores provisionales de la sección 6.
-Fase actual: **2 terminada** (ver sección 8).
+Fase actual: **3 terminada** (ver sección 8).
 
 Documento rector: `docs/ESPECIFICACION.md`. Si algo de aquí lo contradice,
 manda la especificación y este plan se corrige.
@@ -379,3 +379,29 @@ eventos instructor) pero no las implementa.
   baja) y nivel del digestor; rastreo del actuador de vapor en MAN.
 - Costo: el control agrega ≈ 0,8 s por hora simulada (≈ 1,4 s/h en total,
   más de 2 500 veces tiempo real).
+
+### Fase 3 — terminada
+- `src/puente/`: la simulación con control corre en un Web Worker
+  (`worker.js`) manejado por un motor sin APIs del navegador (`motor.js`,
+  probado en Node): aceleración ×1 a ×300 y pausa, presupuesto de cómputo por
+  ciclo, historial de tendencias de 8 h (todas las mediciones, consignas y
+  salidas cada 5 s), instantáneas a ≈ 5 Hz. `cliente.js` es la única interfaz
+  de las pantallas (estado, comandos con rechazo motivado, guardar,
+  tendencias).
+- `src/hmi/`: 9 pantallas (5 mímicos SVG declarativos, calidad y
+  laboratorio, tendencias, alarmas y eventos, perfiles), carátulas de lazo,
+  panel de transmisor, menús de bombas, mallas y calentadores, panel básico
+  del instructor, banner y contadores de alarmas. Estilo de alto desempeño.
+  `src/ui/`: menú inicial, guardar/cargar (localStorage y archivo JSON).
+- Partida nueva: 8 h previas sin control (≈ 5 s) y entrega en operación.
+- Aceptación (`npm run e2e`): operar con las pantallas, cambio de ritmo,
+  respuesta a una alarma con enclavamiento, ×300 a ≈ 297 s/s con 60 cuadros
+  por segundo (peor cuadro 17 ms), guardado. Guía en `docs/GUIA-PANTALLAS.md`.
+- Doble revisión: revisión independiente del control (9 defectos corregidos,
+  con pruebas de regresión); en el navegador se corrigieron superposiciones
+  de textos, la leyenda de colores, el tamaño de los mímicos en celular, el
+  favicon y que los eventos del calentamiento previo aparecieran en la
+  partida.
+- Pendiente para fases siguientes: textura del DCS en los monitores 3D
+  (Fase 4: los mímicos son SVG, convertibles a imagen), eventos con guion y
+  misiones (Fase 5), historial de tendencias dentro del archivo guardado.

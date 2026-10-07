@@ -13,9 +13,11 @@
     "calibrar": "node herramientas/calibrar.js",
     "tabla-parametros": "node herramientas/tabla-parametros.js",
     "sensibilidades": "node herramientas/sensibilidades.js",
-    "sintonia": "node herramientas/sintonia.js"
+    "sintonia": "node herramientas/sintonia.js",
+    "e2e": "node herramientas/e2e.js"
   },
   "devDependencies": {
+    "playwright-core": "1.56",
     "vite": "^8.0.0",
     "vitest": "^5.0.0"
   }

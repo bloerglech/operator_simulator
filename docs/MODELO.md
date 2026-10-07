@@ -370,10 +370,13 @@ referencia de orden para la fase principal).
 
 | Fase | E (kJ/mol) | Órdenes | Origen |
 |------|-----------|---------|--------|
-| Inicial | E_f (baja) | a_f | supuesto |
-| Principal, término OH | E_p1 | a_p1 | supuesto |
-| Principal, término OH·HS | E_p2 | a_p2, b_p2 | supuesto |
-| Residual | E_r | a_r | supuesto |
+| Inicial | 50 | a_f = 0 | supuesto |
+| Principal, término OH | 130 | a_p1 = 1 | supuesto |
+| Principal, término OH·HS | 120 | a_p2 = 0,5; b_p2 = 0,4 | supuesto |
+| Residual | 117 | a_r = 0,7 | supuesto |
+
+(Valores vigentes en `config/cinetica.json`; las A de cada fase están
+calibradas, ver `docs/CALIBRACION.md`.)
 
 Reparto inicial de la lignina (supuesto, eucalipto): rápida ≈ 20 %,
 principal ≈ 72 %, residual ≈ 8 %. El menor requerimiento de factor H del
@@ -462,9 +465,10 @@ base (6–10 g/L en extracciones, 4–7 g/L en el soplado).
 ### 6.9 Impregnación y rechazos
 
 ```
-dφ_k/dt = − k_imp(T) · S_vap · h(OH) · φ_k / δ_k²
-h(OH) = [OH]/([OH] + K_imp)
-S_vap = 1 − exp(−(vapor/madera) · t_silo / τ_vap)   (calidad de vaporización, 0–1)
+dφ_k/dt = − k_imp(T) · S_vap · h(OH) · (δ_ref/δ_k)² · φ_k
+h(OH) = [OH]/([OH] + K_OH)
+S_vap = calidad de vaporización (0–1), propiedad del lote de astillas
+        (en la Fase 1c se calcula con el modelo del silo: vapor/madera y tiempo)
 ```
 
 - Lo no impregnado reacciona solo con la fracción ψ (S-08).

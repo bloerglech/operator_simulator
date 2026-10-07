@@ -169,13 +169,15 @@ $$ECCSA = e_{min} + (e_{max}-e_{min})\frac{[OH^-]}{[OH^-]+K_e}$$
 La **ECCSA** (*effective capillary cross-sectional area*) representa que la
 madera hinchada en álcali deja pasar mejor los iones; la idea viene de Stone
 (1957) *(por verificar)*. Los valores de $D_{ref}$, $E_D$ y la forma de ECCSA
-son **supuestos** elegidos para una constante de tiempo de ≈ 20 min a 150 °C
-con astillas de 4 mm.
+son **supuestos** elegidos para una constante de tiempo de ≈ 9 min a 150 °C
+con astillas de 4 mm (en la Fase 1b se aceleró desde ≈ 20 min; ver
+capítulo 4.10).
 
-**Ejemplo 3.1.** Con $D_{ref} = 1{,}1\times10^{-9}$ m²/s y L = 2 mm:
-$k_D = 3 \times 1{,}1\times10^{-9} / (0{,}002)^2 = 8{,}3\times10^{-4}$ s⁻¹, es
-decir τ = 1/k_D ≈ 20 min. Con astillas de 8 mm (sobre espesor), L = 4 mm y
-τ ≈ 80 min: cuatro veces más lento. Por eso el sobre espesor da rechazos.
+**Ejemplo 3.1.** Con $D_{ref} = 2{,}5\times10^{-9}$ m²/s, ECCSA = 1 y
+L = 2 mm: $k_D = 3 \times 2{,}5\times10^{-9} / (0{,}002)^2 = 1{,}9\times10^{-3}$ s⁻¹,
+es decir τ = 1/k_D ≈ 9 min. Con astillas de 8 mm (sobre espesor), L = 4 mm y
+τ ≈ 36 min: cuatro veces más lento. Con poco álcali la ECCSA baja (hasta
+0,3) y la difusión se hace hasta tres veces más lenta. Por eso el sobre espesor da rechazos.
 
 ### Calor
 

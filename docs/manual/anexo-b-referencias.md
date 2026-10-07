@@ -68,6 +68,31 @@ marcado en `config/` (ver Anexo A): las constantes cinéticas de eucalipto son
   *Zeitschrift des Vereines Deutscher Ingenieure* 39. *(por verificar)* —
   Esfuerzo en columnas de material granular con fricción en la pared.
 
+## Control de procesos y alarmas
+
+- Seborg, D. E., Edgar, T. F., Mellichamp, D. A. y Doyle, F. J. (2016).
+  *Process Dynamics and Control*, 4.ª ed. Wiley. — PID, cascadas,
+  prealimentación, relación, sintonía.
+- Åström, K. J. y Hägglund, T. (2006). *Advanced PID Control*. ISA,
+  Research Triangle Park. — Forma ISA, anti-windup, transferencia sin golpe,
+  derivada sobre el PV.
+- Skogestad, S. (2003). Simple analytic rules for model reduction and PID
+  controller tuning. *Journal of Process Control* 13(4). — Reglas SIMC usadas
+  como punto de partida de la sintonía.
+- ANSI/ISA-18.2 (2016). *Management of Alarm Systems for the Process
+  Industries*. — Ciclo de vida y estados de alarma, archivo, supresión,
+  criterio de inundación (más de 10 alarmas en 10 min).
+- EEMUA 191 (3.ª ed., 2013). *Alarm Systems: A Guide to Design, Management
+  and Procurement*. *(por verificar la edición)* — Prioridades y tasas de
+  alarmas manejables por un operador.
+- IEC 61511 (2016). *Functional safety — Safety instrumented systems for the
+  process industry sector*. — Separación entre el control básico y la
+  protección instrumentada.
+
+Las sintonías, rangos, ruidos, límites de alarma y enclavamientos del
+simulador **no** vienen de estas referencias: son supuestos de diseño
+verificados con las pruebas del capítulo 6.
+
 ## Métodos numéricos
 
 - Patankar, S. V. (1980). *Numerical Heat Transfer and Fluid Flow*.

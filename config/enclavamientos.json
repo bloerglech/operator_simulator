@@ -1,0 +1,193 @@
+{
+ "_descripcion": "Enclavamientos: condición sobre un transmisor (con retardo en s) y acciones. Mientras están disparados fuerzan las salidas indicadas (el lazo queda en MAN). Rearme manual: el operador lo rearma cuando la condición desapareció.",
+ "enclavamientos": [
+  {
+   "id": "I-01",
+   "descripcion": "Parada de alimentación por presión muy alta del digestor",
+   "condicion": {
+    "tag": "PI-301",
+    "op": ">",
+    "retardo": 2,
+    "limite": 8.5
+   },
+   "acciones": [
+    {
+     "lazo": "WIC-101",
+     "salida": 0
+    }
+   ],
+   "rearme": "manual"
+  },
+  {
+   "id": "I-02",
+   "descripcion": "Parada de alimentación por nivel de astillas muy alto en el digestor",
+   "condicion": {
+    "tag": "LI-302",
+    "op": ">",
+    "retardo": 30,
+    "limite": 56
+   },
+   "acciones": [
+    {
+     "lazo": "WIC-101",
+     "salida": 0
+    }
+   ],
+   "rearme": "manual"
+  },
+  {
+   "id": "I-03",
+   "descripcion": "Pérdida de circulación superior con vapor abierto: cierra el vapor",
+   "condicion": {
+    "tag": "FI-401",
+    "op": "<",
+    "retardo": 10,
+    "limite": 300
+   },
+   "acciones": [
+    {
+     "lazo": "TIC-402",
+     "salida": 0
+    }
+   ],
+   "rearme": "manual"
+  },
+  {
+   "id": "I-04",
+   "descripcion": "Pérdida de circulación inferior con vapor abierto: cierra el vapor",
+   "condicion": {
+    "tag": "FI-403",
+    "op": "<",
+    "retardo": 10,
+    "limite": 300
+   },
+   "acciones": [
+    {
+     "lazo": "TIC-404",
+     "salida": 0
+    }
+   ],
+   "rearme": "manual"
+  },
+  {
+   "id": "I-05",
+   "descripcion": "Pérdida de circulación de transferencia: cierra el vapor",
+   "condicion": {
+    "tag": "FI-211",
+    "op": "<",
+    "retardo": 10,
+    "limite": 300
+   },
+   "acciones": [
+    {
+     "lazo": "TIC-212",
+     "salida": 0
+    }
+   ],
+   "rearme": "manual"
+  },
+  {
+   "id": "I-06",
+   "descripcion": "Temperatura de soplado muy alta: detiene el soplado",
+   "condicion": {
+    "tag": "TI-604",
+    "op": ">",
+    "retardo": 60,
+    "limite": 98
+   },
+   "acciones": [
+    {
+     "lazo": "LIC-302",
+     "salida": 0
+    }
+   ],
+   "rearme": "manual"
+  },
+  {
+   "id": "I-07",
+   "descripcion": "Corriente muy alta del raspador del digestor: detiene soplado y alimentación",
+   "condicion": {
+    "tag": "II-307",
+    "op": ">",
+    "retardo": 5,
+    "limite": 350
+   },
+   "acciones": [
+    {
+     "lazo": "LIC-302",
+     "salida": 0
+    },
+    {
+     "lazo": "WIC-101",
+     "salida": 0
+    }
+   ],
+   "rearme": "manual"
+  },
+  {
+   "id": "I-08",
+   "descripcion": "Estanque de soplado lleno: detiene el soplado",
+   "condicion": {
+    "tag": "LI-606",
+    "op": ">",
+    "retardo": 10,
+    "limite": 95
+   },
+   "acciones": [
+    {
+     "lazo": "LIC-302",
+     "salida": 0
+    }
+   ],
+   "rearme": "manual"
+  },
+  {
+   "id": "I-09",
+   "descripcion": "Protección de la bomba de circulación superior (ΔP de mallas muy alta)",
+   "condicion": {
+    "tag": "PDI-524",
+    "op": ">",
+    "retardo": 60,
+    "limite": 0.95
+   },
+   "acciones": [
+    {
+     "comando": {
+      "tipo": "bomba",
+      "id": "bomba_circ_sup",
+      "accion": "detener"
+     }
+    },
+    {
+     "lazo": "TIC-402",
+     "salida": 0
+    }
+   ],
+   "rearme": "manual"
+  },
+  {
+   "id": "I-10",
+   "descripcion": "Protección de la bomba de circulación inferior (ΔP de mallas muy alta)",
+   "condicion": {
+    "tag": "PDI-526",
+    "op": ">",
+    "retardo": 60,
+    "limite": 0.95
+   },
+   "acciones": [
+    {
+     "comando": {
+      "tipo": "bomba",
+      "id": "bomba_circ_inf",
+      "accion": "detener"
+     }
+    },
+    {
+     "lazo": "TIC-404",
+     "salida": 0
+    }
+   ],
+   "rearme": "manual"
+  }
+ ]
+}

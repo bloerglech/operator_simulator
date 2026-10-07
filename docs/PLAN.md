@@ -1,7 +1,7 @@
 # PLAN DE TRABAJO
 
 Estado: **aprobado** con los valores provisionales de la sección 6.
-Fase actual: **1c terminada; Fase 1 completa** (ver sección 8).
+Fase actual: **2 terminada** (ver sección 8).
 
 Documento rector: `docs/ESPECIFICACION.md`. Si algo de aquí lo contradice,
 manda la especificación y este plan se corrige.
@@ -350,3 +350,32 @@ eventos instructor) pero no las implementa.
 - Pendiente para fases siguientes: control de presión y de nivel (Fase 2),
   canalización y demás perturbaciones (Fase 5), secuencias completas de
   partida y parada (Fase 6), estados iniciales guardados para escenarios.
+
+### Fase 2 — terminada
+- `src/control/` como extensión de la planta (`crearSistema`): instrumentos
+  con ruido, filtro, retardo y fallas; analizadores de álcali y kappa;
+  laboratorio con retardo de 20–40 min; PID ISA con MAN/AUTO/CAS,
+  transferencia sin golpe e integración condicional; actuadores con
+  constante de tiempo, carrera, banda muerta y falla "pegado".
+- 29 lazos (todos los de la sección 8 de la especificación salvo el nivel
+  del tubo de astillas, que requiere modelar su licor: MODELO.md L-11),
+  bloques de carga de álcali, relación licor/madera, seguimiento
+  (lavado y dilución), coordinación de ritmo, factor H y kappa.
+- 10 enclavamientos con rearme manual y puente de instructor; 43 alarmas
+  configuradas más las generadas (enclavamiento disparado, falla de señal),
+  con banda muerta, retardo, prioridad, reconocimiento, archivo temporal y
+  supresión por planta detenida.
+- Aceptación: `npm run sintonia` / `tests/sintonia.test.js` (escalón de los
+  29 lazos, sin oscilación sostenida, sobrepaso y asentamiento dentro de lo
+  configurado, `docs/SINTONIA.md`); prueba de cada enclavamiento; tres
+  eventos simples sin avalancha (máx. 6 alarmas en 10 min); estado
+  estacionario 2 h sin alarmas ni enclavamientos; determinismo y
+  guardar/cargar con control. 138 pruebas en total.
+- Correcciones durante la doble revisión: el control arrancaba antes de que
+  existieran los diagnósticos (consignas en 0); la coordinación de lavado
+  pisaba la consigna del operador; la consistencia de soplado no respondía a
+  la dilución (licor de soplado fijo: S-38); TIC-604 no podía actuar
+  (selección de maestro); sintonías de calentadores (ganancia de proceso
+  baja) y nivel del digestor; rastreo del actuador de vapor en MAN.
+- Costo: el control agrega ≈ 0,8 s por hora simulada (≈ 1,4 s/h en total,
+  más de 2 500 veces tiempo real).

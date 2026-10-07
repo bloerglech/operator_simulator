@@ -532,8 +532,11 @@ UA = UA_limpio / (1 + f),   df/dt = k_inc · exp(−E/R·(1/T − 1/T_ref))   (C
 
 Cada calentador tiene una unidad de respaldo limpia (comando `conmutar`) y
 se puede lavar con ácido (f = 0). Si la consigna no se alcanza, el
-calentador queda "saturado" (en la Fase 2 la válvula de vapor del TIC
-quedará abierta al 100 %). UA_limpio se dimensionó con ≈ 30 % de margen
+calentador queda "saturado". Con el control (Fase 2) el TIC maneja la
+válvula de vapor: T_consigna se reemplaza por
+`T_ent + apertura · Q_valvula / (ṁ·cp)`, con `Q_valvula` el calor a válvula
+totalmente abierta (≈ 1,4 veces el caso base, supuesto); sigue limitado
+por T_sal,max. UA_limpio se dimensionó con ≈ 30 % de margen
 sobre el caso base (P8). Una caída de presión del cabezal MP baja T_s y la
 capacidad.
 
@@ -676,21 +679,95 @@ Ver 7.3 y 7.4. El licor de impregnación (licor negro caliente) sale de las
 mallas de extracción principal del digestor con su bomba (S-22 resuelto).
 La hidráulica interna de las bombas de astillas no se modela (L-08).
 
-## 12. Instrumentación y laboratorio
+## 12. Instrumentación, control, enclavamientos y alarmas (`src/control/`)
 
-- **Transmisor:** `medida = retardo_τd(filtro_τ(valor_real)) + ruido(σ) +
-  deriva(t)`, saturado al rango; modos de falla: congelado, fuera de rango
-  alto/bajo, deriva lenta. Ruido del flujo aleatorio de instrumentos.
-- **Analizador de kappa** (soplado): muestra cada 20–30 min, resultado =
-  kappa de la pulpa que pasaba en el instante de muestreo + error
-  N(0, σ_κ), publicado al terminar el análisis.
-- **Analizadores de álcali residual** en circulaciones y extracciones
-  (muestreo discreto).
-- **Laboratorio:** solicitudes (kappa, viscosidad, álcali residual,
-  humedad y granulometría de astillas, licor blanco) con retraso de
-  20–40 min y error propio.
+El sistema de control es una **extensión** de la planta
+(`crearPlanta(config, { extension })`, `src/control/sistema.js`): el
+simulador no depende de él. Corre en cada paso rápido (0,2 s) antes de los
+equipos y guarda todo su estado en `estado.control` (se guarda, carga y es
+determinista). Orden en cada paso: transmisores → enclavamientos → bloques y
+lazos → alarmas. El control arranca en el primer paso lento (antes no hay
+niveles ni temperaturas de salida calculados) tomando como consigna inicial
+el valor medido (`"sp": "pv"`) o la configurada. `crearSistema(config,
+{ horasPrevias })` corre antes la planta sin control para partir cerca del
+estado estacionario (el estado inicial del simulador es sintético, S-30).
 
----
+### 12.1 Instrumentos (`instrumentos.js`, `mediciones.js`)
+
+- **Transmisor:** `medida = filtro_τ(retardo_τd(valor_real)) + ruido + deriva`,
+  saturada al rango. Ruido blanco N(0, σ) con σ en % del rango, del flujo
+  aleatorio `instrumentos`. Fallas: `congelado`, `alto`/`bajo` (señal fuera
+  de rango: calidad "mala", alarma de falla, el lazo pasa a manual) y
+  `deriva` (1 % del rango por hora).
+- **Variables medidas:** nombres cortos resueltos al construir
+  (`P:dig`, `T:zona:dig:coccion_superior`, `L:astillas:dig`, `FD`, `kappa:soplado`…;
+  lista en `mediciones.js`). Algunas son calculadas como en un DCS real
+  (relación licor/madera, factor de dilución, producción, factor H).
+- **Analizadores** (álcali en extracciones, kappa en el soplado): muestra
+  cada `periodo`, publica tras `analisis` s con error N(0, σ) y mantiene el
+  valor hasta la siguiente muestra. Kappa: cada 25 min, análisis 6 min.
+- **Laboratorio:** el operador pide un análisis; se toma el valor verdadero
+  en ese instante, se le suma el error del análisis y se publica entre 20 y
+  40 min después (flujo aleatorio `laboratorio`).
+
+### 12.2 PID (`pid.js`)
+
+Forma ISA en % del rango del PV:
+`u = Kc·[e + (1/Ti)∫e dt − Td·dPV_f/dt]`, acción directa o inversa,
+derivada sobre el PV filtrado (sin golpe al cambiar la consigna).
+Anti-windup por **integración condicional**: si el paso integral llevaría la
+salida más allá de un límite, se integra solo hasta el límite.
+**Transferencia sin golpe:** en MAN el integral sigue a la salida; al pasar a
+AUTO/CAS se inicializa para que la salida no salte. Modos MAN, AUTO y CAS.
+
+### 12.3 Lazos y actuadores (`lazos.js`, `config/lazos.json`)
+
+29 lazos (lista en el anexo A del manual). Salidas posibles: válvula del
+simulador, caudal de una corriente, caudal de madera de un descargador,
+velocidad del medidor, válvula de vapor de un calentador, salida de un
+ciclón flash, un servicio, o la consigna de otro lazo (cascada).
+**Actuador** de cada salida (salvo cascadas): primer orden τ, límite de
+velocidad (tiempo de carrera) y banda muerta; falla "pegado" (instructor).
+Las válvulas del simulador ya tienen su propia dinámica (§8), aquí solo
+se agrega la banda muerta. En MAN, si otro movió el actuador, el lazo
+adopta esa posición. Un maestro cuyo esclavo no está en CAS sigue al
+esclavo (no acumula integral). Un esclavo puede tener varios maestros
+posibles y el operador elige uno (FIC-601: factor de dilución FDC-607 o
+temperatura de soplado TIC-604).
+
+Sintonías verificadas con escalones de consigna (`npm run sintonia`,
+`docs/SINTONIA.md`, `tests/sintonia.test.js`): sin oscilación sostenida,
+sobrepaso y asentamiento dentro de los límites de `"prueba"` de cada lazo.
+
+### 12.4 Bloques de cálculo y control avanzado
+
+| Tipo | Cálculo |
+|------|---------|
+| `carga_alcali` (FFC-110) | Licor blanco total = carga·W/EA (m³/h), repartido en % a los FIC en CAS. El EA del licor blanco se actualiza con el último análisis de laboratorio. W filtrado (τ 60 s). |
+| `licor_madera` (FFC-117) | Licor negro a la alimentación = L/W·W − agua de la astilla − otros licores al tope. Humedad del laboratorio. |
+| `seguimiento` (FFC-503, FFC-602) | El esclavo sigue los cambios de una fuente desde la activación: extracción final ← filtrado de lavado; dilución ← licor de soplado. |
+| `ritmo` (RC-700) | Rampa de la consigna de madera (ADt/d por hora) y escalado proporcional de las consignas marcadas `escala_ritmo`. |
+| `factor_h` (HIC-703) | H previsto = [k_rel(T_sup)·t_sup + k_rel(T_inf)·t_inf + H_resto]·(W_base/W) + corrección (al activarse, H medido − H previsto). Integral: sesgo de ±8 °C sobre las consignas de TIC-402 y TIC-404. |
+| `kappa` (AIC-701) | PI muestreado: con cada valor nuevo del analizador corrige el objetivo de H (si HIC-703 está activo) o la carga de álcali. |
+
+### 12.5 Enclavamientos (`enclavamientos.js`)
+
+Condición sobre la **medición** (un transmisor en falla puede disparar en
+falso), con retardo. Al dispararse ejecuta una vez sus comandos (detener
+bomba) y mientras siga disparado fuerza salidas de lazos (que quedan en MAN).
+Rearme manual, aceptado solo si la condición desapareció. El instructor
+puede puentear. Lista en el anexo A.
+
+### 12.6 Alarmas (`alarmas.js`)
+
+Inspirado en ISA-18.2: tipos alta, baja, desviación de lazo y evento;
+banda muerta, retardo de activación, prioridades 1–4. Estados: normal →
+activa sin reconocer → reconocida → normal; "retornada sin reconocer" si la
+condición desaparece antes. Se generan solas las alarmas de enclavamiento
+(prioridad 1) y de falla de señal (prioridad 3). Supresión del grupo
+"proceso" con la alimentación detenida; archivo temporal (máx. 8 h, no para
+prioridad 1). Se cuenta la tasa de activaciones en 10 min (criterio de
+inundación: < 10).
 
 ## 13. Calibración
 
@@ -772,11 +849,16 @@ mínimas).
 | S-28 | Caso base: filtrado de lavado al fondo 1 180 m³/h con extracción final 790 m³/h (ambos +70 respecto de la Fase 1a) para un factor de dilución de 2,2 m³/ADt sin que el filtrado frío suba a la zona de cocción. |
 | S-29 | Difusión libre ↔ retenido con τ ≈ 9 min a 150 °C (D_ref = 2,5·10⁻⁹ m²/s); condensación (OH_c) y reprecipitación de lignina centradas en 3 g/L de álcali dentro de la astilla. Con valores más lentos o umbrales más altos, el interior de la astilla quedaba sin álcali y la temperatura dejaba de bajar el kappa. |
 | S-30 | Estado inicial de operación sintético: parcelas precocinadas según su edad esperada en la columna, con un licor de cocción típico; tasa de penetración inicial estimada. |
-| S-31 | Presión: compresibilidad del vaso 5·10⁻¹⁰ 1/Pa; válvulas con presión solo en la extracción principal y el exceso del impregnador; el resto de las corrientes con caudal fijo hasta la Fase 2. |
-| S-32 | Ciclones flash a presión constante y nivel con control proporcional ideal; el vapor de ambos va al silo; el condensado de la vaporización queda como humedad de las astillas. |
+| S-31 | Presión: compresibilidad del vaso 5·10⁻¹⁰ 1/Pa; válvulas con presión solo en la extracción principal y el exceso del impregnador; el resto de las corrientes con caudal fijado (desde la Fase 2 lo fija el control a través de actuadores, S-37). |
+| S-32 | Ciclones flash a presión constante y nivel con control proporcional ideal (desde la Fase 2, LIC-510/511 fijan la salida); el vapor de ambos va al silo; el condensado de la vaporización queda como humedad de las astillas. |
 | S-33 | Compactación tipo Janssen con μK = 0,08 y constante de tiempo de 10 min; hueco máximo de colgamiento 600 m³. |
 | S-34 | Mallas: ΔP limpia 0,15–0,3 bar, taponamiento ≈ 1 R0 cada 6 h sin conmutación, equilibrio ≈ 0,25 R0 con conmutación. |
 | S-35 | Licor de impregnación desde la extracción principal (260 m³/h); por la válvula de extracción principal a flash pasan ≈ 100 m³/h. |
+| S-36 | Instrumentos, lazos, bloques, enclavamientos y alarmas: todos los valores son supuestos de un DCS típico (formato compacto en `config/instrumentos|lazos|enclavamientos|alarmas.json`). |
+| S-37 | Las salidas de caudal de los FIC fijan el caudal de la corriente a través de un actuador de primer orden (τ 4 s, carrera 30 s); no se modela la hidráulica de cada válvula de línea. |
+| S-38 | El licor de la lechada de soplado es un caudal fijado (CIC-605 lo manipula); la dilución lo sigue con el bloque FFC-602. Equivale a controlar la consistencia con la dilución a caudal total de soplado constante. |
+| S-39 | El nivel de astillas del digestor se controla con el caudal de pulpa del soplado (LIC-302) y el del impregnador con la transferencia (LIC-202); el raspador no se manipula. |
+| S-40 | Factor H previsto del bloque HIC-703 con tiempos de zona fijos (1,0 h y 1,2 h) más una corrección tomada al activarse. |
 | S-23 | Una tubería entre vasos entrega en cada paso el volumen que se le ingresó en el paso anterior (desfase de un paso lento, 5 s), lo que evita lazos algebraicos. |
 
 ## 16. Limitaciones conocidas
@@ -792,6 +874,8 @@ mínimas).
 | L-07 | Compactación, colgamiento y raspadores con modelo simplificado. |
 | L-08 | Bombas de astillas sin hidráulica interna. |
 | L-09 | Dispersión numérica de primer orden en el licor libre (no en las astillas). |
+| L-11 | No se modela el nivel de licor del tubo de astillas: el lazo "nivel del tubo de astillas" de la especificación queda pendiente (el tubo solo acumula astillas, WI-104). |
+| L-12 | Los enclavamientos y alarmas son un conjunto mínimo representativo, no una lista de una planta real. |
 | L-10 | Resolución de la columna: una parcela ≈ 1/3 de celda (≈ 1,5 min de residencia en el impregnador, ≈ 2,5 min en el digestor). |
 
 ## 17. Estado de implementación
@@ -818,6 +902,11 @@ mínimas).
 | Mallas, compactación, colgamiento, raspadores | Fase 1c ✔ |
 | Propiedades del licor variables con los sólidos | Descartado (ver §7) |
 | Canalización | Fase 5 |
+| Instrumentos con fallas, analizadores, laboratorio | Fase 2 ✔ |
+| PID ISA, modos, actuadores, 29 lazos con pruebas de escalón | Fase 2 ✔ |
+| Bloques de relación, seguimiento, ritmo, factor H, kappa | Fase 2 ✔ |
+| Enclavamientos (10) y alarmas (43 + generadas) | Fase 2 ✔ |
+| Nivel de licor del tubo de astillas | Pendiente (L-11) |
 
 ## 18. Referencias (a verificar al implementar)
 

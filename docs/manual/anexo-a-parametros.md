@@ -9,7 +9,7 @@ Orígenes (ver capítulo 1.5): `literatura` (publicación citada), `especificaci
 
 | Origen | Cantidad de parámetros |
 |--------|------------------------|
-| supuesto | 342 |
+| supuesto | 345 |
 | especificacion | 19 |
 | literatura | 3 |
 | calibrado | 14 |
@@ -116,12 +116,15 @@ Orígenes (ver capítulo 1.5): `literatura` (publicación citada), `especificaci
 | `calentadores.retorno_transf.UA_limpio` | 300 | kW/K | supuesto |  |
 | `calentadores.retorno_transf.incrustacion` | 0.02 | 1/d | supuesto | aumento de f por día a 150 °C |
 | `calentadores.retorno_transf.E_incrustacion` | 40 | kJ/mol | supuesto |  |
+| `calentadores.retorno_transf.Q_valvula` | 16 | MW | supuesto | calor con la válvula de vapor totalmente abierta (≈ 1,4 veces el caso base) |
 | `calentadores.circ_sup.UA_limpio` | 800 | kW/K | supuesto |  |
 | `calentadores.circ_sup.incrustacion` | 0.02 | 1/d | supuesto |  |
 | `calentadores.circ_sup.E_incrustacion` | 40 | kJ/mol | supuesto |  |
+| `calentadores.circ_sup.Q_valvula` | 36 | MW | supuesto | calor con la válvula de vapor totalmente abierta (≈ 1,4 veces el caso base) |
 | `calentadores.circ_inf.UA_limpio` | 700 | kW/K | supuesto |  |
 | `calentadores.circ_inf.incrustacion` | 0.02 | 1/d | supuesto |  |
 | `calentadores.circ_inf.E_incrustacion` | 40 | kJ/mol | supuesto |  |
+| `calentadores.circ_inf.Q_valvula` | 32 | MW | supuesto | calor con la válvula de vapor totalmente abierta (≈ 1,4 veces el caso base) |
 | `flash.flash1.P` | 2.5 | bar(a) | supuesto |  |
 | `flash.flash1.volumen` | 60 | m3 | supuesto |  |
 | `flash.flash1.nivel_consigna` | 50 | % | supuesto |  |
@@ -436,3 +439,205 @@ Orígenes (ver capítulo 1.5): `literatura` (publicación citada), `especificaci
 | `objetivos_calibracion.alcaliExtraccion.tolerancia` | 0.3 | - | supuesto |  |
 | `objetivos_calibracion.rechazos.objetivo` | 0.3 | - | especificacion | % sobre pulpa (< 0,5) |
 | `objetivos_calibracion.rechazos.tolerancia` | 0.05 | - | supuesto |  |
+
+## Sistema de control (config/instrumentos, lazos, enclavamientos, alarmas)
+
+Formato compacto: **todos estos valores son supuestos** de diseño de un DCS
+típico, no datos de una planta. Sintonías verificadas con pruebas de escalón
+(`npm run sintonia`, ver `docs/SINTONIA.md`).
+
+### Transmisores y analizadores
+
+Ruido: desviación estándar en % del rango. τ: filtro de primer orden (s).
+Analizadores: periodo de muestreo / tiempo de análisis (s) / error (desv. est.).
+
+| Tag | Descripción | Variable | Rango | Ruido % | τ s | Analizador |
+|-----|-------------|----------|-------|---------|-----|------------|
+| WI-101 | Caudal de astillas (medidor, densidad nominal) | `W:medidor` | 0–300 t/h | 0.3 | 2 |  |
+| SI-101 | Velocidad del medidor de astillas | `rpm:medidor` | 0–25 rpm | 0.1 | 1 |  |
+| LI-102 | Nivel del silo de astillas | `L:silo` | 0–100 % | 0.5 | 10 |  |
+| TI-103 | Temperatura de astillas vaporizadas | `T:silo` | 0–120 °C | 0.2 | 30 |  |
+| WI-104 | Astillas acumuladas en el tubo de astillas | `M:tubo` | 0–30 t | 0.5 | 5 |  |
+| FI-111 | Licor blanco a la alimentación | `Q:lb_alim` | 0–400 m3/h | 0.5 | 3 |  |
+| FI-112 | Licor blanco a la transferencia | `Q:lb_transf` | 0–100 m3/h | 0.5 | 3 |  |
+| FI-113 | Licor blanco a la circulación superior | `Q:lb_sup` | 0–200 m3/h | 0.5 | 3 |  |
+| FI-114 | Licor blanco a la circulación inferior | `Q:lb_inf` | 0–200 m3/h | 0.5 | 3 |  |
+| FI-115 | Licor negro a la impregnación | `Q:licor_imp` | 0–500 m3/h | 0.5 | 3 |  |
+| FI-116 | Circulación de tope del impregnador | `Q:circ_tope_imp` | 0–500 m3/h | 0.5 | 3 |  |
+| LW-117 | Relación licor/madera (calculada) | `LW` | 0–8 m³/t | 0 | 10 |  |
+| PI-201 | Presión del impregnador | `P:imp` | 0–12 bar(g) | 0.2 | 0.5 |  |
+| LI-202 | Nivel de astillas del impregnador | `L:astillas:imp` | 0–23 m | 0.5 | 10 |  |
+| TI-203 | Temperatura de impregnación | `T:zona:imp:impregnacion` | 0–200 °C | 0.1 | 20 |  |
+| FI-204 | Exceso del separador del impregnador | `Q:imp_exceso` | 0–500 m3/h | 0.5 | 3 |  |
+| II-205 | Corriente del raspador del impregnador | `I:raspador:imp` | 0–400 A | 0.5 | 2 |  |
+| FI-211 | Retorno de la circulación de transferencia | `Q:retorno_transf` | 0–1500 m3/h | 0.5 | 3 |  |
+| TI-212 | Salida del calentador de transferencia | `T:calentador:retorno_transf` | 50–200 °C | 0.1 | 5 |  |
+| PI-301 | Presión del digestor (tope) | `P:dig` | 0–12 bar(g) | 0.2 | 0.5 |  |
+| LI-302 | Nivel de astillas del digestor | `L:astillas:dig` | 0–57 m | 0.5 | 10 |  |
+| TI-303 | Temperatura del tope del digestor | `T:zona:dig:tope` | 0–200 °C | 0.1 | 20 |  |
+| TI-304 | Temperatura de cocción superior | `T:zona:dig:coccion_superior` | 0–200 °C | 0.1 | 20 |  |
+| TI-305 | Temperatura de cocción inferior | `T:zona:dig:coccion_inferior` | 0–200 °C | 0.1 | 20 |  |
+| TI-306 | Temperatura de la zona de lavado | `T:zona:dig:lavado` | 0–200 °C | 0.1 | 20 |  |
+| II-307 | Corriente del raspador del digestor | `I:raspador:dig` | 0–500 A | 0.5 | 2 |  |
+| FI-401 | Circulación de cocción superior | `Q:circ_sup` | 0–1500 m3/h | 0.5 | 3 |  |
+| TI-402 | Salida del calentador superior | `T:calentador:circ_sup` | 50–200 °C | 0.1 | 5 |  |
+| FI-403 | Circulación de cocción inferior | `Q:circ_inf` | 0–1500 m3/h | 0.5 | 3 |  |
+| TI-404 | Salida del calentador inferior | `T:calentador:circ_inf` | 50–200 °C | 0.1 | 5 |  |
+| FI-405 | Filtrado a la circulación superior | `Q:fil_sup` | 0–400 m3/h | 0.5 | 3 |  |
+| FI-406 | Filtrado a la circulación inferior | `Q:fil_inf` | 0–400 m3/h | 0.5 | 3 |  |
+| FI-410 | Vapor de media presión a calentadores | `vapor:total` | 0–200 t/h | 0.5 | 5 |  |
+| FI-501 | Extracción superior | `Q:ext_superior` | 0–300 m3/h | 0.5 | 3 |  |
+| FI-502 | Extracción principal a flash | `Q:ext_principal` | 0–500 m3/h | 0.5 | 3 |  |
+| FI-503 | Extracción final | `Q:ext_final` | 0–1500 m3/h | 0.5 | 3 |  |
+| AI-504 | Álcali efectivo en la extracción principal | `EA:corriente:ext_principal` | 0–40 g/L | 0 | 0 | 600 / 120 / ±0.3 |
+| AI-505 | Álcali efectivo en la extracción final | `EA:corriente:ext_final` | 0–40 g/L | 0 | 0 | 600 / 120 / ±0.3 |
+| LI-510 | Nivel del ciclón flash 1 | `L:flash:flash1` | 0–100 % | 0.5 | 3 |  |
+| LI-511 | Nivel del ciclón flash 2 | `L:flash:flash2` | 0–100 % | 0.5 | 3 |  |
+| FI-512 | Licor negro débil a evaporadores | `Q:flash:flash2` | 0–2500 m3/h | 0.5 | 5 |  |
+| PDI-521 | ΔP separador del impregnador | `dP:malla:separador_imp` | 0–2 bar | 0.5 | 5 |  |
+| PDI-522 | ΔP separador del digestor | `dP:malla:separador_dig` | 0–2 bar | 0.5 | 5 |  |
+| PDI-523 | ΔP mallas de extracción superior | `dP:malla:mallas_superior` | 0–2 bar | 0.5 | 5 |  |
+| PDI-524 | ΔP mallas de la circulación superior | `dP:malla:mallas_circ_sup` | 0–2 bar | 0.5 | 5 |  |
+| PDI-525 | ΔP mallas de extracción principal | `dP:malla:mallas_principal` | 0–2 bar | 0.5 | 5 |  |
+| PDI-526 | ΔP mallas de la circulación inferior | `dP:malla:mallas_circ_inf` | 0–2 bar | 0.5 | 5 |  |
+| PDI-527 | ΔP mallas de extracción final | `dP:malla:mallas_final` | 0–2 bar | 0.5 | 5 |  |
+| FI-601 | Filtrado de lavado al fondo | `Q:fil_fondo` | 0–2000 m3/h | 0.5 | 3 |  |
+| FI-602 | Dilución del fondo | `Q:dilucion` | 0–500 m3/h | 0.5 | 3 |  |
+| FI-603 | Soplado (lechada) | `Q:soplado` | 0–2000 m3/h | 0.5 | 3 |  |
+| TI-604 | Temperatura de soplado | `T:corriente:soplado` | 0–150 °C | 0.1 | 10 |  |
+| CI-605 | Consistencia de soplado | `Cs:soplado` | 0–20 % | 1 | 10 |  |
+| LI-606 | Nivel del estanque de soplado | `L:estanque` | 0–100 % | 0.5 | 10 |  |
+| FD-607 | Factor de dilución (calculado) | `FD` | 0–6 m³/ADt | 0 | 60 |  |
+| AI-701 | Kappa en el soplado (analizador) | `kappa:soplado` | 0–100  | 0 | 0 | 1500 / 360 / ±0.5 |
+| QI-702 | Producción (calculada) | `prod` | 0–4000 ADt/d | 0 | 60 |  |
+| HI-703 | Factor H en el soplado (calculado) | `H:soplado` | 0–1500  | 0 | 60 |  |
+
+### Laboratorio (retardo 20–40 min)
+
+| Análisis | Nombre | Error (desv. est.) |
+|----------|--------|--------------------|
+| kappa | Kappa de la pulpa | ±0.4  |
+| viscosidad | Viscosidad intrínseca | ±15 mL/g |
+| rendimiento | Rendimiento (estimado) | ±0.5 % |
+| rechazos | Rechazos | ±0.05 % |
+| alcali_ext_principal | Álcali residual, extracción principal | ±0.2 g/L |
+| alcali_ext_final | Álcali residual, extracción final | ±0.2 g/L |
+| alcali_soplado | Álcali residual, soplado | ±0.2 g/L |
+| humedad_astillas | Humedad de astillas | ±0.8 % |
+| densidad_astillas | Densidad básica de astillas | ±8 kg/m³ |
+| finos_astillas | Finos en astillas (granulometría) | ±0.4 % |
+| licor_blanco_EA | Álcali efectivo del licor blanco | ±1 g/L |
+| licor_blanco_sulfidez | Sulfidez del licor blanco | ±0.8 % |
+
+### Lazos
+
+| Lazo | Descripción | PV | Salida | Kc | Ti s | Acción | Modo inicial (maestros) |
+|------|-------------|----|--------|----|------|--------|-------------------------|
+| WIC-101 | Ritmo de producción: caudal de astillas (velocidad del medidor) | WI-101 | medidor  | 0.3 | 8 | inversa | AUTO |
+| LIC-102 | Nivel del silo de astillas (transportador) | LI-102 | servicio transportadorSilo | 3 | 900 | inversa | AUTO |
+| FIC-111 | Licor blanco a la alimentación | FI-111 | caudal lb_alim | 0.3 | 4 | inversa | CAS (FFC-110) |
+| FIC-112 | Licor blanco a la transferencia | FI-112 | caudal lb_transf | 0.3 | 4 | inversa | CAS (FFC-110) |
+| FIC-113 | Licor blanco a la circulación superior | FI-113 | caudal lb_sup | 0.3 | 4 | inversa | CAS (FFC-110) |
+| FIC-114 | Licor blanco a la circulación inferior | FI-114 | caudal lb_inf | 0.3 | 4 | inversa | CAS (FFC-110) |
+| FIC-115 | Licor negro a la impregnación | FI-115 | caudal licor_imp | 0.3 | 4 | inversa | CAS (FFC-117) |
+| FIC-116 | Circulación de tope del impregnador | FI-116 | caudal circ_tope_imp | 0.3 | 4 | inversa | AUTO |
+| PIC-201 | Presión del impregnador (exceso del separador) | PI-201 | valvula imp_exceso | 2 | 40 | directa | AUTO |
+| LIC-202 | Nivel de astillas del impregnador (transferencia) | LI-202 | madera transferencia | 4 | 1800 | directa | AUTO |
+| FIC-211 | Retorno de la circulación de transferencia | FI-211 | caudal retorno_transf | 0.3 | 4 | inversa | AUTO |
+| TIC-212 | Temperatura de salida del calentador de transferencia | TI-212 | vapor retorno_transf | 6 | 60 | inversa | AUTO |
+| PIC-301 | Presión del digestor (extracción principal) | PI-301 | valvula ext_principal | 3 | 30 | directa | AUTO |
+| LIC-302 | Nivel de astillas del digestor (soplado) | LI-302 | madera soplado | 6 | 1500 | directa | AUTO |
+| FIC-401 | Circulación de cocción superior | FI-401 | caudal circ_sup | 0.3 | 4 | inversa | AUTO |
+| TIC-402 | Temperatura de salida del calentador superior | TI-402 | vapor circ_sup | 4 | 60 | inversa | AUTO |
+| FIC-403 | Circulación de cocción inferior | FI-403 | caudal circ_inf | 0.3 | 4 | inversa | AUTO |
+| TIC-404 | Temperatura de salida del calentador inferior | TI-404 | vapor circ_inf | 4 | 60 | inversa | AUTO |
+| FIC-405 | Filtrado a la circulación superior | FI-405 | caudal fil_sup | 0.3 | 4 | inversa | AUTO |
+| FIC-406 | Filtrado a la circulación inferior | FI-406 | caudal fil_inf | 0.3 | 4 | inversa | AUTO |
+| FIC-501 | Extracción superior | FI-501 | caudal ext_superior | 0.3 | 4 | inversa | AUTO |
+| FIC-503 | Extracción final | FI-503 | caudal ext_final | 0.3 | 4 | inversa | CAS (FFC-503) |
+| LIC-510 | Nivel del ciclón flash 1 | LI-510 | flash flash1 | 2 | 300 | directa | AUTO |
+| LIC-511 | Nivel del ciclón flash 2 | LI-511 | flash flash2 | 2 | 300 | directa | AUTO |
+| FIC-601 | Filtrado de lavado al fondo | FI-601 | caudal fil_fondo | 0.3 | 4 | inversa | CAS (FDC-607 o TIC-604) |
+| FIC-602 | Dilución del fondo | FI-602 | caudal dilucion | 0.3 | 4 | inversa | CAS (FFC-602) |
+| CIC-605 | Consistencia de soplado (licor de la lechada de soplado; la dilución lo sigue) | CI-605 | caudal soplado | 1 | 300 | directa | AUTO |
+| TIC-604 | Temperatura de soplado (maestro alternativo del filtrado de lavado) | TI-604 | consigna de FIC-601 | 4 | 1200 | directa | MAN |
+| FDC-607 | Factor de dilución (filtrado de lavado) | FD-607 | consigna de FIC-601 | 1 | 300 | inversa | AUTO |
+
+### Bloques de cálculo y control avanzado
+
+| Bloque | Descripción | Tipo | Activo | Parámetros |
+|--------|-------------|------|--------|------------|
+| FFC-110 | Carga de álcali (razón sobre madera) y reparto del licor blanco | carga_alcali | sí | `{"carga":18,"EA_licor_blanco":117.5,"reparto":{"FIC-111":50,"FIC-112":10,"FIC-113":20,"FIC-114":20}}` |
+| FFC-117 | Relación licor/madera en la alimentación (licor negro) | licor_madera | sí | `{"relacion":4,"humedad":47.5}` |
+| FFC-503 | Coordinación del lavado: la extracción final sigue los cambios del filtrado de lavado | seguimiento | sí | `{"fuente":"lazo:FIC-601","esclavo":"FIC-503","ganancia":1}` |
+| FFC-602 | Coordinación del fondo: la dilución sigue los cambios del licor de soplado | seguimiento | sí | `{"fuente":"corriente:soplado","esclavo":"FIC-602","ganancia":1}` |
+| RC-700 | Coordinación de cambios de ritmo (control avanzado) | ritmo | no | `{"produccion":3000,"rampa":150,"rendimiento":53.5}` |
+| HIC-703 | Control de factor H con corrección por ritmo (control avanzado) | factor_h | no | `{"objetivo":460,"tiempo_superior":1,"tiempo_inferior":1.2,"H_resto":60,"ganancia":0.004,"bias_max":8}` |
+| AIC-701 | Control de kappa con el analizador (control avanzado) | kappa | no | `{"objetivo":17,"ganancia":6,"Ti":10800}` |
+
+### Enclavamientos (rearme manual)
+
+| Id | Descripción | Condición (retardo) | Acciones |
+|----|-------------|---------------------|----------|
+| I-01 | Parada de alimentación por presión muy alta del digestor | PI-301 > 8.5 (2 s) | WIC-101 → 0 % |
+| I-02 | Parada de alimentación por nivel de astillas muy alto en el digestor | LI-302 > 56 (30 s) | WIC-101 → 0 % |
+| I-03 | Pérdida de circulación superior con vapor abierto: cierra el vapor | FI-401 < 300 (10 s) | TIC-402 → 0 % |
+| I-04 | Pérdida de circulación inferior con vapor abierto: cierra el vapor | FI-403 < 300 (10 s) | TIC-404 → 0 % |
+| I-05 | Pérdida de circulación de transferencia: cierra el vapor | FI-211 < 300 (10 s) | TIC-212 → 0 % |
+| I-06 | Temperatura de soplado muy alta: detiene el soplado | TI-604 > 98 (60 s) | LIC-302 → 0 % |
+| I-07 | Corriente muy alta del raspador del digestor: detiene soplado y alimentación | II-307 > 350 (5 s) | LIC-302 → 0 %; WIC-101 → 0 % |
+| I-08 | Estanque de soplado lleno: detiene el soplado | LI-606 > 95 (10 s) | LIC-302 → 0 % |
+| I-09 | Protección de la bomba de circulación superior (ΔP de mallas muy alta) | PDI-524 > 0.95 (60 s) | bomba bomba_circ_sup detener; TIC-402 → 0 % |
+| I-10 | Protección de la bomba de circulación inferior (ΔP de mallas muy alta) | PDI-526 > 0.95 (60 s) | bomba bomba_circ_inf detener; TIC-404 → 0 % |
+
+### Alarmas configuradas
+
+Además se generan solas una alarma de prioridad 1 por cada enclavamiento
+disparado y una de prioridad 3 por cada transmisor con señal fuera de rango.
+Supresión del grupo "proceso" con WI-101 < 20 durante 600 s.
+
+| Id | Mensaje | Fuente | Tipo y límite | Banda | Retardo s | Prioridad | Grupo |
+|----|---------|--------|---------------|-------|-----------|-----------|-------|
+| PI-301-AA | Presión del digestor muy alta | PI-301 | alta 8 | 0.2 | 2 | 1 | seguridad |
+| PI-301-A | Presión del digestor alta | PI-301 | alta 7 | 0.2 | 5 | 2 | seguridad |
+| PI-301-B | Presión del digestor baja: riesgo de vaporización | PI-301 | baja 4 | 0.2 | 5 | 2 | seguridad |
+| PI-201-A | Presión del impregnador alta | PI-201 | alta 7 | 0.2 | 5 | 2 | seguridad |
+| PI-201-B | Presión del impregnador baja | PI-201 | baja 3.5 | 0.2 | 10 | 3 | proceso |
+| LI-302-A | Nivel de astillas del digestor alto | LI-302 | alta 55.5 | 0.3 | 30 | 2 | proceso |
+| LI-302-B | Nivel de astillas del digestor bajo | LI-302 | baja 45 | 0.3 | 30 | 2 | proceso |
+| LI-202-A | Nivel de astillas del impregnador alto | LI-202 | alta 22.5 | 0.2 | 30 | 3 | proceso |
+| LI-202-B | Nivel de astillas del impregnador bajo | LI-202 | baja 18 | 0.2 | 30 | 3 | proceso |
+| TI-304-B | Temperatura de cocción superior baja | TI-304 | baja 144 | 0.5 | 120 | 3 | proceso |
+| TI-304-A | Temperatura de cocción superior alta | TI-304 | alta 153 | 0.5 | 120 | 3 | proceso |
+| TI-305-B | Temperatura de cocción inferior baja | TI-305 | baja 147 | 0.5 | 120 | 3 | proceso |
+| TI-305-A | Temperatura de cocción inferior alta | TI-305 | alta 156 | 0.5 | 120 | 3 | proceso |
+| TI-604-A | Temperatura de soplado alta | TI-604 | alta 92 | 1 | 60 | 2 | proceso |
+| AI-504-B | Álcali residual bajo en la extracción principal | AI-504 | baja 4 | 0.3 | 0 | 2 | proceso |
+| AI-505-B | Álcali residual bajo en la extracción final | AI-505 | baja 4 | 0.3 | 0 | 2 | proceso |
+| AI-701-A | Kappa alto en el soplado | AI-701 | alta 19 | 0.3 | 0 | 3 | proceso |
+| AI-701-B | Kappa bajo en el soplado | AI-701 | baja 15 | 0.3 | 0 | 3 | proceso |
+| CI-605-A | Consistencia de soplado alta | CI-605 | alta 12 | 0.3 | 60 | 4 | proceso |
+| CI-605-B | Consistencia de soplado baja | CI-605 | baja 6 | 0.3 | 60 | 4 | proceso |
+| LI-510-A | Nivel alto en el ciclón flash 1 | LI-510 | alta 85 | 2 | 10 | 3 | equipo |
+| LI-511-A | Nivel alto en el ciclón flash 2 | LI-511 | alta 85 | 2 | 10 | 3 | equipo |
+| LI-606-A | Nivel alto en el estanque de soplado | LI-606 | alta 85 | 2 | 10 | 2 | equipo |
+| LI-606-B | Nivel bajo en el estanque de soplado | LI-606 | baja 10 | 2 | 30 | 4 | equipo |
+| LI-102-B | Nivel bajo en el silo de astillas | LI-102 | baja 20 | 2 | 30 | 3 | equipo |
+| WI-104-A | Astillas acumulándose en el tubo de astillas | WI-104 | alta 2 | 0.5 | 10 | 2 | equipo |
+| PDI-524-A | ΔP alta en las mallas de circulación superior | PDI-524 | alta 0.8 | 0.05 | 60 | 3 | equipo |
+| PDI-525-A | ΔP alta en las mallas de extracción principal | PDI-525 | alta 0.8 | 0.05 | 60 | 3 | equipo |
+| PDI-526-A | ΔP alta en las mallas de circulación inferior | PDI-526 | alta 0.8 | 0.05 | 60 | 3 | equipo |
+| PDI-527-A | ΔP alta en las mallas de extracción final | PDI-527 | alta 0.8 | 0.05 | 60 | 3 | equipo |
+| II-307-A | Corriente alta del raspador del digestor | II-307 | alta 300 | 10 | 10 | 2 | equipo |
+| II-205-A | Corriente alta del raspador del impregnador | II-205 | alta 220 | 10 | 10 | 3 | equipo |
+| FI-401-B | Caudal bajo en la circulación superior | FI-401 | baja 600 | 20 | 10 | 2 | proceso |
+| FI-403-B | Caudal bajo en la circulación inferior | FI-403 | baja 600 | 20 | 10 | 2 | proceso |
+| FI-211-B | Caudal bajo en la circulación de transferencia | FI-211 | baja 600 | 20 | 10 | 2 | proceso |
+| TIC-402-D | El calentador superior no alcanza su consigna | lazo:TIC-402 | desviacion 4 | 0.5 | 300 | 3 | equipo |
+| TIC-404-D | El calentador inferior no alcanza su consigna | lazo:TIC-404 | desviacion 4 | 0.5 | 300 | 3 | equipo |
+| TIC-212-D | El calentador de transferencia no alcanza su consigna | lazo:TIC-212 | desviacion 4 | 0.5 | 300 | 3 | equipo |
+| EV-apertura_alivio | Abrió la válvula de alivio | evento:apertura_alivio | evento  | 0 | 0 | 1 | seguridad |
+| EV-apertura_seguridad | Abrió la válvula de seguridad | evento:apertura_seguridad | evento  | 0 | 0 | 1 | seguridad |
+| EV-vaporizacion_subita | Vaporización súbita en el vaso | evento:vaporizacion_subita | evento  | 0 | 0 | 1 | seguridad |
+| EV-caida_columna | Caída de la columna de astillas | evento:caida_columna | evento  | 0 | 0 | 2 | equipo |
+| EV-detencion_bomba | Bomba detenida | evento:detencion_bomba | evento  | 0 | 0 | 3 | equipo |

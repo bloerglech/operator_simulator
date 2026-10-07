@@ -15,7 +15,7 @@ simulador, para que describa lo que realmente está implementado.
 | [3. Transporte, hidráulica y energía](03-transporte-hidraulica-energia.md) | Modelo de la columna, del licor y del calor; métodos numéricos | Fase 1a |
 | [4. Cinética de cocción y calibración](04-cinetica-y-calibracion.md) | Deslignificación, carbohidratos, HexA, viscosidad, álcali, impregnación, calibración | Fase 1b |
 | [5. Presión, equipos y estados de operación](05-presion-equipos-estados.md) | Presión del vaso hidráulico, válvulas y seguridad, calentadores, flash, silo, mallas, compactación, colgamiento | Fase 1c |
-| 6. Control, enclavamientos y alarmas | Lazos PID, tiempos muertos, control avanzado | Fase 2 (pendiente) |
+| [6. Control, enclavamientos y alarmas](06-control-enclavamientos-alarmas.md) | Instrumentos, PID, sintonía, cascadas y relaciones, control avanzado, enclavamientos, alarmas | Fase 2 |
 | 7. Operación y perturbaciones | Respuesta a eventos, procedimientos | Fases 5–6 (pendiente) |
 | [Anexo A. Tabla de parámetros](anexo-a-parametros.md) | Valor, unidad, origen y fuente de cada parámetro (generado) | Se completa en cada fase |
 | [Anexo B. Referencias](anexo-b-referencias.md) | Bibliografía, con el estado de verificación de cada dato | Se completa en cada fase |

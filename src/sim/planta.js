@@ -24,11 +24,28 @@ import { pasoMalla } from './mallas.js'
 
 const copiar = (x) => JSON.parse(JSON.stringify(x))
 
+/**
+ * opciones: { semilla, modo: 'operacion' | 'vacio', extension }
+ * `extension` es una fábrica (config) => { inicializar, pasoRapido, maneja,
+ * validar, comando, instantanea } que agrega capas sobre el proceso (el
+ * control, en src/control) sin que el simulador dependa de ellas. Corre en
+ * cada paso rápido, antes de los equipos, y guarda su estado en estado.control.
+ */
 export function crearPlanta(config, opciones = {}) {
   let modelo = construirModelo(config)
   let estado = crearEstadoInicial(modelo, opciones)
   let cola = [] // comandos pendientes
   let pendiente = 0 // segundos solicitados aún no simulados
+  let ext = opciones.extension ? opciones.extension(modelo.config) : null
+  const ctx = () => ({
+    modelo,
+    estado,
+    dt: modelo.dtR,
+    aplicar: (cmd) => aplicarComando(modelo, estado, cmd, true),
+    validar: (cmd) => validarComando(modelo, estado, cmd),
+    evento: (tipo, datos) => registrarEvento(modelo, estado, tipo, datos),
+  })
+  if (ext) ext.inicializar(ctx())
 
   function avanzar(segundos) {
     pendiente += segundos
@@ -40,23 +57,34 @@ export function crearPlanta(config, opciones = {}) {
 
   function pasoRapido() {
     if (cola.length > 0) {
-      for (const cmd of cola) aplicarComando(modelo, estado, cmd)
+      for (const cmd of cola) {
+        if (ext?.maneja(cmd)) {
+          ext.comando(ctx(), cmd)
+          estado.registro.push({ paso: estado.paso, ...cmd })
+        } else aplicarComando(modelo, estado, cmd)
+      }
       cola = []
     }
+    if (ext) ext.pasoRapido(ctx())
     pasoRapidoEquipos(modelo, estado, modelo.dtR)
     estado.paso += 1
     if (estado.paso % modelo.pasosPorLento === 0) pasoLento(modelo, estado)
   }
 
   function enviarComando(cmd) {
-    validarComando(modelo, estado, cmd)
+    if (ext?.maneja(cmd)) ext.validar(ctx(), cmd)
+    else validarComando(modelo, estado, cmd)
     cola.push(copiar(cmd))
   }
 
   return {
     avanzar,
     enviarComando,
-    leerEstado: (op) => instantanea(modelo, estado, op),
+    leerEstado: (op) => {
+      const s = instantanea(modelo, estado, op)
+      if (ext) s.control = ext.instantanea(ctx(), op)
+      return s
+    },
     balances: () => cierreBalances(modelo, estado),
     tiempo: () => estado.paso * modelo.dtR,
     guardar: () => copiar({ formato: 'simulador-digestor', version: 1, config: modelo.config, estado, cola, pendiente }),
@@ -67,6 +95,10 @@ export function crearPlanta(config, opciones = {}) {
       estado = datos.estado
       cola = datos.cola ?? []
       pendiente = datos.pendiente ?? 0
+      if (opciones.extension) {
+        ext = opciones.extension(modelo.config)
+        if (!estado.control) ext.inicializar(ctx())
+      }
     },
     /** Acceso de solo lectura al modelo (geometría, corrientes) para herramientas y pruebas. */
     modelo: () => modelo,
@@ -88,6 +120,8 @@ const CAMPOS_CORRIENTE = ['caudal', 'caudalMadera', 'T_salida', 'velocidad']
  *   { tipo: 'bomba', id, accion: 'partir' | 'detener' }
  *   { tipo: 'venteo', id: vaso, accion: 'abrir' | 'cerrar' }
  *   { tipo: 'calentador', id, accion: 'conmutar' | 'lavado_acido' }  (unidad de respaldo; limpieza)
+ *   { tipo: 'calentador', id, accion: 'vapor', valor }  (apertura de la válvula de vapor 0–1; null = consigna ideal)
+ *   { tipo: 'flash', id, valor }  (caudal de salida m³/s; null = control de nivel ideal)
  *   { tipo: 'servicio', id, valor }  (presionVaporMP, presionVaporBP, vaporBPMax, limiteEvaporadores,
  *                                     transportadorSilo, lavado, Tpatio, vaporFlashSilo — también perturbaciones)
  *   { tipo: 'mallas', id, accion: 'retrolavar' | 'conmutacion_on' | 'conmutacion_off' | 'lavado_acido' }
@@ -125,7 +159,11 @@ function validarComando(modelo, estado, cmd) {
     if (!['abrir', 'cerrar'].includes(cmd.accion)) throw new Error('Acción de venteo: abrir o cerrar')
   } else if (cmd.tipo === 'calentador') {
     if (!modelo.equipos.calentadores[cmd.id]) throw new Error(`Calentador desconocido: ${cmd.id}`)
-    if (!['conmutar', 'lavado_acido'].includes(cmd.accion)) throw new Error('Acción de calentador: conmutar o lavado_acido')
+    if (!['conmutar', 'lavado_acido', 'vapor'].includes(cmd.accion)) throw new Error('Acción de calentador: conmutar, lavado_acido o vapor')
+    if (cmd.accion === 'vapor' && cmd.valor !== null) numero()
+  } else if (cmd.tipo === 'flash') {
+    if (!modelo.equipos.flash[cmd.id]) throw new Error(`Ciclón flash desconocido: ${cmd.id}`)
+    if (cmd.valor !== null) numero()
   } else if (cmd.tipo === 'servicio') {
     if (!(cmd.id in estado.servicios)) throw new Error(`Servicio desconocido: ${cmd.id}`)
     numero()
@@ -142,7 +180,7 @@ function validarComando(modelo, estado, cmd) {
   } else throw new Error(`Comando desconocido: ${cmd.tipo}`)
 }
 
-function aplicarComando(modelo, estado, cmd) {
+function aplicarComando(modelo, estado, cmd, interno = false) {
   if (cmd.tipo === 'ajustar') {
     const v = cmd.campo === 'T_salida' ? cmd.valor : Math.max(0, cmd.valor)
     if (cmd.campo === 'caudalMadera' && estado.ajustes[cmd.id].velocidad !== undefined) {
@@ -151,9 +189,14 @@ function aplicarComando(modelo, estado, cmd) {
     estado.ajustes[cmd.id][cmd.campo] = v
   } else if (cmd.tipo === 'calentador') {
     const c = estado.equipos.calentadores[cmd.id]
-    if (cmd.accion === 'conmutar') c.activo = 1 - c.activo
-    else c.incrustacion[c.activo] = 0
-    registrarEvento(modelo, estado, cmd.accion === 'conmutar' ? 'conmutacion_calentador' : 'lavado_acido', { equipo: cmd.id })
+    if (cmd.accion === 'vapor') c.aperturaVapor = cmd.valor === null ? null : Math.min(1, Math.max(0, cmd.valor))
+    else {
+      if (cmd.accion === 'conmutar') c.activo = 1 - c.activo
+      else c.incrustacion[c.activo] = 0
+      registrarEvento(modelo, estado, cmd.accion === 'conmutar' ? 'conmutacion_calentador' : 'lavado_acido', { equipo: cmd.id })
+    }
+  } else if (cmd.tipo === 'flash') {
+    estado.equipos.flash[cmd.id].salidaConsigna = cmd.valor === null ? null : Math.max(0, cmd.valor)
   } else if (cmd.tipo === 'servicio') {
     estado.servicios[cmd.id] = cmd.valor
   } else if (cmd.tipo === 'mallas') {
@@ -179,6 +222,7 @@ function aplicarComando(modelo, estado, cmd) {
   } else if (cmd.tipo === 'valvula') {
     estado.valvulas[cmd.id].comando = Math.min(1, Math.max(0, cmd.valor))
   } else if (cmd.tipo === 'bomba') {
+    if (estado.bombas[cmd.id].marcha === (cmd.accion === 'partir')) return
     estado.bombas[cmd.id].marcha = cmd.accion === 'partir'
     registrarEvento(modelo, estado, cmd.accion === 'partir' ? 'partida_bomba' : 'detencion_bomba', { equipo: cmd.id })
   } else if (cmd.tipo === 'venteo') {
@@ -186,7 +230,7 @@ function aplicarComando(modelo, estado, cmd) {
     pr.venteo = cmd.accion === 'abrir'
     if (!pr.venteo) pr.Pref = pr.P // al cerrar, el vaso queda a la presión del momento
   }
-  estado.registro.push({ paso: estado.paso, ...cmd })
+  if (!interno) estado.registro.push({ paso: estado.paso, ...cmd })
 }
 
 // ---------------------------------------------------------------------------

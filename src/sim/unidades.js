@@ -78,6 +78,7 @@ const UNIDADES = {
   'mmol/kg': { f: 1e-3 },
   'L/g': { f: 1 }, // inverso de g/L (= m³/kg)
   'mL/g': { f: 1 }, // viscosidad intrínseca
+  'A': { f: 1 }, // corriente eléctrica
 }
 
 /** Lista de unidades reconocidas (para el validador y la documentación). */

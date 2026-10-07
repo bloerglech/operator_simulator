@@ -1,0 +1,842 @@
+{
+ "_descripcion": "Lazos de control. Kc adimensional (% de salida por % de PV), Ti y Td en s. accion: directa (la salida sube si el PV sube) o inversa. sp: valor en la unidad del PV o \"pv\" (toma el valor actual). modo inicial: AUTO, MAN o CAS (consigna desde el maestro). Sintonías: supuesto, verificadas con pruebas de escalón. maestros: lista de maestros posibles de un esclavo (el operador elige uno; \"maestro\" es el inicial). prueba: escalón de consigna para npm run sintonia (escalon en la unidad del PV, duracion y asentamiento_max en s, sobrepaso_max en %, banda absoluta y promedio en s opcionales, preparar: comandos previos).",
+ "lazos": [
+  {
+   "tag": "WIC-101",
+   "descripcion": "Ritmo de producción: caudal de astillas (velocidad del medidor)",
+   "pv": "WI-101",
+   "salida": {
+    "tipo": "medidor",
+    "unidad": "rpm",
+    "min": 0,
+    "max": 25
+   },
+   "Kc": 0.3,
+   "Ti": 8,
+   "Td": 0,
+   "accion": "inversa",
+   "sp": "pv",
+   "modo": "AUTO",
+   "prueba": {
+    "escalon": -10,
+    "duracion": 600,
+    "asentamiento_max": 120,
+    "sobrepaso_max": 20
+   }
+  },
+  {
+   "tag": "LIC-102",
+   "descripcion": "Nivel del silo de astillas (transportador)",
+   "pv": "LI-102",
+   "salida": {
+    "tipo": "servicio",
+    "id": "transportadorSilo",
+    "unidad": "t/h",
+    "min": 0,
+    "max": 400
+   },
+   "Kc": 3,
+   "Ti": 900,
+   "Td": 0,
+   "accion": "inversa",
+   "sp": "pv",
+   "modo": "AUTO",
+   "prueba": {
+    "escalon": -5,
+    "duracion": 10800,
+    "asentamiento_max": 7200,
+    "sobrepaso_max": 30,
+    "promedio": 300
+   }
+  },
+  {
+   "tag": "FIC-111",
+   "descripcion": "Licor blanco a la alimentación",
+   "pv": "FI-111",
+   "salida": {
+    "tipo": "caudal",
+    "corriente": "lb_alim",
+    "unidad": "m3/h",
+    "min": 0,
+    "max": 400
+   },
+   "Kc": 0.3,
+   "Ti": 4,
+   "Td": 0,
+   "accion": "inversa",
+   "sp": "pv",
+   "modo": "CAS",
+   "maestro": "FFC-110",
+   "prueba": {
+    "escalon": 20,
+    "duracion": 600,
+    "asentamiento_max": 120,
+    "sobrepaso_max": 20
+   }
+  },
+  {
+   "tag": "FIC-112",
+   "descripcion": "Licor blanco a la transferencia",
+   "pv": "FI-112",
+   "salida": {
+    "tipo": "caudal",
+    "corriente": "lb_transf",
+    "unidad": "m3/h",
+    "min": 0,
+    "max": 100
+   },
+   "Kc": 0.3,
+   "Ti": 4,
+   "Td": 0,
+   "accion": "inversa",
+   "sp": "pv",
+   "modo": "CAS",
+   "maestro": "FFC-110",
+   "prueba": {
+    "escalon": 5,
+    "duracion": 600,
+    "asentamiento_max": 120,
+    "sobrepaso_max": 20
+   }
+  },
+  {
+   "tag": "FIC-113",
+   "descripcion": "Licor blanco a la circulación superior",
+   "pv": "FI-113",
+   "salida": {
+    "tipo": "caudal",
+    "corriente": "lb_sup",
+    "unidad": "m3/h",
+    "min": 0,
+    "max": 200
+   },
+   "Kc": 0.3,
+   "Ti": 4,
+   "Td": 0,
+   "accion": "inversa",
+   "sp": "pv",
+   "modo": "CAS",
+   "maestro": "FFC-110",
+   "prueba": {
+    "escalon": 10,
+    "duracion": 600,
+    "asentamiento_max": 120,
+    "sobrepaso_max": 20
+   }
+  },
+  {
+   "tag": "FIC-114",
+   "descripcion": "Licor blanco a la circulación inferior",
+   "pv": "FI-114",
+   "salida": {
+    "tipo": "caudal",
+    "corriente": "lb_inf",
+    "unidad": "m3/h",
+    "min": 0,
+    "max": 200
+   },
+   "Kc": 0.3,
+   "Ti": 4,
+   "Td": 0,
+   "accion": "inversa",
+   "sp": "pv",
+   "modo": "CAS",
+   "maestro": "FFC-110",
+   "prueba": {
+    "escalon": 10,
+    "duracion": 600,
+    "asentamiento_max": 120,
+    "sobrepaso_max": 20
+   }
+  },
+  {
+   "tag": "FIC-115",
+   "descripcion": "Licor negro a la impregnación",
+   "pv": "FI-115",
+   "salida": {
+    "tipo": "caudal",
+    "corriente": "licor_imp",
+    "unidad": "m3/h",
+    "min": 0,
+    "max": 500
+   },
+   "Kc": 0.3,
+   "Ti": 4,
+   "Td": 0,
+   "accion": "inversa",
+   "sp": "pv",
+   "modo": "CAS",
+   "maestro": "FFC-117",
+   "prueba": {
+    "escalon": 20,
+    "duracion": 600,
+    "asentamiento_max": 120,
+    "sobrepaso_max": 20
+   }
+  },
+  {
+   "tag": "FIC-116",
+   "descripcion": "Circulación de tope del impregnador",
+   "pv": "FI-116",
+   "salida": {
+    "tipo": "caudal",
+    "corriente": "circ_tope_imp",
+    "unidad": "m3/h",
+    "min": 0,
+    "max": 500
+   },
+   "Kc": 0.3,
+   "Ti": 4,
+   "Td": 0,
+   "accion": "inversa",
+   "sp": "pv",
+   "modo": "AUTO",
+   "escala_ritmo": true,
+   "prueba": {
+    "escalon": 20,
+    "duracion": 600,
+    "asentamiento_max": 120,
+    "sobrepaso_max": 20
+   }
+  },
+  {
+   "tag": "PIC-201",
+   "descripcion": "Presión del impregnador (exceso del separador)",
+   "pv": "PI-201",
+   "salida": {
+    "tipo": "valvula",
+    "id": "imp_exceso",
+    "unidad": "%",
+    "min": 0,
+    "max": 100
+   },
+   "Kc": 2,
+   "Ti": 40,
+   "Td": 0,
+   "accion": "directa",
+   "sp": 6.0,
+   "modo": "AUTO",
+   "prueba": {
+    "escalon": -0.3,
+    "duracion": 1800,
+    "asentamiento_max": 900,
+    "sobrepaso_max": 30,
+    "banda": 0.06,
+    "promedio": 120
+   }
+  },
+  {
+   "tag": "LIC-202",
+   "descripcion": "Nivel de astillas del impregnador (transferencia)",
+   "pv": "LI-202",
+   "salida": {
+    "tipo": "madera",
+    "corriente": "transferencia",
+    "unidad": "t/h",
+    "min": 0,
+    "max": 400
+   },
+   "Kc": 4,
+   "Ti": 1800,
+   "Td": 0,
+   "accion": "directa",
+   "sp": 21.5,
+   "modo": "AUTO",
+   "prueba": {
+    "escalon": -0.5,
+    "duracion": 7200,
+    "asentamiento_max": 3600,
+    "sobrepaso_max": 30,
+    "banda": 0.1,
+    "promedio": 300
+   }
+  },
+  {
+   "tag": "FIC-211",
+   "descripcion": "Retorno de la circulación de transferencia",
+   "pv": "FI-211",
+   "salida": {
+    "tipo": "caudal",
+    "corriente": "retorno_transf",
+    "unidad": "m3/h",
+    "min": 0,
+    "max": 1500
+   },
+   "Kc": 0.3,
+   "Ti": 4,
+   "Td": 0,
+   "accion": "inversa",
+   "sp": "pv",
+   "modo": "AUTO",
+   "escala_ritmo": true,
+   "prueba": {
+    "escalon": 50,
+    "duracion": 600,
+    "asentamiento_max": 120,
+    "sobrepaso_max": 20
+   }
+  },
+  {
+   "tag": "TIC-212",
+   "descripcion": "Temperatura de salida del calentador de transferencia",
+   "pv": "TI-212",
+   "salida": {
+    "tipo": "vapor",
+    "calentador": "retorno_transf",
+    "unidad": "%",
+    "min": 0,
+    "max": 100
+   },
+   "Kc": 6,
+   "Ti": 60,
+   "Td": 0,
+   "accion": "inversa",
+   "sp": "pv",
+   "modo": "AUTO",
+   "prueba": {
+    "escalon": -2,
+    "duracion": 2700,
+    "asentamiento_max": 1200,
+    "sobrepaso_max": 20,
+    "banda": 0.25,
+    "promedio": 120
+   }
+  },
+  {
+   "tag": "PIC-301",
+   "descripcion": "Presión del digestor (extracción principal)",
+   "pv": "PI-301",
+   "salida": {
+    "tipo": "valvula",
+    "id": "ext_principal",
+    "unidad": "%",
+    "min": 0,
+    "max": 100
+   },
+   "Kc": 3,
+   "Ti": 30,
+   "Td": 0,
+   "accion": "directa",
+   "sp": 5.5,
+   "modo": "AUTO",
+   "prueba": {
+    "escalon": 0.3,
+    "duracion": 1800,
+    "asentamiento_max": 900,
+    "sobrepaso_max": 30,
+    "banda": 0.06,
+    "promedio": 120
+   }
+  },
+  {
+   "tag": "LIC-302",
+   "descripcion": "Nivel de astillas del digestor (soplado)",
+   "pv": "LI-302",
+   "salida": {
+    "tipo": "madera",
+    "corriente": "soplado",
+    "unidad": "t/h",
+    "min": 0,
+    "max": 400
+   },
+   "Kc": 6,
+   "Ti": 1500,
+   "Td": 0,
+   "accion": "directa",
+   "sp": "pv",
+   "modo": "AUTO",
+   "prueba": {
+    "escalon": -1,
+    "duracion": 10800,
+    "asentamiento_max": 5400,
+    "sobrepaso_max": 40,
+    "banda": 0.3,
+    "promedio": 600
+   }
+  },
+  {
+   "tag": "FIC-401",
+   "descripcion": "Circulación de cocción superior",
+   "pv": "FI-401",
+   "salida": {
+    "tipo": "caudal",
+    "corriente": "circ_sup",
+    "unidad": "m3/h",
+    "min": 0,
+    "max": 1500
+   },
+   "Kc": 0.3,
+   "Ti": 4,
+   "Td": 0,
+   "accion": "inversa",
+   "sp": "pv",
+   "modo": "AUTO",
+   "escala_ritmo": true,
+   "prueba": {
+    "escalon": 50,
+    "duracion": 600,
+    "asentamiento_max": 120,
+    "sobrepaso_max": 20
+   }
+  },
+  {
+   "tag": "TIC-402",
+   "descripcion": "Temperatura de salida del calentador superior",
+   "pv": "TI-402",
+   "salida": {
+    "tipo": "vapor",
+    "calentador": "circ_sup",
+    "unidad": "%",
+    "min": 0,
+    "max": 100
+   },
+   "Kc": 4,
+   "Ti": 60,
+   "Td": 0,
+   "accion": "inversa",
+   "sp": "pv",
+   "modo": "AUTO",
+   "prueba": {
+    "escalon": 2,
+    "duracion": 2700,
+    "asentamiento_max": 1200,
+    "sobrepaso_max": 20,
+    "banda": 0.25,
+    "promedio": 120
+   }
+  },
+  {
+   "tag": "FIC-403",
+   "descripcion": "Circulación de cocción inferior",
+   "pv": "FI-403",
+   "salida": {
+    "tipo": "caudal",
+    "corriente": "circ_inf",
+    "unidad": "m3/h",
+    "min": 0,
+    "max": 1500
+   },
+   "Kc": 0.3,
+   "Ti": 4,
+   "Td": 0,
+   "accion": "inversa",
+   "sp": "pv",
+   "modo": "AUTO",
+   "escala_ritmo": true,
+   "prueba": {
+    "escalon": 50,
+    "duracion": 600,
+    "asentamiento_max": 120,
+    "sobrepaso_max": 20
+   }
+  },
+  {
+   "tag": "TIC-404",
+   "descripcion": "Temperatura de salida del calentador inferior",
+   "pv": "TI-404",
+   "salida": {
+    "tipo": "vapor",
+    "calentador": "circ_inf",
+    "unidad": "%",
+    "min": 0,
+    "max": 100
+   },
+   "Kc": 4,
+   "Ti": 60,
+   "Td": 0,
+   "accion": "inversa",
+   "sp": "pv",
+   "modo": "AUTO",
+   "prueba": {
+    "escalon": 2,
+    "duracion": 2700,
+    "asentamiento_max": 1200,
+    "sobrepaso_max": 20,
+    "banda": 0.25,
+    "promedio": 120
+   }
+  },
+  {
+   "tag": "FIC-405",
+   "descripcion": "Filtrado a la circulación superior",
+   "pv": "FI-405",
+   "salida": {
+    "tipo": "caudal",
+    "corriente": "fil_sup",
+    "unidad": "m3/h",
+    "min": 0,
+    "max": 400
+   },
+   "Kc": 0.3,
+   "Ti": 4,
+   "Td": 0,
+   "accion": "inversa",
+   "sp": "pv",
+   "modo": "AUTO",
+   "escala_ritmo": true,
+   "prueba": {
+    "escalon": 15,
+    "duracion": 600,
+    "asentamiento_max": 120,
+    "sobrepaso_max": 20
+   }
+  },
+  {
+   "tag": "FIC-406",
+   "descripcion": "Filtrado a la circulación inferior",
+   "pv": "FI-406",
+   "salida": {
+    "tipo": "caudal",
+    "corriente": "fil_inf",
+    "unidad": "m3/h",
+    "min": 0,
+    "max": 400
+   },
+   "Kc": 0.3,
+   "Ti": 4,
+   "Td": 0,
+   "accion": "inversa",
+   "sp": "pv",
+   "modo": "AUTO",
+   "escala_ritmo": true,
+   "prueba": {
+    "escalon": 15,
+    "duracion": 600,
+    "asentamiento_max": 120,
+    "sobrepaso_max": 20
+   }
+  },
+  {
+   "tag": "FIC-501",
+   "descripcion": "Extracción superior",
+   "pv": "FI-501",
+   "salida": {
+    "tipo": "caudal",
+    "corriente": "ext_superior",
+    "unidad": "m3/h",
+    "min": 0,
+    "max": 300
+   },
+   "Kc": 0.3,
+   "Ti": 4,
+   "Td": 0,
+   "accion": "inversa",
+   "sp": "pv",
+   "modo": "AUTO",
+   "escala_ritmo": true,
+   "prueba": {
+    "escalon": 10,
+    "duracion": 600,
+    "asentamiento_max": 120,
+    "sobrepaso_max": 20
+   }
+  },
+  {
+   "tag": "FIC-503",
+   "descripcion": "Extracción final",
+   "pv": "FI-503",
+   "salida": {
+    "tipo": "caudal",
+    "corriente": "ext_final",
+    "unidad": "m3/h",
+    "min": 0,
+    "max": 1500
+   },
+   "Kc": 0.3,
+   "Ti": 4,
+   "Td": 0,
+   "accion": "inversa",
+   "sp": "pv",
+   "modo": "CAS",
+   "escala_ritmo": true,
+   "prueba": {
+    "escalon": 40,
+    "duracion": 600,
+    "asentamiento_max": 120,
+    "sobrepaso_max": 20
+   },
+   "maestro": "FFC-503"
+  },
+  {
+   "tag": "LIC-510",
+   "descripcion": "Nivel del ciclón flash 1",
+   "pv": "LI-510",
+   "salida": {
+    "tipo": "flash",
+    "id": "flash1",
+    "unidad": "m3/h",
+    "min": 0,
+    "max": 2500
+   },
+   "Kc": 2,
+   "Ti": 300,
+   "Td": 0,
+   "accion": "directa",
+   "sp": 50,
+   "modo": "AUTO",
+   "prueba": {
+    "escalon": -10,
+    "duracion": 3600,
+    "asentamiento_max": 1800,
+    "sobrepaso_max": 30
+   }
+  },
+  {
+   "tag": "LIC-511",
+   "descripcion": "Nivel del ciclón flash 2",
+   "pv": "LI-511",
+   "salida": {
+    "tipo": "flash",
+    "id": "flash2",
+    "unidad": "m3/h",
+    "min": 0,
+    "max": 2500
+   },
+   "Kc": 2,
+   "Ti": 300,
+   "Td": 0,
+   "accion": "directa",
+   "sp": 50,
+   "modo": "AUTO",
+   "prueba": {
+    "escalon": -10,
+    "duracion": 3600,
+    "asentamiento_max": 1800,
+    "sobrepaso_max": 30
+   }
+  },
+  {
+   "tag": "FIC-601",
+   "descripcion": "Filtrado de lavado al fondo",
+   "pv": "FI-601",
+   "salida": {
+    "tipo": "caudal",
+    "corriente": "fil_fondo",
+    "unidad": "m3/h",
+    "min": 0,
+    "max": 2000
+   },
+   "Kc": 0.3,
+   "Ti": 4,
+   "Td": 0,
+   "accion": "inversa",
+   "sp": "pv",
+   "modo": "CAS",
+   "maestro": "FDC-607",
+   "escala_ritmo": true,
+   "prueba": {
+    "escalon": 60,
+    "duracion": 600,
+    "asentamiento_max": 120,
+    "sobrepaso_max": 20
+   },
+   "maestros": [
+    "FDC-607",
+    "TIC-604"
+   ]
+  },
+  {
+   "tag": "FIC-602",
+   "descripcion": "Dilución del fondo",
+   "pv": "FI-602",
+   "salida": {
+    "tipo": "caudal",
+    "corriente": "dilucion",
+    "unidad": "m3/h",
+    "min": 0,
+    "max": 500
+   },
+   "Kc": 0.3,
+   "Ti": 4,
+   "Td": 0,
+   "accion": "inversa",
+   "sp": "pv",
+   "modo": "CAS",
+   "maestro": "FFC-602",
+   "escala_ritmo": true,
+   "prueba": {
+    "escalon": 15,
+    "duracion": 600,
+    "asentamiento_max": 120,
+    "sobrepaso_max": 20
+   }
+  },
+  {
+   "tag": "CIC-605",
+   "descripcion": "Consistencia de soplado (licor de la lechada de soplado; la dilución lo sigue)",
+   "pv": "CI-605",
+   "salida": {
+    "tipo": "caudal",
+    "corriente": "soplado",
+    "unidad": "m3/h",
+    "min": 0,
+    "max": 1500
+   },
+   "Kc": 1.0,
+   "Ti": 300,
+   "Td": 0,
+   "accion": "directa",
+   "sp": "pv",
+   "modo": "AUTO",
+   "prueba": {
+    "escalon": -0.5,
+    "duracion": 3600,
+    "asentamiento_max": 1800,
+    "sobrepaso_max": 30,
+    "banda": 0.15,
+    "promedio": 600
+   }
+  },
+  {
+   "tag": "TIC-604",
+   "descripcion": "Temperatura de soplado (maestro alternativo del filtrado de lavado)",
+   "pv": "TI-604",
+   "salida": {
+    "tipo": "lazo",
+    "id": "FIC-601"
+   },
+   "Kc": 4,
+   "Ti": 1200,
+   "Td": 0,
+   "accion": "directa",
+   "sp": "pv",
+   "modo": "MAN",
+   "prueba": {
+    "escalon": 2,
+    "duracion": 10800,
+    "asentamiento_max": 7200,
+    "sobrepaso_max": 40,
+    "banda": 0.6,
+    "promedio": 600,
+    "preparar": [
+     {
+      "tipo": "lazo",
+      "id": "FIC-601",
+      "accion": "maestro",
+      "valor": "TIC-604"
+     },
+     {
+      "tipo": "lazo",
+      "id": "TIC-604",
+      "accion": "modo",
+      "valor": "AUTO"
+     }
+    ]
+   }
+  },
+  {
+   "tag": "FDC-607",
+   "descripcion": "Factor de dilución (filtrado de lavado)",
+   "pv": "FD-607",
+   "salida": {
+    "tipo": "lazo",
+    "id": "FIC-601"
+   },
+   "Kc": 1.0,
+   "Ti": 300,
+   "Td": 0,
+   "accion": "inversa",
+   "sp": "pv",
+   "modo": "AUTO",
+   "prueba": {
+    "escalon": 0.3,
+    "duracion": 7200,
+    "asentamiento_max": 3600,
+    "sobrepaso_max": 30,
+    "banda": 0.05,
+    "promedio": 300
+   }
+  }
+ ],
+ "bloques": [
+  {
+   "tag": "FFC-110",
+   "tipo": "carga_alcali",
+   "descripcion": "Carga de álcali (razón sobre madera) y reparto del licor blanco",
+   "activo": true,
+   "parametros": {
+    "carga": 18,
+    "EA_licor_blanco": 117.5,
+    "reparto": {
+     "FIC-111": 50,
+     "FIC-112": 10,
+     "FIC-113": 20,
+     "FIC-114": 20
+    }
+   },
+   "nota": "carga en % como NaOH sobre madera seca; EA en g/L (se actualiza con el laboratorio)"
+  },
+  {
+   "tag": "FFC-117",
+   "tipo": "licor_madera",
+   "descripcion": "Relación licor/madera en la alimentación (licor negro)",
+   "activo": true,
+   "parametros": {
+    "relacion": 4.0,
+    "humedad": 47.5
+   },
+   "nota": "relación en m³/t; humedad en % (se actualiza con el laboratorio)"
+  },
+  {
+   "tag": "FFC-503",
+   "tipo": "seguimiento",
+   "descripcion": "Coordinación del lavado: la extracción final sigue los cambios del filtrado de lavado",
+   "activo": true,
+   "parametros": {
+    "fuente": "lazo:FIC-601",
+    "esclavo": "FIC-503",
+    "ganancia": 1
+   }
+  },
+  {
+   "tag": "FFC-602",
+   "descripcion": "Coordinación del fondo: la dilución sigue los cambios del licor de soplado",
+   "tipo": "seguimiento",
+   "activo": true,
+   "parametros": {
+    "fuente": "corriente:soplado",
+    "esclavo": "FIC-602",
+    "ganancia": 1
+   }
+  },
+  {
+   "tag": "RC-700",
+   "tipo": "ritmo",
+   "descripcion": "Coordinación de cambios de ritmo (control avanzado)",
+   "activo": false,
+   "parametros": {
+    "produccion": 3000,
+    "rampa": 150,
+    "rendimiento": 53.5
+   },
+   "nota": "producción en ADt/d; rampa en ADt/d por hora"
+  },
+  {
+   "tag": "HIC-703",
+   "tipo": "factor_h",
+   "descripcion": "Control de factor H con corrección por ritmo (control avanzado)",
+   "activo": false,
+   "parametros": {
+    "objetivo": 460,
+    "tiempo_superior": 1.0,
+    "tiempo_inferior": 1.2,
+    "H_resto": 60,
+    "ganancia": 0.004,
+    "bias_max": 8
+   },
+   "nota": "tiempos de residencia a ritmo nominal en h; ganancia en °C por (unidad de H · min)"
+  },
+  {
+   "tag": "AIC-701",
+   "tipo": "kappa",
+   "descripcion": "Control de kappa con el analizador (control avanzado)",
+   "activo": false,
+   "parametros": {
+    "objetivo": 17,
+    "ganancia": 6,
+    "Ti": 10800
+   },
+   "nota": "ajusta el objetivo de H (si HIC-703 está activo) o la carga de álcali"
+  }
+ ]
+}

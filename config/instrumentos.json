@@ -1,0 +1,928 @@
+{
+ "_descripcion": "Instrumentos (formato compacto, todos supuestos): rango [mín, máx] y error en la unidad del instrumento; ruido en % del rango (desviación estándar); tau (filtro) y retardo en s; analizadores: periodo de muestreo y tiempo de análisis en s. Laboratorio: retardos en min.",
+ "transmisores": [
+  {
+   "tag": "WI-101",
+   "descripcion": "Caudal de astillas (medidor, densidad nominal)",
+   "variable": "W:medidor",
+   "unidad": "t/h",
+   "rango": [
+    0,
+    300
+   ],
+   "ruido": 0.3,
+   "tau": 2,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "SI-101",
+   "descripcion": "Velocidad del medidor de astillas",
+   "variable": "rpm:medidor",
+   "unidad": "rpm",
+   "rango": [
+    0,
+    25
+   ],
+   "ruido": 0.1,
+   "tau": 1,
+   "retardo": 0,
+   "decimales": 2
+  },
+  {
+   "tag": "LI-102",
+   "descripcion": "Nivel del silo de astillas",
+   "variable": "L:silo",
+   "unidad": "%",
+   "rango": [
+    0,
+    100
+   ],
+   "ruido": 0.5,
+   "tau": 10,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "TI-103",
+   "descripcion": "Temperatura de astillas vaporizadas",
+   "variable": "T:silo",
+   "unidad": "°C",
+   "rango": [
+    0,
+    120
+   ],
+   "ruido": 0.2,
+   "tau": 30,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "WI-104",
+   "descripcion": "Astillas acumuladas en el tubo de astillas",
+   "variable": "M:tubo",
+   "unidad": "t",
+   "rango": [
+    0,
+    30
+   ],
+   "ruido": 0.5,
+   "tau": 5,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "FI-111",
+   "descripcion": "Licor blanco a la alimentación",
+   "variable": "Q:lb_alim",
+   "unidad": "m3/h",
+   "rango": [
+    0,
+    400
+   ],
+   "ruido": 0.5,
+   "tau": 3,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "FI-112",
+   "descripcion": "Licor blanco a la transferencia",
+   "variable": "Q:lb_transf",
+   "unidad": "m3/h",
+   "rango": [
+    0,
+    100
+   ],
+   "ruido": 0.5,
+   "tau": 3,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "FI-113",
+   "descripcion": "Licor blanco a la circulación superior",
+   "variable": "Q:lb_sup",
+   "unidad": "m3/h",
+   "rango": [
+    0,
+    200
+   ],
+   "ruido": 0.5,
+   "tau": 3,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "FI-114",
+   "descripcion": "Licor blanco a la circulación inferior",
+   "variable": "Q:lb_inf",
+   "unidad": "m3/h",
+   "rango": [
+    0,
+    200
+   ],
+   "ruido": 0.5,
+   "tau": 3,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "FI-115",
+   "descripcion": "Licor negro a la impregnación",
+   "variable": "Q:licor_imp",
+   "unidad": "m3/h",
+   "rango": [
+    0,
+    500
+   ],
+   "ruido": 0.5,
+   "tau": 3,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "FI-116",
+   "descripcion": "Circulación de tope del impregnador",
+   "variable": "Q:circ_tope_imp",
+   "unidad": "m3/h",
+   "rango": [
+    0,
+    500
+   ],
+   "ruido": 0.5,
+   "tau": 3,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "LW-117",
+   "descripcion": "Relación licor/madera (calculada)",
+   "variable": "LW",
+   "unidad": "m3/t",
+   "etiqueta": "m³/t",
+   "rango": [
+    0,
+    8
+   ],
+   "ruido": 0,
+   "tau": 10,
+   "retardo": 0,
+   "decimales": 2
+  },
+  {
+   "tag": "PI-201",
+   "descripcion": "Presión del impregnador",
+   "variable": "P:imp",
+   "unidad": "bar(g)",
+   "rango": [
+    0,
+    12
+   ],
+   "ruido": 0.2,
+   "tau": 0.5,
+   "retardo": 0,
+   "decimales": 2
+  },
+  {
+   "tag": "LI-202",
+   "descripcion": "Nivel de astillas del impregnador",
+   "variable": "L:astillas:imp",
+   "unidad": "m",
+   "rango": [
+    0,
+    23
+   ],
+   "ruido": 0.5,
+   "tau": 10,
+   "retardo": 0,
+   "decimales": 2
+  },
+  {
+   "tag": "TI-203",
+   "descripcion": "Temperatura de impregnación",
+   "variable": "T:zona:imp:impregnacion",
+   "unidad": "°C",
+   "rango": [
+    0,
+    200
+   ],
+   "ruido": 0.1,
+   "tau": 20,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "FI-204",
+   "descripcion": "Exceso del separador del impregnador",
+   "variable": "Q:imp_exceso",
+   "unidad": "m3/h",
+   "rango": [
+    0,
+    500
+   ],
+   "ruido": 0.5,
+   "tau": 3,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "II-205",
+   "descripcion": "Corriente del raspador del impregnador",
+   "variable": "I:raspador:imp",
+   "unidad": "A",
+   "rango": [
+    0,
+    400
+   ],
+   "ruido": 0.5,
+   "tau": 2,
+   "retardo": 0,
+   "decimales": 0
+  },
+  {
+   "tag": "FI-211",
+   "descripcion": "Retorno de la circulación de transferencia",
+   "variable": "Q:retorno_transf",
+   "unidad": "m3/h",
+   "rango": [
+    0,
+    1500
+   ],
+   "ruido": 0.5,
+   "tau": 3,
+   "retardo": 0,
+   "decimales": 0
+  },
+  {
+   "tag": "TI-212",
+   "descripcion": "Salida del calentador de transferencia",
+   "variable": "T:calentador:retorno_transf",
+   "unidad": "°C",
+   "rango": [
+    50,
+    200
+   ],
+   "ruido": 0.1,
+   "tau": 5,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "PI-301",
+   "descripcion": "Presión del digestor (tope)",
+   "variable": "P:dig",
+   "unidad": "bar(g)",
+   "rango": [
+    0,
+    12
+   ],
+   "ruido": 0.2,
+   "tau": 0.5,
+   "retardo": 0,
+   "decimales": 2
+  },
+  {
+   "tag": "LI-302",
+   "descripcion": "Nivel de astillas del digestor",
+   "variable": "L:astillas:dig",
+   "unidad": "m",
+   "rango": [
+    0,
+    57
+   ],
+   "ruido": 0.5,
+   "tau": 10,
+   "retardo": 0,
+   "decimales": 2
+  },
+  {
+   "tag": "TI-303",
+   "descripcion": "Temperatura del tope del digestor",
+   "variable": "T:zona:dig:tope",
+   "unidad": "°C",
+   "rango": [
+    0,
+    200
+   ],
+   "ruido": 0.1,
+   "tau": 20,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "TI-304",
+   "descripcion": "Temperatura de cocción superior",
+   "variable": "T:zona:dig:coccion_superior",
+   "unidad": "°C",
+   "rango": [
+    0,
+    200
+   ],
+   "ruido": 0.1,
+   "tau": 20,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "TI-305",
+   "descripcion": "Temperatura de cocción inferior",
+   "variable": "T:zona:dig:coccion_inferior",
+   "unidad": "°C",
+   "rango": [
+    0,
+    200
+   ],
+   "ruido": 0.1,
+   "tau": 20,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "TI-306",
+   "descripcion": "Temperatura de la zona de lavado",
+   "variable": "T:zona:dig:lavado",
+   "unidad": "°C",
+   "rango": [
+    0,
+    200
+   ],
+   "ruido": 0.1,
+   "tau": 20,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "II-307",
+   "descripcion": "Corriente del raspador del digestor",
+   "variable": "I:raspador:dig",
+   "unidad": "A",
+   "rango": [
+    0,
+    500
+   ],
+   "ruido": 0.5,
+   "tau": 2,
+   "retardo": 0,
+   "decimales": 0
+  },
+  {
+   "tag": "FI-401",
+   "descripcion": "Circulación de cocción superior",
+   "variable": "Q:circ_sup",
+   "unidad": "m3/h",
+   "rango": [
+    0,
+    1500
+   ],
+   "ruido": 0.5,
+   "tau": 3,
+   "retardo": 0,
+   "decimales": 0
+  },
+  {
+   "tag": "TI-402",
+   "descripcion": "Salida del calentador superior",
+   "variable": "T:calentador:circ_sup",
+   "unidad": "°C",
+   "rango": [
+    50,
+    200
+   ],
+   "ruido": 0.1,
+   "tau": 5,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "FI-403",
+   "descripcion": "Circulación de cocción inferior",
+   "variable": "Q:circ_inf",
+   "unidad": "m3/h",
+   "rango": [
+    0,
+    1500
+   ],
+   "ruido": 0.5,
+   "tau": 3,
+   "retardo": 0,
+   "decimales": 0
+  },
+  {
+   "tag": "TI-404",
+   "descripcion": "Salida del calentador inferior",
+   "variable": "T:calentador:circ_inf",
+   "unidad": "°C",
+   "rango": [
+    50,
+    200
+   ],
+   "ruido": 0.1,
+   "tau": 5,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "FI-405",
+   "descripcion": "Filtrado a la circulación superior",
+   "variable": "Q:fil_sup",
+   "unidad": "m3/h",
+   "rango": [
+    0,
+    400
+   ],
+   "ruido": 0.5,
+   "tau": 3,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "FI-406",
+   "descripcion": "Filtrado a la circulación inferior",
+   "variable": "Q:fil_inf",
+   "unidad": "m3/h",
+   "rango": [
+    0,
+    400
+   ],
+   "ruido": 0.5,
+   "tau": 3,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "FI-410",
+   "descripcion": "Vapor de media presión a calentadores",
+   "variable": "vapor:total",
+   "unidad": "t/h",
+   "rango": [
+    0,
+    200
+   ],
+   "ruido": 0.5,
+   "tau": 5,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "FI-501",
+   "descripcion": "Extracción superior",
+   "variable": "Q:ext_superior",
+   "unidad": "m3/h",
+   "rango": [
+    0,
+    300
+   ],
+   "ruido": 0.5,
+   "tau": 3,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "FI-502",
+   "descripcion": "Extracción principal a flash",
+   "variable": "Q:ext_principal",
+   "unidad": "m3/h",
+   "rango": [
+    0,
+    500
+   ],
+   "ruido": 0.5,
+   "tau": 3,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "FI-503",
+   "descripcion": "Extracción final",
+   "variable": "Q:ext_final",
+   "unidad": "m3/h",
+   "rango": [
+    0,
+    1500
+   ],
+   "ruido": 0.5,
+   "tau": 3,
+   "retardo": 0,
+   "decimales": 0
+  },
+  {
+   "tag": "AI-504",
+   "descripcion": "Álcali efectivo en la extracción principal",
+   "variable": "EA:corriente:ext_principal",
+   "unidad": "g/L NaOH",
+   "etiqueta": "g/L",
+   "rango": [
+    0,
+    40
+   ],
+   "ruido": 0,
+   "tau": 0,
+   "retardo": 0,
+   "decimales": 1,
+   "periodo": 600,
+   "analisis": 120,
+   "error": 0.3
+  },
+  {
+   "tag": "AI-505",
+   "descripcion": "Álcali efectivo en la extracción final",
+   "variable": "EA:corriente:ext_final",
+   "unidad": "g/L NaOH",
+   "etiqueta": "g/L",
+   "rango": [
+    0,
+    40
+   ],
+   "ruido": 0,
+   "tau": 0,
+   "retardo": 0,
+   "decimales": 1,
+   "periodo": 600,
+   "analisis": 120,
+   "error": 0.3
+  },
+  {
+   "tag": "LI-510",
+   "descripcion": "Nivel del ciclón flash 1",
+   "variable": "L:flash:flash1",
+   "unidad": "%",
+   "rango": [
+    0,
+    100
+   ],
+   "ruido": 0.5,
+   "tau": 3,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "LI-511",
+   "descripcion": "Nivel del ciclón flash 2",
+   "variable": "L:flash:flash2",
+   "unidad": "%",
+   "rango": [
+    0,
+    100
+   ],
+   "ruido": 0.5,
+   "tau": 3,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "FI-512",
+   "descripcion": "Licor negro débil a evaporadores",
+   "variable": "Q:flash:flash2",
+   "unidad": "m3/h",
+   "rango": [
+    0,
+    2500
+   ],
+   "ruido": 0.5,
+   "tau": 5,
+   "retardo": 0,
+   "decimales": 0
+  },
+  {
+   "tag": "PDI-521",
+   "descripcion": "ΔP separador del impregnador",
+   "variable": "dP:malla:separador_imp",
+   "unidad": "bar",
+   "rango": [
+    0,
+    2
+   ],
+   "ruido": 0.5,
+   "tau": 5,
+   "retardo": 0,
+   "decimales": 2
+  },
+  {
+   "tag": "PDI-522",
+   "descripcion": "ΔP separador del digestor",
+   "variable": "dP:malla:separador_dig",
+   "unidad": "bar",
+   "rango": [
+    0,
+    2
+   ],
+   "ruido": 0.5,
+   "tau": 5,
+   "retardo": 0,
+   "decimales": 2
+  },
+  {
+   "tag": "PDI-523",
+   "descripcion": "ΔP mallas de extracción superior",
+   "variable": "dP:malla:mallas_superior",
+   "unidad": "bar",
+   "rango": [
+    0,
+    2
+   ],
+   "ruido": 0.5,
+   "tau": 5,
+   "retardo": 0,
+   "decimales": 2
+  },
+  {
+   "tag": "PDI-524",
+   "descripcion": "ΔP mallas de la circulación superior",
+   "variable": "dP:malla:mallas_circ_sup",
+   "unidad": "bar",
+   "rango": [
+    0,
+    2
+   ],
+   "ruido": 0.5,
+   "tau": 5,
+   "retardo": 0,
+   "decimales": 2
+  },
+  {
+   "tag": "PDI-525",
+   "descripcion": "ΔP mallas de extracción principal",
+   "variable": "dP:malla:mallas_principal",
+   "unidad": "bar",
+   "rango": [
+    0,
+    2
+   ],
+   "ruido": 0.5,
+   "tau": 5,
+   "retardo": 0,
+   "decimales": 2
+  },
+  {
+   "tag": "PDI-526",
+   "descripcion": "ΔP mallas de la circulación inferior",
+   "variable": "dP:malla:mallas_circ_inf",
+   "unidad": "bar",
+   "rango": [
+    0,
+    2
+   ],
+   "ruido": 0.5,
+   "tau": 5,
+   "retardo": 0,
+   "decimales": 2
+  },
+  {
+   "tag": "PDI-527",
+   "descripcion": "ΔP mallas de extracción final",
+   "variable": "dP:malla:mallas_final",
+   "unidad": "bar",
+   "rango": [
+    0,
+    2
+   ],
+   "ruido": 0.5,
+   "tau": 5,
+   "retardo": 0,
+   "decimales": 2
+  },
+  {
+   "tag": "FI-601",
+   "descripcion": "Filtrado de lavado al fondo",
+   "variable": "Q:fil_fondo",
+   "unidad": "m3/h",
+   "rango": [
+    0,
+    2000
+   ],
+   "ruido": 0.5,
+   "tau": 3,
+   "retardo": 0,
+   "decimales": 0
+  },
+  {
+   "tag": "FI-602",
+   "descripcion": "Dilución del fondo",
+   "variable": "Q:dilucion",
+   "unidad": "m3/h",
+   "rango": [
+    0,
+    500
+   ],
+   "ruido": 0.5,
+   "tau": 3,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "FI-603",
+   "descripcion": "Soplado (lechada)",
+   "variable": "Q:soplado",
+   "unidad": "m3/h",
+   "rango": [
+    0,
+    2000
+   ],
+   "ruido": 0.5,
+   "tau": 3,
+   "retardo": 0,
+   "decimales": 0
+  },
+  {
+   "tag": "TI-604",
+   "descripcion": "Temperatura de soplado",
+   "variable": "T:corriente:soplado",
+   "unidad": "°C",
+   "rango": [
+    0,
+    150
+   ],
+   "ruido": 0.1,
+   "tau": 10,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "CI-605",
+   "descripcion": "Consistencia de soplado",
+   "variable": "Cs:soplado",
+   "unidad": "%",
+   "rango": [
+    0,
+    20
+   ],
+   "ruido": 1,
+   "tau": 10,
+   "retardo": 0,
+   "decimales": 2
+  },
+  {
+   "tag": "LI-606",
+   "descripcion": "Nivel del estanque de soplado",
+   "variable": "L:estanque",
+   "unidad": "%",
+   "rango": [
+    0,
+    100
+   ],
+   "ruido": 0.5,
+   "tau": 10,
+   "retardo": 0,
+   "decimales": 1
+  },
+  {
+   "tag": "FD-607",
+   "descripcion": "Factor de dilución (calculado)",
+   "variable": "FD",
+   "unidad": "-",
+   "etiqueta": "m³/ADt",
+   "rango": [
+    0,
+    6
+   ],
+   "ruido": 0,
+   "tau": 60,
+   "retardo": 0,
+   "decimales": 2
+  },
+  {
+   "tag": "AI-701",
+   "descripcion": "Kappa en el soplado (analizador)",
+   "variable": "kappa:soplado",
+   "unidad": "-",
+   "etiqueta": "",
+   "rango": [
+    0,
+    100
+   ],
+   "ruido": 0,
+   "tau": 0,
+   "retardo": 0,
+   "decimales": 1,
+   "periodo": 1500,
+   "analisis": 360,
+   "error": 0.5
+  },
+  {
+   "tag": "QI-702",
+   "descripcion": "Producción (calculada)",
+   "variable": "prod",
+   "unidad": "ADt/d",
+   "rango": [
+    0,
+    4000
+   ],
+   "ruido": 0,
+   "tau": 60,
+   "retardo": 0,
+   "decimales": 0
+  },
+  {
+   "tag": "HI-703",
+   "descripcion": "Factor H en el soplado (calculado)",
+   "variable": "H:soplado",
+   "unidad": "-",
+   "etiqueta": "",
+   "rango": [
+    0,
+    1500
+   ],
+   "ruido": 0,
+   "tau": 60,
+   "retardo": 0,
+   "decimales": 0
+  }
+ ],
+ "laboratorio": {
+  "retardo_min": 20,
+  "retardo_max": 40,
+  "analisis": {
+   "kappa": {
+    "nombre": "Kappa de la pulpa",
+    "variable": "kappa:soplado",
+    "unidad": "-",
+    "etiqueta": "",
+    "error": 0.4,
+    "decimales": 1
+   },
+   "viscosidad": {
+    "nombre": "Viscosidad intrínseca",
+    "variable": "visc:soplado",
+    "unidad": "mL/g",
+    "error": 15,
+    "decimales": 0
+   },
+   "rendimiento": {
+    "nombre": "Rendimiento (estimado)",
+    "variable": "rend:soplado",
+    "unidad": "%",
+    "error": 0.5,
+    "decimales": 1
+   },
+   "rechazos": {
+    "nombre": "Rechazos",
+    "variable": "rech:soplado",
+    "unidad": "%",
+    "error": 0.05,
+    "decimales": 2
+   },
+   "alcali_ext_principal": {
+    "nombre": "Álcali residual, extracción principal",
+    "variable": "EA:corriente:ext_principal",
+    "unidad": "g/L NaOH",
+    "etiqueta": "g/L",
+    "error": 0.2,
+    "decimales": 1
+   },
+   "alcali_ext_final": {
+    "nombre": "Álcali residual, extracción final",
+    "variable": "EA:corriente:ext_final",
+    "unidad": "g/L NaOH",
+    "etiqueta": "g/L",
+    "error": 0.2,
+    "decimales": 1
+   },
+   "alcali_soplado": {
+    "nombre": "Álcali residual, soplado",
+    "variable": "EA:corriente:soplado",
+    "unidad": "g/L NaOH",
+    "etiqueta": "g/L",
+    "error": 0.2,
+    "decimales": 1
+   },
+   "humedad_astillas": {
+    "nombre": "Humedad de astillas",
+    "variable": "humedad:astillas",
+    "unidad": "%",
+    "error": 0.8,
+    "decimales": 1
+   },
+   "densidad_astillas": {
+    "nombre": "Densidad básica de astillas",
+    "variable": "densidad:astillas",
+    "unidad": "kg/m3",
+    "etiqueta": "kg/m³",
+    "error": 8,
+    "decimales": 0
+   },
+   "finos_astillas": {
+    "nombre": "Finos en astillas (granulometría)",
+    "variable": "finos:astillas",
+    "unidad": "%",
+    "error": 0.4,
+    "decimales": 1
+   },
+   "licor_blanco_EA": {
+    "nombre": "Álcali efectivo del licor blanco",
+    "variable": "EAfuente:licor_blanco",
+    "unidad": "g/L NaOH",
+    "etiqueta": "g/L",
+    "error": 1.0,
+    "decimales": 1
+   },
+   "licor_blanco_sulfidez": {
+    "nombre": "Sulfidez del licor blanco",
+    "variable": "Sfuente:licor_blanco",
+    "unidad": "%",
+    "error": 0.8,
+    "decimales": 1
+   }
+  }
+ }
+}

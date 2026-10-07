@@ -11,7 +11,8 @@ import { factorMalla, resistencia } from './mallas.js'
 /** Registra un evento (incidente u operación) con el tiempo simulado. */
 export function registrarEvento(modelo, estado, tipo, datos = {}) {
   const t = estado.paso * modelo.dtR
-  estado.eventos.push({ t, tipo, ...datos })
+  estado.nEventos = (estado.nEventos ?? 0) + 1 // contador monótono (la lista se recorta)
+  estado.eventos.push({ n: estado.nEventos, t, tipo, ...datos })
   estado.incidentes[tipo] = (estado.incidentes[tipo] ?? 0) + 1
   if (estado.eventos.length > 500) estado.eventos.splice(0, estado.eventos.length - 500)
 }

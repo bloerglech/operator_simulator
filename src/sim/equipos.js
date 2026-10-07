@@ -39,6 +39,7 @@ export function construirEquipos(config) {
     const r = `equipos.calentadores.${id}`
     calentadores[id] = {
       UA: p(c, 'UA_limpio', `${r}.UA_limpio`),
+      Qvalvula: p(c, 'Q_valvula', `${r}.Q_valvula`),
       tasa: p(c, 'incrustacion', `${r}.incrustacion`),
       E: p(c, 'E_incrustacion', `${r}.E_incrustacion`),
     }
@@ -100,13 +101,14 @@ export function estadoEquiposInicial(modelo, { modo, fuentes, ajustes, licorTipi
       lleno: false,
       vapor: 0,
       salida: 0,
+      salidaConsigna: null, // m³/s si el control de nivel (Fase 2) maneja la salida
     }
   }
   const estanque = paqueteVacio(nEsp)
   if (operando) estanque.licor = { v: eq.estanque.V * eq.estanque.nivelInicial, T: 75, c: licorTipico.c.map((x) => x * 0.5) }
   const calentadores = {}
   for (const id of Object.keys(eq.calentadores)) {
-    calentadores[id] = { incrustacion: [0, 0], activo: 0, Q: 0, vapor: 0, Tmax: 0, saturado: false }
+    calentadores[id] = { incrustacion: [0, 0], activo: 0, Q: 0, vapor: 0, Tmax: 0, saturado: false, aperturaVapor: null, Tsalida: 0 }
   }
   return {
     estado: {
@@ -272,13 +274,19 @@ export function calentar(modelo, estado, id, licor, Tconsigna, dt) {
   const f = ec.incrustacion[ec.activo]
   const UA = cfg.UA / (1 + f)
   const Tmax = Ts - (Ts - licor.T) * Math.exp(-UA / mcp)
-  const Tsal = Math.max(licor.T, Math.min(Tconsigna, Tmax))
+  // Con la válvula de vapor manejada por el control, el calor queda limitado
+  // por su apertura; sin control, se alcanza la consigna ideal.
+  const Tobjetivo = ec.aperturaVapor === null || ec.aperturaVapor === undefined
+    ? Tconsigna
+    : licor.T + (ec.aperturaVapor * cfg.Qvalvula) / mcp
+  const Tsal = Math.max(licor.T, Math.min(Tobjetivo, Tmax))
   const q = mcp * (Tsal - licor.T) * dt // kJ
   licor.T = Tsal
   ec.Q = q / dt
   ec.vapor = ec.Q / calorLatente(Ts) // kg/s
   ec.Tmax = Tmax
-  ec.saturado = Tconsigna > Tmax + 0.05
+  ec.saturado = Tobjetivo > Tmax + 0.05
+  ec.Tsalida = Tsal
   // Incrustación (CaCO₃): crece con la temperatura del licor.
   const arr = Math.exp((-cfg.E / R_GAS) * (1 / kelvin(Tsal) - 1 / kelvin(150)))
   ec.incrustacion[ec.activo] += cfg.tasa * arr * dt
@@ -333,7 +341,9 @@ export function pasoFlashYEstanque(modelo, estado, dt) {
     f.vapor = mv / dt
     // Nivel: control proporcional ideal, limitado aguas abajo.
     const Vsp = cfg.V * cfg.sp
-    let salida = Math.max(0, (li.v - Vsp) * (1 - Math.exp(-dt / cfg.tau)))
+    let salida = f.salidaConsigna === null || f.salidaConsigna === undefined
+      ? Math.max(0, (li.v - Vsp) * (1 - Math.exp(-dt / cfg.tau)))
+      : f.salidaConsigna * dt
     const destinoFlash = estado.equipos.flash[cfg.destino]
     if (destinoFlash?.lleno) salida = 0
     if (cfg.destino === 'evaporadores') salida = Math.min(salida, estado.servicios.limiteEvaporadores * dt)

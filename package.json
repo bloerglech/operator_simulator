@@ -12,7 +12,8 @@
     "caso-base": "node herramientas/caso-base.js",
     "calibrar": "node herramientas/calibrar.js",
     "tabla-parametros": "node herramientas/tabla-parametros.js",
-    "sensibilidades": "node herramientas/sensibilidades.js"
+    "sensibilidades": "node herramientas/sensibilidades.js",
+    "sintonia": "node herramientas/sintonia.js"
   },
   "devDependencies": {
     "vite": "^8.0.0",

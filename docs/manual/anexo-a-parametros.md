@@ -9,7 +9,7 @@ Orígenes (ver capítulo 1.5): `literatura` (publicación citada), `especificaci
 
 | Origen | Cantidad de parámetros |
 |--------|------------------------|
-| supuesto | 347 |
+| supuesto | 348 |
 | especificacion | 19 |
 | literatura | 3 |
 | calibrado | 14 |
@@ -146,6 +146,7 @@ Orígenes (ver capítulo 1.5): `literatura` (publicación citada), `especificaci
 | `tubo_astillas.sobrecapacidad_bombas` | 20 | % | supuesto | caudal extra para vaciar lo acumulado |
 | `estanque_soplado.volumen` | 3000 | m3 | supuesto |  |
 | `estanque_soplado.nivel_inicial` | 50 | % | supuesto |  |
+| `estanque_soplado.consistencia_descarga` | 100 | kg/m3 | supuesto | consistencia nominal de la pulpa que toma el lavado: fija el caudal volumétrico de las bombas de descarga (máximo 1,5 veces el nominal), también cuando el estanque solo tiene licor |
 | `mallas.separador_imp.dP_limpia` | 0.15 | bar | supuesto | a caudal de diseño, limpia |
 | `mallas.separador_imp.Q_diseno` | 600 | m3/h | supuesto |  |
 | `mallas.separador_imp.dP_maxima` | 0.8 | bar | supuesto | límite de succión de la bomba |
@@ -591,6 +592,7 @@ Analizadores: periodo de muestreo / tiempo de análisis (s) / error (desv. est.)
 | I-08 | Estanque de soplado lleno: detiene el soplado | LI-606 > 95 (10 s) | LIC-302 → 0 % |
 | I-09 | Protección de la bomba de circulación superior (ΔP de mallas muy alta) | PDI-524 > 0.95 (60 s) | bomba bomba_circ_sup detener; TIC-402 → 0 % |
 | I-10 | Protección de la bomba de circulación inferior (ΔP de mallas muy alta) | PDI-526 > 0.95 (60 s) | bomba bomba_circ_inf detener; TIC-404 → 0 % |
+| I-11 | Parada de alimentación por nivel de astillas muy alto en el impregnador | LI-202 > 22.8 (30 s) | WIC-101 → 0 % |
 
 ### Alarmas configuradas
 

@@ -883,6 +883,9 @@ mínimas).
 | S-44 | Indicadores del turno con valores verdaderos del proceso; la pulpa fuera de especificación se valoriza con 40 % de descuento; precios en `config/campana.json` (supuestos). |
 | S-45 | Consignas de LIC-202 (22,1 m) y PIC-201 (6,1 bar) iguales al estado estacionario sin control, para que el control no desplace el punto calibrado; las circulaciones de cocción no se escalan con el ritmo. |
 | S-46 | Colgamiento: la columna se suelta sin caer de golpe si las extracciones bajo ella (principal y final) se mantienen bajo el 60 % de su caudal al colgarse durante 5 min (supuesto que representa aflojar la compactación contra las mallas); si el hueco supera 600 m³ cae de golpe. |
+| S-47 | Estanque de soplado: el lavado toma pulpa a su tasa, con un caudal volumétrico de descarga de hasta 1,5 veces el nominal (consistencia de descarga 100 kg/m³); con solo licor en el estanque, la descarga sigue. |
+| S-48 | Alivio y seguridad descargan el licor libre más alto del vaso: si el tope está lleno de astillas, el licor llega a la válvula a través del lecho. |
+| S-49 | La coordinación de ritmo (RC-700) conserva su base al desactivarse; mientras está inactiva y hay madera la renueva con el estado actual, así al partir después de una parada escala desde un estado coherente. |
 | S-23 | Una tubería entre vasos entrega en cada paso el volumen que se le ingresó en el paso anterior (desfase de un paso lento, 5 s), lo que evita lazos algebraicos. |
 
 ## 16. Limitaciones conocidas
@@ -931,7 +934,7 @@ mínimas).
 | Instrumentos con fallas, analizadores, laboratorio | Fase 2 ✔ |
 | PID ISA, modos, actuadores, 29 lazos con pruebas de escalón | Fase 2 ✔ |
 | Bloques de relación, seguimiento, ritmo, factor H, kappa | Fase 2 ✔ |
-| Enclavamientos (10) y alarmas (43 + generadas) | Fase 2 ✔ |
+| Enclavamientos (11) y alarmas (43 + generadas) | Fase 2 ✔ (I-11 en la Fase 6) |
 | Nivel de licor del tubo de astillas | Pendiente (L-11) |
 | Eventos (27), generador aleatorio, director, indicadores del turno | Fase 5 ✔ |
 | Motor de misiones, tutorial y capítulos 1 a 3 | Fase 5 ✔ |

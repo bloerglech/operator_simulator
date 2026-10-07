@@ -333,13 +333,16 @@ function pasoLento(modelo, estado) {
   }
   // 5. Extracciones y salidas solicitadas. Las corrientes con válvula sacan lo
   //    que acumuló el paso rápido según la presión; el alivio y la seguridad
-  //    descargan desde el tope.
+  //    descargan el licor libre más alto (si el tope está lleno de astillas, el
+  //    licor llega a la válvula a través del lecho).
   for (const v of modelo.vasos) {
-    const pr = estado.vasos[v.id].presion
+    const ev = estado.vasos[v.id]
+    const pr = ev.presion
     const e = entradas[v.id]
     e.venteo = pr.venteo
-    if (pr.acumulado.alivio > 0) e.extracciones.push({ id: '__alivio', j: 0, v: pr.acumulado.alivio })
-    if (pr.acumulado.seguridad > 0) e.extracciones.push({ id: '__seguridad', j: 0, v: pr.acumulado.seguridad })
+    const jDescarga = Math.max(0, ev.vf.findIndex((x) => x > 0.01))
+    if (pr.acumulado.alivio > 0) e.extracciones.push({ id: '__alivio', j: jDescarga, v: pr.acumulado.alivio })
+    if (pr.acumulado.seguridad > 0) e.extracciones.push({ id: '__seguridad', j: jDescarga, v: pr.acumulado.seguridad })
   }
   for (const c of modelo.corrientes) {
     if (!c.origen.vaso) continue

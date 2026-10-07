@@ -361,7 +361,7 @@ eventos instructor) pero no las implementa.
   del tubo de astillas, que requiere modelar su licor: MODELO.md L-11),
   bloques de carga de álcali, relación licor/madera, seguimiento
   (lavado y dilución), coordinación de ritmo, factor H y kappa.
-- 10 enclavamientos con rearme manual y puente de instructor; 43 alarmas
+- 11 enclavamientos con rearme manual y puente de instructor; 43 alarmas
   configuradas más las generadas (enclavamiento disparado, falla de señal),
   con banda muerta, retardo, prioridad, reconocimiento, archivo temporal y
   supresión por planta detenida.

@@ -3,6 +3,7 @@
 import { describe, it, expect } from 'vitest'
 import { jugar } from './planes/jugar.js'
 import { planParadaCorta } from './planes/paradaCorta.js'
+import { planParadaGeneral } from './planes/paradaGeneral.js'
 
 describe('capítulo 4: mallas', () => {
   const MALLAS = ['mallas_circ_sup', 'mallas_circ_inf']
@@ -100,5 +101,22 @@ describe('capítulo 7: parada corta', () => {
     expect(r.resultado.exito).toBe(true)
     expect(r.resultado.resumen.incidentes.enclavamiento).toBe(0)
     expect(r.resultado.resumen.incidentes.apertura_alivio).toBe(0)
+  })
+})
+
+describe('capítulo 8: parada general', () => {
+  it('en orden, enfriando antes de despresurizar, aprueba con oro', () => {
+    const r = jugar('parada_general', planParadaGeneral(), 23)
+    expect(r.resultado.exito).toBe(true)
+    expect(r.resultado.medalla).toBe('oro')
+  })
+  it('despresurizar con el digestor caliente falla', () => {
+    const r = jugar('parada_general', {
+      5: [{ tipo: 'lazo', id: 'WIC-101', accion: 'consigna', valor: 0 }, { tipo: 'lazo', id: 'FIC-601', accion: 'modo', valor: 'AUTO' }],
+      6: [{ tipo: 'lazo', id: 'FIC-601', accion: 'consigna', valor: 0 }, { tipo: 'lazo', id: 'PIC-301', accion: 'consigna', valor: 1 }],
+      16: [{ tipo: 'venteo', id: 'dig', accion: 'abrir' }],
+    }, 2)
+    expect(r.resultado.exito).toBe(false)
+    expect(r.fallida).toMatch(/110 °C/)
   })
 })

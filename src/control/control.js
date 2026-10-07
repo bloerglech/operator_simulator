@@ -172,7 +172,9 @@ export function extensionControl(config) {
         const sb = ce.bloques[cmd.id]
         if (cmd.accion === 'activar' && !sb.activo) {
           sb.activo = true
-          sb.base = null // cada activación toma como base el estado actual
+          // Cada activación toma como base el estado actual (la coordinación de
+          // ritmo ya la trae: la renueva mientras está inactiva, ver lazos.js).
+          if (lz.bloques[cmd.id].tipo !== 'ritmo' || !sb.base) sb.base = null
           sb.bias = 0
           delete sb.ultimo
           delete sb.Wbase

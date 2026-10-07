@@ -8,6 +8,7 @@
 //   bomba {id,x,y}                    nivel {tag,x,y,w,h}
 //   malla {id,x,y,h}                  calentador {id,x,y}
 //   columna {vaso,x,y,w,h,altura}     boton {x,y,w,texto,accion}
+//   venteo {vaso,x,y}
 // `actualizar(estado)` refresca valores, colores y estados sin rehacer el SVG.
 
 import { s } from './dom.js'
@@ -34,7 +35,7 @@ export function crearMimico(def, app) {
   const raiz = s('svg', { class: 'mimico', viewBox: `0 0 ${def.ancho} ${def.alto}`, preserveAspectRatio: 'xMidYMin meet' })
   const actualizadores = []
   // Primero tubos y vasos (fondo), después instrumentos (encima).
-  const orden = { vaso: 0, zona: 1, columna: 1, tubo: 2, malla: 3, texto: 4 }
+  const orden = { vaso: 0, zona: 1, columna: 1, tubo: 2, malla: 3, venteo: 3, texto: 4 }
   const elementos = [...def.elementos].sort((a, b) => (orden[a.tipo] ?? 5) - (orden[b.tipo] ?? 5))
   for (const e of elementos) {
     const r = DIBUJAR[e.tipo]?.(e, app)
@@ -170,6 +171,20 @@ const DIBUJAR = {
       actualizar(estado) {
         const m = estado.mallas[e.id]
         if (m) linea.setAttribute('class', `malla${m.dP > 0.8 * m.dPmax ? ' alta' : ''}`)
+      },
+    }
+  },
+
+  /** Venteo del tope de un vaso (válvula manual a la atmósfera). Clic: abrir o cerrar. */
+  venteo: (e, app) => {
+    const marca = s('rect', { class: 'venteo', x: e.x, y: e.y, width: 40, height: 18, rx: 3 })
+    const texto = s('text', { x: e.x + 20, y: e.y + 13, 'text-anchor': 'middle', class: 'suave', texto: 'Venteo' })
+    return {
+      nodo: s('g', { class: 'clic', onclick: (ev) => app.menuVenteo(e.vaso, ev) }, marca, texto),
+      actualizar(estado) {
+        const abierto = !!estado.vasos[e.vaso]?.presion?.venteo
+        marca.setAttribute('class', `venteo${abierto ? ' abierto' : ''}`)
+        texto.textContent = abierto ? 'Venteo ABIERTO' : 'Venteo'
       },
     }
   },

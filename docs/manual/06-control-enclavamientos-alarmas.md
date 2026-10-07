@@ -16,7 +16,7 @@ más lenta y de la más automática a la más humana:
 
 | Capa | Qué hace | En el simulador |
 |------|----------|-----------------|
-| Protección (enclavamientos) | Lleva la planta a un estado seguro cuando una variable sale de un límite, sin preguntar | 10 enclavamientos, rearme manual |
+| Protección (enclavamientos) | Lleva la planta a un estado seguro cuando una variable sale de un límite, sin preguntar | 11 enclavamientos, rearme manual |
 | Control regulatorio | Mantiene cada variable en su consigna (caudales, presiones, temperaturas, niveles) | 29 lazos PID |
 | Control avanzado | Coordina varios lazos para un objetivo de proceso (factor H, kappa, ritmo) | 3 bloques que el operador activa |
 | Operador y alarmas | Decide, cambia consignas, responde a lo anormal | 43 alarmas configuradas + generadas |

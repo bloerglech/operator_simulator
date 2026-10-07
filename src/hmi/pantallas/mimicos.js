@@ -49,6 +49,7 @@ const DEF_alimentacion = ({
     // Impregnador
     { tipo: 'vaso', ...IMP, etiqueta: 'Impregnador', etiquetaIzq: true },
     { tipo: 'columna', vaso: 'imp', x: IMP.x + 6, y: IMP.y + 6, w: IMP.w - 12, h: IMP.h - 12, altura: 23 },
+    { tipo: 'venteo', vaso: 'imp', x: IMP.x + IMP.w + 8, y: IMP.y - 24 },
     { tipo: 'malla', id: 'separador_imp', x: IMP.x + IMP.w, y: yImp(0.5), h: 26 },
     tubo([[IMP.x + IMP.w, yImp(1)], [640, yImp(1)], [640, 52], [560, 52], [560, IMP.y]], 'fino'),
     lazo('FIC-116', 655, 46), T(655, 40, 'Circulación de tope', 'suave'),
@@ -96,6 +97,7 @@ const DEF_digestor = ({
     // Entradas por el tope
     tubo([[300, 40], [460, 40], [460, yDig(0)]], 'astillas'), T(300, 34, 'transferencia', 'suave'),
     // Mallas (pared derecha) y sus corrientes
+    { tipo: 'venteo', vaso: 'dig', x: 470, y: yDig(0) - 26 },
     { tipo: 'malla', id: 'separador_dig', x: 538, y: yDig(0.4), h: 14 },
     { tipo: 'malla', id: 'mallas_superior', x: 538, y: yDig(2.5), h: 12 },
     { tipo: 'malla', id: 'mallas_circ_sup', x: 538, y: yDig(8.4), h: 14 },

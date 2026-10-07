@@ -1,7 +1,7 @@
 # Misiones
 
 Generado por `npm run documentar` desde `src/misiones/campana.js` (no editar a mano).
-Orden de la campaña: `tutorial` → `turno_noche` → `mas_toneladas` → `licor_debil` → `mallas` → `presurizacion` → `columna_colgada` → `parada_corta`.
+Orden de la campaña: `tutorial` → `turno_noche` → `mas_toneladas` → `licor_debil` → `mallas` → `presurizacion` → `columna_colgada` → `parada_corta` → `parada_general`.
 Cada misión superada desbloquea la siguiente. Medallas según la fracción de
 puntos: oro ≥ 90 %, plata ≥ 70 %, bronce con todos los objetivos principales.
 La prueba `tests/misiones.test.js` juega cada misión con la respuesta
@@ -232,3 +232,32 @@ esperada (debe aprobar) y sin hacer nada (debe fallar).
 **Criterios de evaluación:** Sin aperturas de la válvula de alivio (2 pt) · Menos de 4 horas de pulpa fuera de especificación (1 pt) · Sin enclavamientos disparados (1 pt); cada objetivo secundario suma 1 pt.
 
 **Respuesta ideal:** Al saber que el lavado no recibirá pulpa, parar antes que los enclavamientos: WIC-101 a 0 y LIC-302 en manual con salida 0 (el estanque deja de subir). Durante la parada: FIC-115 fuera de cascada para que el impregnador siga lleno (si no, la transferencia lo vacía y al partir falta presión), las temperaturas de cocción unos 10 °C abajo y las circulaciones andando; FDC-607 queda retenido sin soplado. Para partir: primero el filtrado de lavado al fondo (FIC-601 en AUTO, unos 400 m³/h) para enfriar el fondo; después madera y soplado juntos en escalones de unas 25 t/h cada 10 minutos, con las temperaturas de vuelta a su valor. Con el ritmo completo, LIC-302 a AUTO con la consigna en el nivel actual y FIC-115 y FIC-601 a CAS. La pulpa que estuvo detenida sale sobrecocida (kappa bajo) unas horas: es el costo de la parada.
+
+## Capítulo 8. Parada general
+
+**Qué enseña:** El orden de una parada larga y por qué: sin astillas ni transferencia no sube el nivel; sin soplado no se vacía el fondo; sin vapor y con filtrado frío el digestor se enfría; recién bajo 100 °C se puede bajar la presión sin que el licor hierva.
+
+**Situación inicial:** caso base tras 8 h de operación. Detención larga programada: bajar el ritmo, cortar astillas, soplado y vapor, enfriar y despresurizar en orden.
+
+**Guion:**
+
+- a los 0 min: Carmen Soto, jefa de turno (telefono): «Hoy es la parada general para la mantención anual. Quiero el digestor frío y sin presión para mañana temprano. Sigue el procedimiento del manual: ritmo al 60 % con RC-700, después astillas y transferencia, soplado, vapor, enfriar con filtrado y al final despresurizar. Sin apuro, en orden.»
+- `{"objetivo":"vapor"}` y `{"tag":"TI-303","op":"<","valor":100}` y `{"tag":"TI-304","op":"<","valor":100}` y `{"tag":"TI-305","op":"<","valor":100}`: Luis Paredes, terreno (radio): «Sala, el digestor está bajo 100 °C en el tope y en las dos zonas de cocción. Listo para despresurizar cuando digas.»
+- `{"objetivo":"despresurizar"}`: Carmen Soto, jefa de turno (telefono): «Digestor frío y sin presión. Entrego la planta a mantención. Buen trabajo.» · fin de la misión
+- a los 22 h: Carmen Soto, jefa de turno (telefono): «Se acabó el plazo de la parada. Mantención no puede entrar.» · fin de la misión
+
+**Objetivos:**
+
+- (principal) Bajar el ritmo al 60 % (WIC-101 a 130 t/h o menos) con una rampa
+- (principal) Cortar las astillas (WIC-101 en 0) y detener la transferencia (LIC-202 en manual, salida 0)
+- (secundario) Mantener lleno de licor el impregnador (FIC-115 en automático)
+- (principal) Detener el soplado (LIC-302 en manual, salida 0)
+- (principal) Cortar el vapor de los calentadores (TIC-402, TIC-404 y TIC-212 en manual, salida 0)
+- (secundario) Enfriar desplazando con filtrado de lavado (FIC-601 en automático, 500 m³/h o más)
+- (principal) Con el digestor bajo 100 °C, detener el filtrado y despresurizar (venteos abiertos, PI-301 bajo 0,5 bar)
+
+**Condiciones de falla:** Bajaste la presión con el digestor sobre 110 °C: el licor hierve dentro (vaporización súbita), golpea la columna y daña las mallas. · El nivel de astillas del digestor llegó al enclavamiento. · Se perdió la circulación de transferencia: el digestor quedó sin presión en el tope. · El estanque de soplado se llenó. · Abrió la válvula de seguridad del digestor.
+
+**Criterios de evaluación:** Planta entregada en menos de 18 horas (1 pt) · Sin aperturas de la válvula de alivio (1 pt) · Sin enclavamientos disparados (1 pt); cada objetivo secundario suma 1 pt.
+
+**Respuesta ideal:** En orden: (1) bajar el ritmo al 60 % con RC-700 y rampa, para que el fondo y el lavado se adapten; (2) cortar astillas y transferencia juntas (WIC-101 en 0 y LIC-202 en manual con salida 0), con FIC-115 fuera de cascada para que el impregnador siga lleno de licor; (3) detener el soplado (LIC-302 en manual, salida 0); (4) cortar el vapor de los tres calentadores con las bombas andando; (5) enfriar desplazando con filtrado de lavado (FIC-601 en AUTO, ≈ 600 m³/h): el licor frío entra por el fondo y sale por las extracciones; tarda muchas horas; (6) recién con el digestor bajo 100 °C (TI-303, TI-304 y TI-305), detener el filtrado (un vaso lleno de líquido no baja su presión mientras le entra líquido), bajar las consignas de PIC-301 y PIC-201 y abrir los venteos. Despresurizar caliente hace hervir el licor dentro del digestor.

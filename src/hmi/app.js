@@ -131,6 +131,16 @@ export function crearApp(raiz, cliente, opciones = {}) {
         { texto: 'Lavado ácido', confirmar: 'El lavado ácido requiere la zona fuera de servicio. ¿Continuar?', accion: () => app.comando({ tipo: 'mallas', id, accion: 'lavado_acido' }) },
       ], ev)
     },
+    menuVenteo(vaso, ev) {
+      const abierto = !!estado?.vasos[vaso]?.presion?.venteo
+      const nombre = vaso === 'dig' ? 'del digestor' : 'del impregnador'
+      menu(`Venteo ${nombre}`, [
+        { texto: abierto ? 'Abierto a la atmósfera' : 'Cerrado', deshabilitado: true },
+        abierto
+          ? { texto: 'Cerrar venteo', accion: () => app.comando({ tipo: 'venteo', id: vaso, accion: 'cerrar' }) }
+          : { texto: 'Abrir venteo', confirmar: `Abrir el venteo ${nombre} lo deja a presión atmosférica. Con el licor sobre 100 °C, hierve. ¿Abrir?`, accion: () => app.comando({ tipo: 'venteo', id: vaso, accion: 'abrir' }) },
+      ], ev)
+    },
     menuCalentador(id, ev) {
       const c = estado?.equipos.calentadores?.[id]
       menu(`Calentador ${id}`, [

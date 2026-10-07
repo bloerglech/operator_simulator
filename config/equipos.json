@@ -608,6 +608,12 @@
       "valor": 50,
       "unidad": "%",
       "origen": "supuesto"
+    },
+    "consistencia_descarga": {
+      "valor": 100,
+      "unidad": "kg/m3",
+      "origen": "supuesto",
+      "nota": "consistencia nominal de la pulpa que toma el lavado: fija el caudal volumétrico de las bombas de descarga (máximo 1,5 veces el nominal), también cuando el estanque solo tiene licor"
     }
   },
   "mallas": {

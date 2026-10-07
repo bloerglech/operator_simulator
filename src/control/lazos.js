@@ -261,7 +261,11 @@ function pasoBloques(lz, inst, ctx, ce, dt) {
   }
   for (const b of Object.values(lz.bloques)) {
     const sb = ce.bloques[b.tag]
-    if (!sb.activo) { sb.salida = null; continue }
+    if (!sb.activo) {
+      if (b.tipo === 'ritmo') renovarBaseRitmo(lz, ce, sb)
+      sb.salida = null
+      continue
+    }
     const pr = sb.parametros
     if (b.tipo === 'carga_alcali') {
       // El EA del licor blanco se toma del último análisis de laboratorio.
@@ -326,6 +330,19 @@ function pasoBloques(lz, inst, ctx, ce, dt) {
 }
 
 /** Coordinación de ritmo: rampa de producción y escalado de los caudales marcados. */
+/**
+ * Con la coordinación de ritmo inactiva, su base sigue al estado actual
+ * (madera y consignas de los lazos escalados) mientras haya madera. Con la
+ * planta detenida se conserva la última: al partir de nuevo, RC-700 escala
+ * los caudales desde un estado coherente y no desde cero.
+ */
+function renovarBaseRitmo(lz, ce, sb) {
+  const W = ce.lazos['WIC-101'].sp
+  if (!(W > 1)) return
+  sb.base = { W, sps: {} }
+  for (const l of Object.values(lz.lazos)) if (l.escala_ritmo) sb.base.sps[l.tag] = ce.lazos[l.tag].sp
+}
+
 function pasoRitmo(lz, ctx, ce, b, sb, dt) {
   const pr = sb.parametros
   const Wobj = (pr.produccion * 0.9) / (pr.rendimiento / 100) / 24 // t/h de madera seca

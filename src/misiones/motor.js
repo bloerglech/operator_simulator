@@ -2,7 +2,7 @@
 //
 // Definición de una misión:
 //   { id, capitulo, titulo, resumen, ensena,
-//     inicio: { horasPrevias, preparacion: { comandos, horas } },   (lo usa el puente)
+//     inicio: { horasPrevias, preparacion: { comandos, horas, despues } o { etapas: [{ comandos, horas }] } },
 //     guion: [{ id, cuando, acciones }],                              eventos guionados
 //     objetivos: [{ id, texto, tipo: 'principal'|'secundario', condicion,
 //                   desde?, evitable?, anticipable?, durante?, plazo?, final?, pistas?: [{ tras, quien, canal, texto, resaltar }] }],

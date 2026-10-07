@@ -454,6 +454,112 @@ const paradaCorta = {
   respuestaIdeal: 'Al saber que el lavado no recibirá pulpa, parar antes que los enclavamientos: WIC-101 a 0 y LIC-302 en manual con salida 0 (el estanque deja de subir). Durante la parada: FIC-115 fuera de cascada para que el impregnador siga lleno (si no, la transferencia lo vacía y al partir falta presión), las temperaturas de cocción unos 10 °C abajo y las circulaciones andando; FDC-607 queda retenido sin soplado. Para partir: primero el filtrado de lavado al fondo (FIC-601 en AUTO, unos 400 m³/h) para enfriar el fondo; después madera y soplado juntos en escalones de unas 25 t/h cada 10 minutos, con las temperaturas de vuelta a su valor. Con el ritmo completo, LIC-302 a AUTO con la consigna en el nivel actual y FIC-115 y FIC-601 a CAS. La pulpa que estuvo detenida sale sobrecocida (kappa bajo) unas horas: es el costo de la parada.',
 }
 
+// ---------------------------------------------------------------------------
+// 8. Parada general
+
+const VAPOR_CORTADO = { y: [{ lazo: 'TIC-402', campo: 'salida', op: '<=', valor: 2 }, { lazo: 'TIC-404', campo: 'salida', op: '<=', valor: 2 }, { lazo: 'TIC-212', campo: 'salida', op: '<=', valor: 2 }] }
+const FRIO = { y: [{ tag: 'TI-303', op: '<', valor: 100 }, { tag: 'TI-304', op: '<', valor: 100 }, { tag: 'TI-305', op: '<', valor: 100 }] }
+
+const paradaGeneral = {
+  id: 'parada_general',
+  capitulo: 'Capítulo 8',
+  titulo: 'Parada general',
+  resumen: 'Detención larga programada: bajar el ritmo, cortar astillas, soplado y vapor, enfriar y despresurizar en orden.',
+  ensena: 'El orden de una parada larga y por qué: sin astillas ni transferencia no sube el nivel; sin soplado no se vacía el fondo; sin vapor y con filtrado frío el digestor se enfría; recién bajo 100 °C se puede bajar la presión sin que el licor hierva.',
+  inicio: { horasPrevias: 8 },
+  guion: [
+    { id: 'entrega', cuando: { tiempo: 0 }, acciones: [
+      jefa('Hoy es la parada general para la mantención anual. Quiero el digestor frío y sin presión para mañana temprano. Sigue el procedimiento del manual: ritmo al 60 % con RC-700, después astillas y transferencia, soplado, vapor, enfriar con filtrado y al final despresurizar. Sin apuro, en orden.')] },
+    { id: 'frio', cuando: { y: [{ objetivo: 'vapor' }, FRIO] }, acciones: [
+      radio('Sala, el digestor está bajo 100 °C en el tope y en las dos zonas de cocción. Listo para despresurizar cuando digas.')] },
+    { id: 'cierre', cuando: { objetivo: 'despresurizar' }, acciones: [
+      jefa('Digestor frío y sin presión. Entrego la planta a mantención. Buen trabajo.'), { terminar: true }] },
+    { id: 'limite', cuando: { tiempo: 22 * H }, acciones: [jefa('Se acabó el plazo de la parada. Mantención no puede entrar.'), { terminar: true }] },
+  ],
+  objetivos: [
+    { id: 'ritmo', tipo: 'principal', texto: 'Bajar el ritmo al 60 % (WIC-101 a 130 t/h o menos) con una rampa',
+      condicion: { lazo: 'WIC-101', campo: 'sp', op: '<=', valor: 130 },
+      pistas: [pista(20 * MIN, 'En «6 Calidad y laboratorio», RC-700: producción objetivo 1 750 ADt/d, rampa 600 ADt/d por hora, y actívalo.', null, 'ayuda')] },
+    { id: 'astillas', tipo: 'principal', texto: 'Cortar las astillas (WIC-101 en 0) y detener la transferencia (LIC-202 en manual, salida 0)', desde: { objetivo: 'ritmo' },
+      condicion: { y: [{ lazo: 'WIC-101', campo: 'sp', op: '<=', valor: 5 }, { lazo: 'LIC-202', campo: 'salida', op: '<=', valor: 2 }] },
+      pistas: [pista(60 * MIN, 'Desactiva RC-700, pon WIC-101 en 0 y LIC-202 en MAN con salida 0: si la transferencia sigue, el impregnador vacía sus astillas en el digestor y el nivel sube hasta el enclavamiento.', 'LIC-202', 'ayuda')] },
+    { id: 'impregnador', tipo: 'secundario', texto: 'Mantener lleno de licor el impregnador (FIC-115 en automático)', desde: { objetivo: 'ritmo' }, anticipable: true,
+      condicion: { lazo: 'FIC-115', modo: 'AUTO' },
+      pistas: [pista(30 * MIN, 'Sin madera, FFC-117 lleva a cero el licor negro al impregnador. Saca FIC-115 de cascada.', 'FIC-115', 'ayuda')] },
+    { id: 'soplado', tipo: 'principal', texto: 'Detener el soplado (LIC-302 en manual, salida 0)', desde: { objetivo: 'astillas' },
+      condicion: { lazo: 'LIC-302', campo: 'salida', op: '<=', valor: 2 },
+      pistas: [pista(10 * MIN, 'Sin astillas entrando, LIC-302 vaciaría el digestor. Pásalo a MAN con salida 0.', 'LIC-302', 'ayuda')] },
+    { id: 'vapor', tipo: 'principal', texto: 'Cortar el vapor de los calentadores (TIC-402, TIC-404 y TIC-212 en manual, salida 0)', desde: { objetivo: 'soplado' },
+      condicion: VAPOR_CORTADO,
+      pistas: [pista(10 * MIN, 'Pantalla «3 Circulaciones»: los tres TIC a MAN con salida 0. Las bombas de circulación siguen andando.', 'TIC-402', 'ayuda')] },
+    { id: 'desplazar', tipo: 'secundario', texto: 'Enfriar desplazando con filtrado de lavado (FIC-601 en automático, 500 m³/h o más)', desde: { objetivo: 'soplado' }, anticipable: true,
+      condicion: { y: [{ lazo: 'FIC-601', modo: 'AUTO' }, { lazo: 'FIC-601', campo: 'sp', op: '>=', valor: 500 }] },
+      pistas: [pista(20 * MIN, 'El filtrado de lavado entra a unos 75 °C por el fondo y sale por las extracciones: es lo que enfría el digestor. Sin soplado, FDC-607 queda retenido; pasa FIC-601 a AUTO con unos 600 m³/h.', 'FIC-601', 'ayuda')] },
+    { id: 'despresurizar', tipo: 'principal', texto: 'Con el digestor bajo 100 °C, detener el filtrado y despresurizar (venteos abiertos, PI-301 bajo 0,5 bar)', desde: { paso: 'frio' },
+      condicion: { tag: 'PI-301', op: '<=', valor: 0.5 },
+      pistas: [pista(10 * MIN, 'Mientras entre filtrado, el digestor lleno de líquido no puede bajar su presión. Pon FIC-601 en 0 y baja las consignas de PIC-301 y PIC-201.', 'FIC-601'),
+        pista(20 * MIN, 'Después abre los venteos del digestor (pantalla «2 Digestor», sobre el tope) y del impregnador (pantalla «1 Alimentación»).', null, 'ayuda')] },
+  ],
+  fallas: [
+    { condicion: { y: [{ tag: 'PI-301', op: '<', valor: 2 }, { o: [{ tag: 'TI-303', op: '>', valor: 110 }, { tag: 'TI-304', op: '>', valor: 110 }, { tag: 'TI-305', op: '>', valor: 110 }] }] },
+      mensaje: 'Bajaste la presión con el digestor sobre 110 °C: el licor hierve dentro (vaporización súbita), golpea la columna y daña las mallas.' },
+    { condicion: { enclavamiento: 'I-02' }, mensaje: 'El nivel de astillas del digestor llegó al enclavamiento.' },
+    { condicion: { enclavamiento: 'I-05' }, mensaje: 'Se perdió la circulación de transferencia: el digestor quedó sin presión en el tope.' },
+    { condicion: { enclavamiento: 'I-08' }, mensaje: 'El estanque de soplado se llenó.' },
+    { condicion: { incidente: 'apertura_seguridad' }, mensaje: 'Abrió la válvula de seguridad del digestor.' },
+  ],
+  fin: { o: [{ paso: 'cierre' }, { paso: 'limite' }] },
+  evaluacion: [
+    { texto: 'Planta entregada en menos de 18 horas', condicion: { no: { tiempo: 18 * H } }, puntos: 1 },
+    { texto: 'Sin aperturas de la válvula de alivio', condicion: { no: { incidente: 'apertura_alivio' } }, puntos: 1 },
+    { texto: 'Sin enclavamientos disparados', condicion: { no: { incidente: 'enclavamiento' } }, puntos: 1 },
+  ],
+  respuestaIdeal: 'En orden: (1) bajar el ritmo al 60 % con RC-700 y rampa, para que el fondo y el lavado se adapten; (2) cortar astillas y transferencia juntas (WIC-101 en 0 y LIC-202 en manual con salida 0), con FIC-115 fuera de cascada para que el impregnador siga lleno de licor; (3) detener el soplado (LIC-302 en manual, salida 0); (4) cortar el vapor de los tres calentadores con las bombas andando; (5) enfriar desplazando con filtrado de lavado (FIC-601 en AUTO, ≈ 600 m³/h): el licor frío entra por el fondo y sale por las extracciones; tarda muchas horas; (6) recién con el digestor bajo 100 °C (TI-303, TI-304 y TI-305), detener el filtrado (un vaso lleno de líquido no baja su presión mientras le entra líquido), bajar las consignas de PIC-301 y PIC-201 y abrir los venteos. Despresurizar caliente hace hervir el licor dentro del digestor.',
+}
+
+// ---------------------------------------------------------------------------
+// 9. Puesta en marcha
+
+const lazo = (id, accion, valor) => ({ tipo: 'lazo', id, accion, valor })
+
+/** La parada general del capítulo 8 como preparación: digestor lleno de astillas, frío y venteado. */
+const PARADA_GENERAL = {
+  etapas: [
+    { comandos: [
+      { tipo: 'bloque', id: 'RC-700', accion: 'parametro', campo: 'produccion', valor: 1750 },
+      { tipo: 'bloque', id: 'RC-700', accion: 'parametro', campo: 'rampa', valor: 600 },
+      { tipo: 'bloque', id: 'RC-700', accion: 'activar' }], horas: 1.5 },
+    { comandos: [
+      { tipo: 'bloque', id: 'RC-700', accion: 'desactivar' }, lazo('WIC-101', 'consigna', 0), lazo('FIC-115', 'modo', 'AUTO'), lazo('FIC-601', 'modo', 'AUTO'),
+      ...['LIC-202', 'LIC-302', 'TIC-402', 'TIC-404', 'TIC-212'].map((id) => lazo(id, 'modo', 'MAN'))], horas: 0 },
+    { comandos: [...['LIC-202', 'LIC-302', 'TIC-402', 'TIC-404', 'TIC-212'].map((id) => lazo(id, 'salida', 0)), lazo('FIC-601', 'consigna', 600)], horas: 13.5 },
+    { comandos: [lazo('FIC-601', 'consigna', 0), lazo('PIC-301', 'consigna', 1), lazo('PIC-201', 'consigna', 1.5)], horas: 0.2 },
+    { comandos: [{ tipo: 'venteo', id: 'dig', accion: 'abrir' }, { tipo: 'venteo', id: 'imp', accion: 'abrir' }], horas: 2 },
+  ],
+}
+
+const puestaEnMarcha = {
+  id: 'puesta_en_marcha',
+  capitulo: 'Capítulo 9',
+  titulo: 'Puesta en marcha',
+  resumen: 'Arranque después de la parada general: el digestor está lleno de astillas, frío y sin presión.',
+  ensena: 'El orden de una partida: cerrar venteos y presurizar, calentar en rampa con las circulaciones andando, partir soplado y madera en escalones, y llegar a kappa en banda y ritmo nominal.',
+  inicio: { horasPrevias: 8, preparacion: PARADA_GENERAL },
+  guion: [
+    { id: 'entrega', cuando: { tiempo: 0 }, acciones: [
+      jefa('Mantención terminó. El digestor está lleno de astillas, frío y venteado. Hay que partir: cierra venteos, presuriza con filtrado, calienta de a poco y después parte soplado y madera. Quiero ritmo completo y kappa en banda antes del fin del turno.')] },
+    { id: 'relevo', cuando: { tiempo: 12 * H }, acciones: [jefa('Fin del turno de partida. Revisemos.'), { terminar: true }] },
+  ],
+  objetivos: [
+    { id: 'presurizar', tipo: 'principal', texto: 'Cerrar los venteos y presurizar el digestor (PI-301 sobre 5 bar)',
+      condicion: { tag: 'PI-301', op: '>=', valor: 5 } },
+  ],
+  fallas: [],
+  fin: { paso: 'relevo' },
+  evaluacion: [],
+  respuestaIdeal: '',
+}
+
 export const MISIONES = {
   tutorial,
   turno_noche: turnoNoche,
@@ -463,4 +569,13 @@ export const MISIONES = {
   presurizacion,
   columna_colgada: columnaColgada,
   parada_corta: paradaCorta,
+  parada_general: paradaGeneral,
+}
+
+// En preparación (no está en la campaña todavía): capítulo 9.
+export const BORRADORES = { puesta_en_marcha: puestaEnMarcha }
+
+/** Definición de una misión de la campaña o en preparación (para pruebas). */
+export function buscarMision(id) {
+  return MISIONES[id] ?? BORRADORES[id] ?? null
 }

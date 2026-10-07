@@ -8,7 +8,8 @@
   "mallas",
   "presurizacion",
   "columna_colgada",
-  "parada_corta"
+  "parada_corta",
+  "parada_general"
  ],
  "especificacion": {
   "kappa": [

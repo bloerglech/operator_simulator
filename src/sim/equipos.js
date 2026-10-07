@@ -67,6 +67,7 @@ export function construirEquipos(config) {
     estanque: {
       V: p(eq.estanque_soplado, 'volumen', 'equipos.estanque_soplado.volumen'),
       nivelInicial: p(eq.estanque_soplado, 'nivel_inicial', 'equipos.estanque_soplado.nivel_inicial'),
+      consistencia: p(eq.estanque_soplado, 'consistencia_descarga', 'equipos.estanque_soplado.consistencia_descarga'),
     },
     vapor: {
       PMP: p(en.vapor, 'P_MP', 'energia.vapor.P_MP'),
@@ -376,8 +377,13 @@ export function pasoFlashYEstanque(modelo, estado, dt) {
     for (const b of resto) fundirParcela(a, b, modelo.fis)
     est.parcelas = [a]
   }
+  // El lavado toma pulpa a su tasa (kg/s); el caudal volumétrico de descarga
+  // queda limitado a 1,5 veces el nominal, y con solo licor la descarga sigue.
   const pulpa = est.parcelas[0]?.m ?? 0
-  const fr = pulpa > 0 ? Math.min(1, (Math.max(0, estado.servicios.lavado) * dt) / pulpa) : 0
+  const lavado = Math.max(0, estado.servicios.lavado)
+  const Vest = volumenPaquete(est)
+  const frVol = Vest > 0 ? (1.5 * lavado / eq.estanque.consistencia * dt) / Vest : 0
+  const fr = Math.min(1, frVol, pulpa > 0 ? (lavado * dt) / pulpa : Infinity)
   if (fr > 0) {
     const sale = partirPaquete(est, fr)
     sumarPaqueteA(cont.sale, sale, modelo.fis)

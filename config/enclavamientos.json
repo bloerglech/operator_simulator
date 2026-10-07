@@ -188,6 +188,23 @@
     }
    ],
    "rearme": "manual"
+  },
+  {
+   "id": "I-11",
+   "descripcion": "Parada de alimentación por nivel de astillas muy alto en el impregnador",
+   "condicion": {
+    "tag": "LI-202",
+    "op": ">",
+    "retardo": 30,
+    "limite": 22.8
+   },
+   "acciones": [
+    {
+     "lazo": "WIC-101",
+     "salida": 0
+    }
+   ],
+   "rearme": "manual"
   }
  ]
 }

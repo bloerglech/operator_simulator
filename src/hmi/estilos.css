@@ -141,6 +141,8 @@ input[type=number], input[type=text], select {
 .mimico .nivel-barra { fill: #8a8a8a; }
 .mimico .malla { fill: none; stroke: #2c2c2c; stroke-width: 3; stroke-dasharray: 2 2; }
 .mimico .malla.alta { stroke: var(--p3); }
+.mimico .venteo { fill: var(--fondo-panel, #e4e4e4); stroke: #6a6a6a; stroke-width: 1; }
+.mimico .venteo.abierto { fill: var(--p2); stroke: #2c2c2c; }
 .mimico .astillas-col { fill: #a39e94; }
 .mimico .perfil { fill: none; stroke: #303030; stroke-width: 1.5; }
 .mimico .perfil.b { stroke: #6a6a6a; stroke-dasharray: 4 2; }

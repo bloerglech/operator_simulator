@@ -15,7 +15,7 @@
 import { construirCatalogo, estadoEventos, iniciarEvento, terminarEvento, pasoEventos } from './eventos.js'
 import { estadoIndicadores, acumular, resumen } from './indicadores.js'
 import { iniciarMision, pasoMision, vistaMision } from '../misiones/motor.js'
-import { MISIONES } from '../misiones/campana.js'
+import { buscarMision } from '../misiones/campana.js'
 
 const TIPOS = new Set(['evento', 'generador', 'mision', 'jugador', 'pistas', 'nota'])
 const MAX_MENSAJES = 200
@@ -63,7 +63,7 @@ export function extensionDirector(config) {
       const dtL = ctx.modelo.dtL
       acumular(se.turno, ctx, config.campana.especificacion, dtL)
       if (se.mision && !se.mision.terminada) {
-        const def = MISIONES[se.mision.id]
+        const def = buscarMision(se.mision.id)
         pasoMision(def, se, ctx, dtL, {
           emitir: (m) => emitir(se, ctx, m),
           evento: (id, p) => iniciarEvento(cat, se, ctx, id, p),
@@ -89,7 +89,7 @@ export function extensionDirector(config) {
         if (typeof cmd.activo !== 'boolean') throw new Error('generador: activo debe ser true o false')
         if (cmd.dificultad !== undefined && !cat.generador.intervalo_medio[cmd.dificultad]) throw new Error('Dificultad inválida (1 a 3)')
       } else if (cmd.tipo === 'mision') {
-        if (cmd.accion === 'iniciar' && !MISIONES[cmd.id]) throw new Error(`Misión desconocida: ${cmd.id}`)
+        if (cmd.accion === 'iniciar' && !buscarMision(cmd.id)) throw new Error(`Misión desconocida: ${cmd.id}`)
         if (!['iniciar', 'abandonar'].includes(cmd.accion)) throw new Error(`Acción de misión inválida: ${cmd.accion}`)
       } else if (cmd.tipo === 'jugador') {
         if (typeof cmd.evento !== 'string' || cmd.evento.length > 40) throw new Error('Evento del jugador inválido')
@@ -113,7 +113,7 @@ export function extensionDirector(config) {
         se.eventos.generador.proximo = null
       } else if (cmd.tipo === 'mision') {
         if (cmd.accion === 'iniciar') {
-          const def = MISIONES[cmd.id]
+          const def = buscarMision(cmd.id)
           iniciarMision(def, se, ctx)
           se.turno = { ...estadoIndicadores(t), incidentes0: { ...ctx.estado.incidentes } }
           emitir(se, ctx, { tipo: 'mision', texto: `${def.capitulo}. ${def.titulo}`, titulo: true, capitulo: def.capitulo, nombre: def.titulo })
@@ -130,7 +130,7 @@ export function extensionDirector(config) {
 
     instantanea(ctx) {
       const se = ctx.estado.escenario
-      const def = se.mision ? MISIONES[se.mision.id] : null
+      const def = se.mision ? buscarMision(se.mision.id) : null
       return {
         mensajes: se.mensajes.slice(-40),
         libro: se.libro.slice(-150),

@@ -94,6 +94,16 @@ function ciclo() {
   const ahora = performance.now()
   const real = (ahora - ultimoTic) / 1000
   ultimoTic = ahora
+  try {
+    paso(ahora, real)
+  } catch (e) {
+    // Un error del motor no debe detener el ciclo: se informa y se sigue.
+    self.postMessage({ tipo: 'error', error: String(e?.message ?? e) })
+  }
+  setTimeout(ciclo, TIC_MS)
+}
+
+function paso(ahora, real) {
   if (motor.listo()) {
     const t0 = performance.now()
     const sim = motor.tic(real, TIC_MS * 0.8, () => performance.now())
@@ -105,6 +115,5 @@ function ciclo() {
       publicar()
     }
   }
-  setTimeout(ciclo, TIC_MS)
 }
 ciclo()

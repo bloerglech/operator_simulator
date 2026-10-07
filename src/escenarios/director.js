@@ -21,6 +21,11 @@ const TIPOS = new Set(['evento', 'generador', 'mision', 'jugador', 'pistas', 'no
 const MAX_MENSAJES = 200
 const MAX_LIBRO = 500
 
+/** Incidentes ocurridos desde el inicio del turno. */
+function incidentesDesde(ahora, antes = {}) {
+  return Object.fromEntries(Object.entries(ahora).map(([k, v]) => [k, v - (antes[k] ?? 0)]))
+}
+
 export function extensionDirector(config) {
   const cat = construirCatalogo(config)
 
@@ -46,7 +51,7 @@ export function extensionDirector(config) {
         eventos: estadoEventos(),
         mensajes: [], nMensaje: 0, libro: [],
         jugador: [], pistas: true, mision: null,
-        turno: estadoIndicadores(ctx.estado.paso * ctx.modelo.dtR),
+        turno: { ...estadoIndicadores(ctx.estado.paso * ctx.modelo.dtR), incidentes0: { ...ctx.estado.incidentes } },
       }
     },
 
@@ -73,6 +78,12 @@ export function extensionDirector(config) {
       if (cmd.tipo === 'evento') {
         if (!['iniciar', 'terminar'].includes(cmd.accion)) throw new Error(`Acción de evento inválida: ${cmd.accion}`)
         if (!cat.porId[cmd.id]) throw new Error(`Evento desconocido: ${cmd.id}`)
+        if (cmd.accion === 'iniciar') {
+          const ops = cat.porId[cmd.id].opciones ?? {}
+          for (const [k, v] of Object.entries(cmd.parametros ?? {})) {
+            if (!ops[k]?.includes(v)) throw new Error(`Parámetro inválido del evento ${cmd.id}: ${k}=${v}`)
+          }
+        }
         if (cmd.accion === 'terminar' && !se.eventos.activos.some((a) => a.id === cmd.id && a.fase === 'activo')) throw new Error(`El evento ${cmd.id} no está activo`)
       } else if (cmd.tipo === 'generador') {
         if (typeof cmd.activo !== 'boolean') throw new Error('generador: activo debe ser true o false')
@@ -104,7 +115,7 @@ export function extensionDirector(config) {
         if (cmd.accion === 'iniciar') {
           const def = MISIONES[cmd.id]
           iniciarMision(def, se, ctx)
-          se.turno = estadoIndicadores(t)
+          se.turno = { ...estadoIndicadores(t), incidentes0: { ...ctx.estado.incidentes } }
           emitir(se, ctx, { tipo: 'mision', texto: `${def.capitulo}. ${def.titulo}`, titulo: true, capitulo: def.capitulo, nombre: def.titulo })
         } else se.mision = null
       } else if (cmd.tipo === 'jugador') {
@@ -128,7 +139,7 @@ export function extensionDirector(config) {
         generador: { ...se.eventos.generador },
         pistas: se.pistas,
         mision: def ? vistaMision(def, se) : null,
-        turno: resumen(se.turno, config.campana.economia, { ...ctx.estado.incidentes }),
+        turno: resumen(se.turno, config.campana.economia, incidentesDesde(ctx.estado.incidentes, se.turno.incidentes0)),
       }
     },
   }

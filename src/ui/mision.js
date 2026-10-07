@@ -28,6 +28,7 @@ export function crearCapaMision(cliente, { resaltar, alTerminar }) {
   let informeMostrado = false
   let firmaObjetivos = ''
   let plegado = false
+  let saltar = false // al reintentar no se repiten los mensajes ya vistos
 
   function siguiente() {
     if (mostrando || cola.length === 0) return
@@ -55,7 +56,8 @@ export function crearCapaMision(cliente, { resaltar, alTerminar }) {
     const esc = estado.escenario
     if (!esc) return
     // Mensajes nuevos (la primera vez solo se toman los últimos del inicio de la misión).
-    if (visto === null) visto = Math.max(0, (esc.mensajes.at(-1)?.n ?? 0) - 6)
+    if (visto === null) visto = Math.max(0, (esc.mensajes.at(-1)?.n ?? 0) - (saltar ? 0 : 6))
+    saltar = false
     for (const m of esc.mensajes) {
       if (m.n <= visto) continue
       visto = m.n
@@ -87,6 +89,6 @@ export function crearCapaMision(cliente, { resaltar, alTerminar }) {
 
   return {
     /** Al reintentar o cambiar de partida se vuelven a leer los mensajes. */
-    reiniciar() { visto = null; cola = []; informeMostrado = false },
+    reiniciar(reintento = false) { visto = null; saltar = reintento; cola = []; informeMostrado = false },
   }
 }

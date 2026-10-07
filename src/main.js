@@ -52,7 +52,8 @@ async function iniciar() {
           if (!id) return avisar('Completaste todas las misiones disponibles.', 6000)
           await arrancar(cliente, { mision: id, semilla: 1000 + misiones.findIndex((m) => m.id === id) })
         }
-        capa.reiniciar()
+        capa.reiniciar(accion === 'reintentar')
+        app.olvidarJugador()
       } catch (e) {
         avisar(e.message, 8000)
       }

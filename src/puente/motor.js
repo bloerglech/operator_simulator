@@ -51,6 +51,8 @@ export function crearMotor(config) {
   }
 
   function guardarPunto() {
+    // Si la misión ya terminó (p. ej. un objetivo y una falla en el mismo paso), el punto no sirve para reintentar.
+    if (sistema.estadoInterno().escenario?.mision?.terminada) return
     puntos.push({ t: sistema.tiempo(), datos: { ...sistema.guardar(), inicioPartida } })
     if (puntos.length > MAX_PUNTOS) puntos.shift()
   }
@@ -75,6 +77,7 @@ export function crearMotor(config) {
         sistema = crearJuego(config, { semilla })
         sistema.cargar(guardado)
         inicioPartida = guardado.inicioPartida ?? 0
+        guardarPunto() // con una misión en curso, el punto de carga sirve para reintentar
       } else {
         sistema = prepararJuego(config, { semilla, horasPrevias, mision, progreso })
         // Lo ocurrido durante la preparación (sin operador) no se muestra como evento de la partida.

@@ -78,14 +78,20 @@ export function crearPlanta(config, opciones = {}) {
 
   function pasoRapido() {
     if (cola.length > 0) {
-      for (const cmd of cola) {
-        const e = extPara(cmd)
-        if (e) {
-          e.comando(ctx(), cmd)
-          anotarComando(estado, cmd)
-        } else aplicarComando(modelo, estado, cmd)
-      }
+      // La cola se vacía antes de aplicar: un comando que falla no se repite en cada paso.
+      const lote = cola
       cola = []
+      for (const cmd of lote) {
+        try {
+          const e = extPara(cmd)
+          if (e) {
+            e.comando(ctx(), cmd)
+            anotarComando(estado, cmd)
+          } else aplicarComando(modelo, estado, cmd)
+        } catch (err) {
+          registrarEvento(modelo, estado, 'comando_fallido', { comando: cmd.tipo, error: String(err?.message ?? err) })
+        }
+      }
     }
     for (const e of exts) e.pasoRapido(ctx())
     pasoRapidoEquipos(modelo, estado, modelo.dtR)
@@ -389,6 +395,13 @@ function pasoLento(modelo, estado) {
   for (const v of modelo.vasos) {
     const ev = estado.vasos[v.id]
     if (ev.hueco > v.huecoMaximo) soltarColumna(modelo, estado, v)
+    else if (ev.colgamiento) {
+      // Con las extracciones bajo la columna reducidas, la columna se suelta sin caer de golpe.
+      const lib = v.liberacion
+      const q = lib.corrientes.reduce((s, id) => s + (estado.corrientes[id].caudalReal ?? 0), 0)
+      ev.colgamiento.tBajo = q < lib.fraccion * ev.colgamiento.q0 ? ev.colgamiento.tBajo + dt : 0
+      if (ev.colgamiento.tBajo >= lib.tiempo) soltarColumna(modelo, estado, v, true)
+    }
   }
 
   // 7. Reacciones de cocción, envejecimiento y factor H de todas las parcelas
@@ -408,13 +421,18 @@ function pasoLento(modelo, estado) {
   for (const tubo of Object.values(estado.tubos)) for (const q of tubo.paquetes) q.parcelas.forEach(procesar)
 }
 
-/** La parte colgada de la columna se suelta y cae sobre el hueco. */
-function soltarColumna(modelo, estado, v) {
+/**
+ * La parte colgada de la columna se suelta y cae sobre el hueco. suave: la
+ * soltó el operador bajando las extracciones (liberacion_columna); si no, cae
+ * de golpe al llenarse el hueco o por orden del instructor (caida_columna).
+ */
+function soltarColumna(modelo, estado, v, suave = false) {
   const ev = estado.vasos[v.id]
   const caida = ev.hueco / v.geom.A[v.geom.n - 1]
   for (const par of ev.parcelas) delete par.colgada
-  registrarEvento(modelo, estado, 'caida_columna', { vaso: v.id, caida })
+  registrarEvento(modelo, estado, suave ? 'liberacion_columna' : 'caida_columna', { vaso: v.id, caida })
   ev.hueco = 0
+  ev.colgamiento = null
 }
 
 /** Cuelga la columna de un vaso desde una altura (m sobre el fondo). */
@@ -426,6 +444,9 @@ function colgarColumna(modelo, estado, v, altura) {
     if (h >= altura) par.colgada = true
     base += par.vol / (par.sc ?? v.sCol)
   }
+  // Caudal de las extracciones bajo la columna al colgarse (referencia para soltarla).
+  const q0 = v.liberacion.corrientes.reduce((s, id) => s + (estado.corrientes[id].caudalReal ?? 0), 0)
+  ev.colgamiento = { q0, tBajo: 0 }
   registrarEvento(modelo, estado, 'colgamiento', { vaso: v.id, altura })
 }
 

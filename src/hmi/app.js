@@ -24,6 +24,7 @@ export function crearApp(raiz, cliente, opciones = {}) {
   let pendienteDibujo = false
   let oculto = false // en la sala 3D el DCS se oculta mientras se camina
   const informados = new Set() // acciones del jugador ya informadas a la misión
+  let reinformar = false // tras repetir o reintentar: volver a informar lo que está a la vista
   let resaltado = null
   function marcarResaltado() {
     for (const el of contenedor.querySelectorAll('.resaltado')) el.classList.remove('resaltado')
@@ -104,6 +105,11 @@ export function crearApp(raiz, cliente, opciones = {}) {
     cerrarLateral,
     menu,
     /** Muestra u oculta el DCS (en la sala 3D); oculto no se redibuja. */
+    /** Al repetir o reintentar una misión: las acciones se vuelven a informar (el estado de la misión retrocedió). */
+    olvidarJugador() {
+      informados.clear()
+      reinformar = true
+    },
     mostrar(si) {
       oculto = !si
       if (si && estado) dibujar()
@@ -245,6 +251,10 @@ export function crearApp(raiz, cliente, opciones = {}) {
     if (!pantalla) ir(inicial)
     // Sin sala 3D, el operador ya está frente al DCS (objetivo «acércate a la consola»).
     if (!opciones.alVolver) app.jugador('dcs')
+    if (reinformar && e.escenario?.mision && !e.escenario.mision.terminada) {
+      reinformar = false
+      if (!oculto) { app.jugador('dcs'); app.jugador('pantalla', idPantalla) }
+    }
     if (!pendienteDibujo) {
       pendienteDibujo = true
       requestAnimationFrame(dibujar)

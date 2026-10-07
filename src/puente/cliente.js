@@ -24,6 +24,8 @@ export function crearCliente() {
       for (const f of suscriptores) f(ultimo, rendimiento)
     } else if (m.tipo === 'progreso') {
       for (const f of progreso) f(m.fraccion)
+    } else if (m.tipo === 'error') {
+      console.error('Simulador:', m.error) // el ciclo del worker sigue
     } else if (m.tipo === 'respuesta') {
       const p = pendientes.get(m.id)
       if (!p) return

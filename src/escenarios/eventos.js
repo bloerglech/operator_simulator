@@ -63,9 +63,12 @@ export function iniciarEvento(cat, se, ctx, id, parametros = {}, aviso = null) {
     if (a.comando) ctx.ejecutar(sustituir(a.comando, p))
     else {
       const objetivo = sustituir(a.objetivo, p)
+      // Si otro evento activo mueve la misma variable, este toma su rampa y su
+      // valor base: al terminar se vuelve al valor anterior a ambos.
+      const base = tomarRampa(se.eventos, objetivo)
       const desde = leerObjetivo(ctx, objetivo)
       const hasta = a.hasta !== undefined ? (a.unidad ? aInterno(a.hasta, a.unidad) : a.hasta) : desde * a.factor
-      inst.rampas.push({ objetivo, desde, hasta, t0: t, duracion: a.rampa ?? 0 })
+      inst.rampas.push({ objetivo, desde, hasta, t0: t, duracion: a.rampa ?? 0, base: base ?? desde })
     }
   }
   se.eventos.activos.push(inst)
@@ -75,6 +78,30 @@ export function iniciarEvento(cat, se, ctx, id, parametros = {}, aviso = null) {
   return inst
 }
 
+/** Clave canónica de la variable que mueve una rampa. */
+function claveObjetivo(o) {
+  return JSON.stringify(Object.keys(o).sort().map((k) => [k, o[k]]))
+}
+
+/**
+ * Quita a los eventos activos las rampas sobre la misma variable y devuelve el
+ * valor base que tenía antes de ellos (o null si ninguno la movía).
+ */
+function tomarRampa(ev, objetivo) {
+  const clave = claveObjetivo(objetivo)
+  let base = null
+  for (const inst of ev.activos) {
+    const quedan = []
+    for (const r of inst.rampas) {
+      if (claveObjetivo(r.objetivo) !== clave) { quedan.push(r); continue }
+      // En retorno, la rampa ya apunta al valor base; activa, lo guarda en base.
+      base ??= inst.fase === 'retorno' ? r.hasta : (r.base ?? r.desde)
+    }
+    inst.rampas = quedan
+  }
+  return base
+}
+
 /** Termina un evento (revierte con rampa si corresponde y ejecuta sus comandos finales). */
 export function terminarEvento(cat, se, ctx, inst) {
   const def = cat.porId[inst.id]
@@ -82,7 +109,7 @@ export function terminarEvento(cat, se, ctx, inst) {
   for (const c of def.alTerminar ?? []) ctx.ejecutar(sustituir(c, inst.parametros))
   if (def.revertir && inst.rampas.length) {
     inst.fase = 'retorno'
-    inst.rampas = inst.rampas.map((r) => ({ objetivo: r.objetivo, desde: leerObjetivo(ctx, r.objetivo), hasta: r.desde, t0: t, duracion: r.duracion }))
+    inst.rampas = inst.rampas.map((r) => ({ objetivo: r.objetivo, desde: leerObjetivo(ctx, r.objetivo), hasta: r.base ?? r.desde, t0: t, duracion: r.duracion }))
   } else inst.fase = 'terminado'
   ctx.evento('fin_perturbacion', { evento: inst.id })
 }

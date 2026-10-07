@@ -10,7 +10,7 @@ export function estadoIndicadores(t) {
     adt: 0, adtEnEspec: 0, fueraEspec: 0,
     kappa: { n: 0, s: 0, s2: 0, min: Infinity, max: -Infinity },
     pulpa: 0, rend: 0, visc: 0, rech: 0, // promedios ponderados por pulpa
-    madera: 0, alcali: 0, vapor: 0, // kg secos, kg NaOH, GJ
+    madera: 0, maderaM3: 0, alcali: 0, vapor: 0, // kg secos, m³ sólidos, kg NaOH, GJ
     licorEvap: 0, solidosEvap: 0, arrastre: 0, // m³, kg, kg de sólidos con la pulpa
     alarmas: 0, alarmasP1: 0, respuesta: { n: 0, s: 0 }, ultimoRegistro: 0,
     paradas: 0, alimentando: true,
@@ -30,8 +30,10 @@ export function acumular(ind, ctx, espec, dt) {
   ind.adt += adt
   const kappa = q?.kappa
   const enEspec = kappa !== undefined && kappa >= espec.kappa[0] && kappa <= espec.kappa[1] && (q.rechazos ?? 0) * 100 <= espec.rechazos_max
+  // Tiempo fuera de especificación: solo mientras se produce (una parada no cuenta).
+  const nominal = (modelo.config.caso_base.produccion.valor / 86400) * 1000 * 0.9
   if (enEspec) ind.adtEnEspec += adt
-  else ind.fueraEspec += dt
+  else if (pulpa > 0.05 * nominal) ind.fueraEspec += dt
   if (kappa !== undefined && pulpa > 0) {
     const k = ind.kappa
     k.n++; k.s += kappa; k.s2 += kappa * kappa
@@ -42,8 +44,12 @@ export function acumular(ind, ctx, espec, dt) {
     ind.rech += q.rechazos * pulpa * dt
   }
   // Madera real: velocidad del medidor por la masa por revolución con la densidad real.
-  const W = (estado.ajustes.astillas?.velocidad ?? 0) * kgPorRevolucion(modelo.equipos, estado.fuentes.astillas.densidad)
+  // (con el tope del medidor y sin madera si el silo está vacío, como en equipos.js).
+  const densidad = estado.fuentes.astillas.densidad
+  const rpm = Math.min(estado.ajustes.astillas?.velocidad ?? 0, modelo.equipos.medidor.rpmMax)
+  const W = (estado.equipos.silo?.masa ?? 1) > 0 ? rpm * kgPorRevolucion(modelo.equipos, densidad) : 0
   ind.madera += W * dt
+  ind.maderaM3 = (ind.maderaM3 ?? 0) + (W * dt) / densidad // m³ sólidos con la densidad real
   const iOH = modelo.idx.OH
   for (const c of modelo.corrientes) {
     const ec = estado.corrientes[c.id]
@@ -88,7 +94,7 @@ export function resumen(ind, economia, incidentes = {}) {
   const desv = k.n > 1 ? Math.sqrt(Math.max(0, k.s2 / k.n - media * media)) : null
   const adt = Math.max(ind.adt, 1e-9)
   const horas = ind.t / 3600
-  const m3madera = ind.madera / 480 // m³ sólidos con la densidad de referencia del caso base
+  const m3madera = ind.maderaM3 ?? ind.madera / 480 // m³ sólidos (partidas antiguas: densidad de referencia)
   const r = {
     horas,
     adt: ind.adt,

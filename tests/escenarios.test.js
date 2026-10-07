@@ -54,6 +54,36 @@ describe('eventos', () => {
   })
 })
 
+describe('eventos superpuestos y comandos que fallan', () => {
+  const humedad = (j) => j.estadoInterno().fuentes.astillas.humedad
+  it('dos eventos sobre la misma variable vuelven al valor de antes de ambos', () => {
+    const j = juego()
+    const h0 = humedad(j)
+    j.enviarComando({ tipo: 'evento', accion: 'iniciar', id: 'lluvia' })
+    j.avanzar(4000)
+    j.enviarComando({ tipo: 'evento', accion: 'iniciar', id: 'lluvia_fuerte' })
+    j.avanzar(4000)
+    const alta = humedad(j)
+    expect(alta).toBeGreaterThan(h0)
+    j.avanzar(24 * H)
+    expect(j.leerEstado().escenario.eventosActivos).toEqual([])
+    expect(humedad(j)).toBeCloseTo(h0, 4)
+  })
+  it('la parada del lavado devuelve el agua de lavado al terminar', () => {
+    const j = juego()
+    const lavado = j.estadoInterno().servicios.lavado
+    j.enviarComando({ tipo: 'evento', accion: 'iniciar', id: 'parada_lavado' })
+    j.avanzar(60)
+    expect(j.estadoInterno().servicios.lavado).toBe(0)
+    j.avanzar(2 * H)
+    expect(j.estadoInterno().servicios.lavado).toBeCloseTo(lavado, 6)
+  })
+  it('un parámetro de evento inválido se rechaza al enviarlo', () => {
+    const j = juego()
+    expect(() => j.enviarComando({ tipo: 'evento', accion: 'iniciar', id: 'valvula_pegada', parametros: { lazo: 'NO-EXISTE' } })).toThrow(/Parámetro inválido/)
+  })
+})
+
 describe('generador aleatorio', () => {
   it('genera eventos con la frecuencia de la dificultad y es determinista', () => {
     const a = juego()

@@ -1,0 +1,26 @@
+{
+  "_descripcion": "Dimensiones de equipos. Provisionales (preguntas P1, P2, P15 de docs/PLAN.md), dimensionadas para que la residencia del caso base quede en 4-6 h.",
+  "vasos": {
+    "imp": {
+      "tramos": [
+        { "altura": { "valor": 23, "unidad": "m", "origen": "supuesto" },
+          "diametro": { "valor": 7.5, "unidad": "m", "origen": "supuesto" } }
+      ]
+    },
+    "dig": {
+      "tramos": [
+        { "altura": { "valor": 30, "unidad": "m", "origen": "supuesto" },
+          "diametro": { "valor": 9.0, "unidad": "m", "origen": "supuesto" } },
+        { "altura": { "valor": 27, "unidad": "m", "origen": "supuesto" },
+          "diametro": { "valor": 10.0, "unidad": "m", "origen": "supuesto" } }
+      ]
+    }
+  },
+  "tubos": {
+    "circ_tope_imp": { "valor": 10, "unidad": "m3", "origen": "supuesto" },
+    "transferencia": { "valor": 12, "unidad": "m3", "origen": "supuesto", "nota": "≈ 30 s a caudal nominal" },
+    "retorno_transf": { "valor": 15, "unidad": "m3", "origen": "supuesto" },
+    "circ_sup": { "valor": 15, "unidad": "m3", "origen": "supuesto" },
+    "circ_inf": { "valor": 15, "unidad": "m3", "origen": "supuesto" }
+  }
+}

@@ -1,17 +1,20 @@
 # MODELO DE PROCESO — Digestor continuo Lo-Solids, eucalipto
 
-Versión: Fase 0 (estructura del modelo; aún sin implementación).
+Versión: Fase 1a (transporte, hidráulica y energía implementados; la cinética
+de cocción es de la Fase 1b). La sección 18 resume qué está implementado.
 Este documento se actualiza en cada cambio del modelo. Cada parámetro
 mencionado vive en `config/*.json` con su unidad y su origen
-(`literatura`, `calibrado`, `supuesto`, `planta`). Los valores numéricos que
-aparecen aquí son **orientativos** para dimensionar y probar; los que valen
-son los de configuración.
+(`literatura`, `calibrado`, `supuesto`, `especificacion`, `planta`). Los
+valores numéricos que aparecen aquí son **orientativos** para dimensionar y
+probar; los que valen son los de configuración.
 
-Convenciones: SI interno (s, m, kg, Pa, K, J). Concentraciones en licor en
-mol/L (= kmol/m³). Temperaturas mostradas en °C, internas en K
-(T[K] = T[°C] + 273,15). Masas de madera en base seca (bs). "Sobre madera"
-significa sobre madera seca alimentada. ADt = tonelada secada al aire
-(90 % sequedad).
+Convenciones internas (`src/sim/unidades.js`): s, m, m³, m³/s, kg, kg/s, kJ,
+kW. Temperaturas internas en **°C** (se pasan a K solo dentro de las
+expresiones de Arrhenius y del factor H). Concentraciones en licor: mol/L
+para OH⁻ y HS⁻, g/L (= kg/m³) para sólidos. La configuración puede usar
+unidades de planta (m³/h, g/L como NaOH o Na₂O, %, MW…); el cargador las
+convierte. Masas de madera en base seca (bs). "Sobre madera" significa sobre
+madera seca alimentada. ADt = tonelada secada al aire (90 % sequedad).
 
 ---
 
@@ -43,26 +46,61 @@ nombres de zonas: recorre la lista de zonas y puntos definidos ahí.
 
 ## 2. Discretización
 
+El modelo combina dos representaciones:
+
+- **Licor libre: celdas fijas (eulerianas)** a lo alto de cada vaso. Cada
+  celda tiene su volumen de licor libre, temperatura y concentraciones.
+- **Astillas: parcelas que se mueven (lagrangianas).** La columna es una
+  pila de parcelas; cada parcela lleva su madera, su licor retenido, su
+  temperatura, su factor H y su edad. Al retirar astillas por el fondo, toda
+  la pila baja. Esto da flujo pistón exacto (el escalón de una perturbación
+  llega al soplado sin "suavizarse" por error numérico), maneja de forma
+  natural el nivel de la columna, los vasos parcialmente llenos y la columna
+  detenida (la parcela sigue cocinándose donde está).
+
+En la Fase 0 se había propuesto un esquema euleriano TVD para las astillas;
+se reemplazó por las parcelas porque elimina la dispersión numérica del
+tiempo muerto, que es central para el juego.
+
 ### 2.1 Celdas
 - Impregnador: `N_imp ≥ 20` celdas; digestor: `N_dig ≥ 60` celdas
-  (configurables). Altura `Δz_j`, área `A_j` (permite vasos cónicos por
-  tramos), volumen `V_j = A_j Δz_j`.
-- Cada malla, separador, punto de adición y boquilla se asigna a una celda.
-- La línea de transferencia y la de soplado son tubos de transporte puro
-  con retardo `τ = V_tubo / Q` (cola de paquetes, flujo pistón exacto).
+  (configurables). Altura `Δz` igual en todas; área `A_j` integrada de los
+  tramos del vaso (permite vasos escalonados o cónicos), `V_j = A_j Δz`.
+- Cada malla, separador, punto de adición y boquilla se asigna a la celda que
+  contiene su altura (`z` desde el tope, en `config/topologia.json`).
+- Tuberías con volumen retenido (transferencia, retornos de circulación):
+  cola de paquetes con flujo pistón exacto, retardo `τ = V_tubo / Q`. Su
+  contenido forma parte del inventario.
 
-### 2.2 Fases en cada celda
-1. **Sólido (astilla):** masas de componentes de madera.
-2. **Licor retenido:** el que llena los poros de la astilla. Volumen
-   `V_r = m_madera · (1/ρ_básica − 1/ρ_pared)` con ρ_pared ≈ 1 500 kg/m³
-   (supuesto S-11), modificado por la pérdida de masa durante la cocción.
-3. **Licor libre:** el resto del volumen de la celda ocupado por líquido,
-   `V_f = V_j − V_sólido − V_r` (en un vaso hidráulico lleno).
+### 2.2 Parcelas de astillas
+- Tamaño: la masa objetivo de una parcela es la masa de astillas de una
+  celda dividida por `parcelas_por_celda` (3 por defecto). Las astillas que
+  entran por el tope se funden con la parcela superior mientras esta no
+  alcance la masa objetivo; luego se abre una nueva.
+- Cada parcela ocupa un volumen de vaso `vol / s_col`, donde `vol` es el
+  volumen de astilla (con poros) y `s_col` la fracción del vaso ocupada por
+  astillas (`hidraulica.fraccion_astillas_columna`; constante en la Fase 1a,
+  variable con la compactación en la Fase 1c).
+- Las parcelas se apilan desde el fondo; la fracción de cada parcela que cae
+  en cada celda (`f_ij`) se calcula en cada paso. El nivel de astillas es la
+  altura del tope de la pila.
 
-Se asume **una sola temperatura por celda** (astilla, licor retenido y libre
-en equilibrio térmico; supuesto S-03).
+Fases líquidas:
+1. **Licor retenido** (dentro de la parcela): llena los poros de la astilla.
+   Volumen de poros `V_p = m · (1/ρ_básica − 1/ρ_pared)` (ρ_pared, S-11).
+   Al entrar, los poros tienen el agua de la humedad de la astilla y aire.
+2. **Licor libre** (en la celda): `V_f,j ≤ V_j − Σ_i f_ij · vol_i`.
 
-### 2.3 Estado por celda
+Temperatura: cada celda tiene la temperatura de su licor libre y cada parcela
+la suya; se acercan con una transferencia de calor rápida (constante de
+tiempo ≈ 11 s para 4 mm, `hidraulica.k_calor`), de modo que en la práctica
+se cumple el supuesto S-03 sin imponerlo.
+
+### 2.3 Estado (completo, incluye lo de las Fases 1b y 1c)
+
+Por parcela (sólido y licor retenido) y por celda (licor libre). En la
+Fase 1a están implementados: masa, volumen, poros, licor retenido, T,
+especies del licor, H, edad y marca (trazador del sólido).
 
 | Símbolo | Descripción | Unidad |
 |---------|-------------|--------|
@@ -82,8 +120,8 @@ en equilibrio térmico; supuesto S-03).
 | para cada licor (r, f): [OH⁻], [HS⁻] | Iones activos | mol/L |
 | para cada licor: LD, XD, CD, OD | Lignina, xilano, otros carbohidratos/ácidos y extraíbles disueltos | kg/m³ |
 | para cada licor: SI | Sólidos inorgánicos inertes (Na₂CO₃, Na₂SO₄, NaCl…) | kg/m³ |
-| para cada licor: Na | Sodio total (para cerrar el balance inorgánico) | mol/L |
-| T | Temperatura | K |
+| para cada licor: TR | Trazador (pruebas y didáctica) | g/L |
+| T | Temperatura | °C |
 | ε, σ | Fracción de líquido de la columna; esfuerzo efectivo sobre la columna | —, Pa |
 
 Clases de tamaño k: sobre espesor, aceptadas, palillos, finos (cada una con
@@ -163,62 +201,88 @@ circulación superior e inferior: fracciones que suman 1 (lazo de reparto).
 ## 5. Transporte e hidráulica dentro de los vasos
 
 ### 5.1 Astillas (flujo pistón)
-Velocidad de la columna en la celda j:
+Cada paso lento (`src/sim/columna.js`):
+1. Se retira por el fondo la masa `ṁ_salida · dt` (raspador del impregnador
+   o soplado del digestor); la parcela del fondo se divide si hace falta.
+2. Se agregan por el tope las astillas que llegan (medidor de astillas o
+   línea de transferencia).
+3. Se recalcula la ubicación de la pila: la parcela i ocupa el intervalo de
+   volumen de vaso `[V_bajo,i , V_bajo,i + vol_i/s_col]` medido desde el fondo,
+   que se reparte entre las celdas (fracciones `f_ij`).
 
-```
-v_j = ṁ_w,j / (ρ_col,j · A_j)       ρ_col = masa de madera seca por m³ de vaso
-```
-
-Las cantidades por masa de madera (componentes, φ_k, H, θ, licor retenido)
-se transportan con `v_j` usando un esquema de volúmenes finitos de segundo
-orden con limitador (van Leer), para conservar el frente y el tiempo
-muerto. La masa sale por el raspador (impregnador) o por el soplado
-(digestor). Si la columna está detenida (`v = 0`) la cinética sigue
-ocurriendo (sobrecocción, sección 6.7 de la especificación).
+La velocidad de la columna en cada celda resulta de esto:
+`v_j = ṁ_salida / (ρ_col · A_j)` con `ρ_col = s_col · ρ_básica`. Si no se
+retira nada, la columna queda detenida y las parcelas siguen acumulando
+factor H (y, desde la Fase 1b, cocinándose).
 
 ### 5.2 Licor libre (balance hidráulico)
-En un vaso hidráulico lleno, para cada celda:
+`src/sim/hidraulica.js`. En cada paso, con la capacidad de licor libre de
+cada celda `cap_j = V_j − Σ_i f_ij vol_i`:
+
+1. Volumen total nuevo = anterior + adiciones − extracciones − penetración −
+   salida de fondo. Si se pide sacar más de lo que hay, se reducen las
+   salidas en proporción.
+2. Si supera la capacidad total, el vaso está **lleno** y el exceso sale por
+   la **corriente de cierre** del vaso (`corriente_cierre` en la topología:
+   el separador del impregnador y la extracción principal del digestor). En
+   la Fase 1c esto se reemplaza por el balance de presión (sección 8): el
+   exceso eleva la presión y los lazos actúan sobre las válvulas. Sin
+   corriente de cierre, el exceso sale como rebalse por el tope.
+3. Si no está lleno, el licor ocupa las celdas desde el fondo; lo que entra
+   en celdas secas cae a la superficie del licor.
+4. Caudal por cara, integrado desde el tope (positivo hacia abajo):
 
 ```
-F_{j+½} = F_{j−½} + Σ adiciones_j − Σ extracciones_j
-          − (d/dt)(V_f + V_r)_j − (retenido que entra/sale con la astilla)
+F_{j+½} = F_{j−½} + adiciones_j − extracciones_j − penetración_j − (V_f,j,nuevo − V_f,j,ant)/dt
 ```
 
-F es el caudal volumétrico de licor libre a través de la cara inferior de
-la celda (positivo hacia abajo), relativo al vaso. Se integra desde el
-tope. El signo resultante define el sentido del flujo: en la zona de
-lavado, el filtrado inyectado en el fondo sube hacia las mallas de
-extracción final (contracorriente) sin que el modelo lo imponga.
+con `F_tope = 0` y `F_fondo` = salida de fondo. El signo define el sentido
+del flujo: en el caso base el filtrado del fondo sube hacia las mallas de
+extracción final (contracorriente), y la extracción principal aspira licor
+desde arriba y desde abajo (efecto Lo-Solids), sin que el modelo lo imponga.
 
-El desbalance global (lo que entra menos lo que sale del vaso) no se
-reparte en las celdas: va a la presión (sección 8).
+Los escalares del licor libre (T y concentraciones) se transportan con un
+esquema contra la corriente **implícito** (`src/sim/transporte.js`):
+conservativo, sin valores negativos y estable con cualquier paso y con
+celdas casi vacías. Lo que sale por extracciones, penetración, cierre y
+fondo sale con la concentración nueva de su celda, así que el balance cierra
+exactamente. La dispersión numérica de primer orden en el licor representa
+en parte la dispersión real por canalización (limitación L-09).
 
-Los escalares del licor libre se transportan con esquema contra la
-corriente de primer orden (la dispersión numérica representa en parte la
-dispersión real por canalización; limitación documentada).
-
-**Canalización** (perturbación): una fracción β_can del caudal de licor en
-una zona pasa sin contacto con la columna; reduce el intercambio
+**Canalización** (perturbación, Fase 5): una fracción β_can del caudal de
+licor en una zona pasa sin contacto con la columna; reduce el intercambio
 libre ↔ retenido y la eficiencia de lavado.
 
-### 5.3 Difusión libre ↔ retenido
-Para cada especie disuelta c (OH⁻, HS⁻, LD, XD, CD, OD, SI):
+### 5.3 Penetración y difusión libre ↔ retenido
+
+**Penetración** (llenado de los poros con licor): la parte de cada parcela
+que está en una celda con licor toma licor libre a razón de
 
 ```
-Ṅ_c = (k_D · a_esp) · V_r · (c_f − c_r)          [mol/s o kg/s]
-k_D · a_esp = D_eff(T, OH) / (δ_ef / 2)² · s_forma
-D_eff = D_ref · exp(−E_D/R · (1/T − 1/T_ref)) · ECCSA(OH)
+dV_r/dt = k_pen(T) · (V_p − V_r),    k_pen = k_ref · exp(−E/R · (1/T − 1/T_ref))
+```
+
+En la Fase 1b se agregan la calidad de vaporización, el álcali y el espesor
+por clase de tamaño (sección 6.9).
+
+**Difusión** de cada especie (OH⁻, HS⁻, LD, XD, CD, OD, SI, TR):
+
+```
+dc_r/dt = k_D · (c_f − c_r)
+k_D = 3 · D_eff / L²          L = espesor/2 (lámina, fuerza impulsora lineal de Glueckauf)
+D_eff = D_ref · exp(−E_D/R · (1/T − 1/T_ref)) · ECCSA([OH⁻]_r) · factor_especie
 ECCSA = e_min + (e_max − e_min) · [OH⁻]/([OH⁻] + K_e)
 ```
 
-δ_ef = espesor medio ponderado por masa de las clases. Modelo de fuerza
-impulsora lineal (sin perfil interno en la astilla; limitación L-02).
-La dependencia de ECCSA con la alcalinidad sigue la estructura descrita
-por Stone (1957); parámetros `supuesto`.
+**Calor**: `dT_astilla/dt = k_calor · (T_licor − T_astilla)`.
 
-Además, la entrada inicial de licor a la astilla (penetración) arrastra
-licor libre al retenido hasta llenar el volumen de poros disponible
-(proporcional a 1 − φ̄).
+Las tres transferencias se integran **implícitamente**, acoplando el licor
+libre de cada celda con todas las porciones de parcela que hay en ella
+(solución cerrada en `src/sim/intercambio.js`; versión optimizada en
+`vaso.js`). Conserva exactamente Σ C·x y es estable con cualquier paso.
+Sin perfil de concentración dentro de la astilla (limitación L-02). La
+dependencia de ECCSA con la alcalinidad sigue la estructura descrita por
+Stone (1957); todos los parámetros son `supuesto`.
 
 ---
 
@@ -431,21 +495,28 @@ Sirven para puntaje y alarmas de calidad; no pretenden ser cuantitativos.
 
 ## 7. Energía (`config/energia.json`)
 
-Por celda:
+Entalpía con referencia 0 °C: licor `ρ·cp·V·T`, parcela
+`(m·cp_madera + ρ·cp·V_r)·T`. El licor libre lleva la temperatura como un
+escalar más del transporte; las parcelas, la suya (sección 5.3). Pérdidas al
+ambiente por vaso, repartidas por volumen de celda:
 
 ```
-d/dt[(m_w·cp_w + ρ_l·(V_r+V_f)·cp_l) · T] = Σ entradas·h − Σ salidas·h
-                                            − UA_pérd · (T − T_amb)
+dT_j/dt = −UA_j · (T_j − T_amb) / (ρ·cp·V_f,j)        (integración exacta)
 ```
 
-- cp madera ≈ 1,4 kJ/kg·K; cp licor ≈ 3,8 kJ/kg·K, función de sólidos
-  disueltos (supuesto S-12).
+- cp madera 1,4 kJ/kg·K; licor ρ = 1 050 kg/m³, cp = 3,8 kJ/kg·K,
+  **constantes** en la Fase 1a (supuesto S-12; la dependencia con los
+  sólidos disueltos queda para la Fase 1c). La humedad de las astillas se
+  trata como licor con esas mismas propiedades (S-18).
 - Calor de reacción despreciado (supuesto S-04; la cocción kraft es
   levemente exotérmica).
 - Las circulaciones extraen licor de una malla, lo calientan y lo
   devuelven por el tubo central a la celda de retorno configurada.
 
-**Calentadores indirectos (vapor MP):**
+**Calentadores indirectos (vapor MP).** En la Fase 1a se simplifican a
+"llevar la corriente a `T_salida` con una potencia máxima `Q_max`"
+(`config/energia.json`); la potencia entregada queda en la contabilidad de
+energía. Modelo completo (Fase 1c):
 
 ```
 Q = U·A · ΔT_ml(T_vap, T_in, T_out)
@@ -486,7 +557,7 @@ C_eff = V_liq · (β_liq + β_vaso) + V_gas / (γ · P)
 ```
 
 - β_liq ≈ 4,6·10⁻¹⁰ 1/Pa (agua); β_vaso por elasticidad del manto
-  (supuesto). Con 7 000 m³ llenos, un desbalance de 0,01 m³/s sube la
+  (supuesto). Con ≈ 4 000 m³ llenos, un desbalance de 0,01 m³/s sube la
   presión del orden de 0,02–0,04 bar/s: segundos a decenas de segundos,
   como pide la especificación.
 - V_gas > 0 en los estados de llenado y en la opción "fase vapor" (donde la
@@ -632,7 +703,14 @@ mínimas).
 | S-13 | Sin intercambio de especies entre clases de tamaño. |
 | S-14 | Álcali residual informado = 40·[OH⁻] (sin ácidos débiles). |
 | S-15 | Pérdidas de calor al ambiente con UA constante por vaso. |
-| S-16 | Valores provisionales de la tabla de preguntas P1–P18 del plan hasta que los confirmes. |
+| S-16 | Valores provisionales de la tabla de preguntas P1–P19 del plan (aceptados por el usuario para avanzar). |
+| S-17 | Fase 1a: con el vaso lleno, el exceso de licor sale por la corriente de cierre (separador del impregnador, extracción principal del digestor). Se reemplaza por el balance de presión en la Fase 1c. |
+| S-18 | La humedad de la astilla entra como licor retenido con las propiedades del licor (agua pura sin especies). |
+| S-19 | Fracción de astillas en la columna constante (40 %) hasta la Fase 1c (compactación). |
+| S-20 | Calentadores como temperatura de salida con potencia máxima hasta la Fase 1c (vapor, incrustación). |
+| S-21 | El caso base inicial parte con astillas ya impregnadas con el licor inicial del vaso; el estado estacionario se alcanza en ≈ 2 residencias (≈ 9 h). |
+| S-22 | El licor de impregnación (licor negro caliente a 150 °C) entra como fuente externa; en la Fase 1c se conecta a la extracción correspondiente. |
+| S-23 | Una tubería entre vasos entrega en cada paso el volumen que se le ingresó en el paso anterior (desfase de un paso lento, 5 s), lo que evita lazos algebraicos. |
 
 ## 16. Limitaciones conocidas
 
@@ -646,8 +724,30 @@ mínimas).
 | L-06 | Índices de blanqueabilidad y color cualitativos. |
 | L-07 | Compactación, colgamiento y raspadores con modelo simplificado. |
 | L-08 | Bombas de astillas sin hidráulica interna. |
+| L-09 | Dispersión numérica de primer orden en el licor libre (no en las astillas). |
+| L-10 | Resolución de la columna: una parcela ≈ 1/3 de celda (≈ 1,5 min de residencia en el impregnador, ≈ 2,5 min en el digestor). |
 
-## 17. Referencias (a verificar al implementar)
+## 17. Estado de implementación
+
+| Parte | Estado |
+|-------|--------|
+| Unidades, parámetros con origen, validación de configuración | Fase 1a ✔ |
+| Generador aleatorio con semilla y flujos separados | Fase 1a ✔ (aún sin uso en la física) |
+| Geometría de vasos por tramos, celdas | Fase 1a ✔ |
+| Columna lagrangiana de parcelas, nivel de astillas | Fase 1a ✔ (compactación constante) |
+| Balance hidráulico, sentido de flujo, vasos parciales, cierre | Fase 1a ✔ |
+| Transporte implícito del licor libre | Fase 1a ✔ |
+| Penetración, difusión, calor libre ↔ retenido | Fase 1a ✔ |
+| Tuberías con flujo pistón (transferencia, retornos) | Fase 1a ✔ |
+| Calentadores (simplificados), pérdidas al ambiente | Fase 1a ✔ |
+| Factor H por parcela | Fase 1a ✔ |
+| Contabilidad y cierre de balances | Fase 1a ✔ |
+| Guardar/cargar, determinismo, comandos con registro | Fase 1a ✔ |
+| Cinética (lignina, carbohidratos, HexA, viscosidad, álcali, impregnación por clase) | Fase 1b |
+| Calibración | Fase 1b |
+| Presión, alivio, vapor, flash, mallas, compactación, alimentación, propiedades del licor | Fase 1c |
+
+## 18. Referencias (a verificar al implementar)
 
 - Vroom, K. E. (1957). The "H" factor: a means of expressing cooking times
   and temperatures as a single variable. Pulp Pap. Mag. Can.

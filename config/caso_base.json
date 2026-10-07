@@ -1,0 +1,50 @@
+{
+  "_descripcion": "Caso base de operación (sección 7 de la especificación). Los caudales de licor y temperaturas de calentadores son provisionales (P7, P8) y se ajustarán en la calibración.",
+  "produccion": { "valor": 3000, "unidad": "ADt/d", "origen": "especificacion" },
+  "rendimiento_nominal": { "valor": 53.5, "unidad": "%", "origen": "especificacion", "nota": "solo para convertir producción en madera hasta la Fase 1b" },
+  "astillas": {
+    "humedad": { "valor": 47.5, "unidad": "%", "origen": "especificacion", "nota": "base húmeda" },
+    "T": { "valor": 95, "unidad": "°C", "origen": "supuesto", "nota": "después de la vaporización" }
+  },
+  "alcali": {
+    "carga_EA": { "valor": 18, "unidad": "%", "origen": "especificacion", "nota": "como NaOH sobre madera seca" },
+    "reparto": {
+      "lb_alim": { "valor": 50, "unidad": "%", "origen": "especificacion" },
+      "lb_transf": { "valor": 10, "unidad": "%", "origen": "especificacion" },
+      "lb_sup": { "valor": 20, "unidad": "%", "origen": "especificacion" },
+      "lb_inf": { "valor": 20, "unidad": "%", "origen": "especificacion" }
+    }
+  },
+  "caudales": {
+    "licor_imp": { "valor": 260, "unidad": "m3/h", "origen": "supuesto" },
+    "circ_tope_imp": { "valor": 230, "unidad": "m3/h", "origen": "supuesto" },
+    "transferencia": { "valor": 1080, "unidad": "m3/h", "origen": "supuesto", "nota": "licor libre que sale con las astillas" },
+    "retorno_transf": { "valor": 900, "unidad": "m3/h", "origen": "supuesto" },
+    "ext_superior": { "valor": 72, "unidad": "m3/h", "origen": "supuesto" },
+    "circ_sup": { "valor": 1000, "unidad": "m3/h", "origen": "supuesto" },
+    "fil_sup": { "valor": 144, "unidad": "m3/h", "origen": "supuesto" },
+    "circ_inf": { "valor": 1000, "unidad": "m3/h", "origen": "supuesto" },
+    "fil_inf": { "valor": 180, "unidad": "m3/h", "origen": "supuesto" },
+    "ext_final": { "valor": 720, "unidad": "m3/h", "origen": "supuesto" },
+    "fil_fondo": { "valor": 1110, "unidad": "m3/h", "origen": "supuesto" },
+    "dilucion": { "valor": 180, "unidad": "m3/h", "origen": "supuesto" },
+    "soplado": { "valor": 720, "unidad": "m3/h", "origen": "supuesto", "nota": "licor libre que sale con la pulpa" }
+  },
+  "temperaturas_calentadores": {
+    "retorno_transf": { "valor": 140, "unidad": "°C", "origen": "especificacion", "nota": "130-140 °C" },
+    "circ_sup": { "valor": 156, "unidad": "°C", "origen": "supuesto" },
+    "circ_inf": { "valor": 155, "unidad": "°C", "origen": "supuesto" }
+  },
+  "estado_inicial": {
+    "imp": {
+      "nivel_astillas": { "valor": 21.5, "unidad": "m", "origen": "supuesto", "nota": "desde el fondo" },
+      "T": { "valor": 115, "unidad": "°C", "origen": "supuesto" },
+      "licor": "licor_impregnacion"
+    },
+    "dig": {
+      "nivel_astillas": { "valor": 55, "unidad": "m", "origen": "supuesto", "nota": "desde el fondo" },
+      "T": { "valor": 148, "unidad": "°C", "origen": "supuesto" },
+      "licor": "licor_impregnacion"
+    }
+  }
+}

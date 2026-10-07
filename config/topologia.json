@@ -1,0 +1,380 @@
+{
+  "_descripcion": "Estructura del sistema de cocción: vasos, zonas y corrientes. Las alturas z se miden desde el tope de cada vaso. Valores provisionales (preguntas P1-P3 de docs/PLAN.md).",
+  "vasos": [
+    {
+      "id": "imp",
+      "nombre": "Impregnador",
+      "tipo": "hidraulico",
+      "celdas": 20,
+      "corriente_cierre": "imp_exceso",
+      "zonas": [
+        {
+          "id": "impregnacion",
+          "nombre": "Impregnación",
+          "desde": {
+            "valor": 0,
+            "unidad": "m",
+            "origen": "supuesto"
+          },
+          "hasta": {
+            "valor": 23,
+            "unidad": "m",
+            "origen": "supuesto"
+          }
+        }
+      ]
+    },
+    {
+      "id": "dig",
+      "nombre": "Digestor",
+      "tipo": "hidraulico",
+      "celdas": 60,
+      "corriente_cierre": "ext_principal",
+      "zonas": [
+        {
+          "id": "tope",
+          "nombre": "Tope y calentamiento",
+          "desde": {
+            "valor": 0,
+            "unidad": "m",
+            "origen": "supuesto"
+          },
+          "hasta": {
+            "valor": 9,
+            "unidad": "m",
+            "origen": "supuesto"
+          }
+        },
+        {
+          "id": "coccion_superior",
+          "nombre": "Cocción superior",
+          "desde": {
+            "valor": 9,
+            "unidad": "m",
+            "origen": "supuesto"
+          },
+          "hasta": {
+            "valor": 27,
+            "unidad": "m",
+            "origen": "supuesto"
+          }
+        },
+        {
+          "id": "coccion_inferior",
+          "nombre": "Cocción inferior",
+          "desde": {
+            "valor": 27,
+            "unidad": "m",
+            "origen": "supuesto"
+          },
+          "hasta": {
+            "valor": 47,
+            "unidad": "m",
+            "origen": "supuesto"
+          }
+        },
+        {
+          "id": "lavado",
+          "nombre": "Lavado en contracorriente",
+          "desde": {
+            "valor": 47,
+            "unidad": "m",
+            "origen": "supuesto"
+          },
+          "hasta": {
+            "valor": 57,
+            "unidad": "m",
+            "origen": "supuesto"
+          }
+        }
+      ]
+    }
+  ],
+  "corrientes": [
+    {
+      "id": "astillas",
+      "nombre": "Astillas desde el medidor",
+      "origen": {
+        "fuente": "astillas"
+      },
+      "destino": {
+        "vaso": "imp",
+        "tope": true
+      }
+    },
+    {
+      "id": "lb_alim",
+      "nombre": "Licor blanco a la alimentación",
+      "origen": {
+        "fuente": "licor_blanco"
+      },
+      "destino": {
+        "vaso": "imp",
+        "tope": true
+      }
+    },
+    {
+      "id": "licor_imp",
+      "nombre": "Licor de impregnación (licor negro caliente)",
+      "origen": {
+        "fuente": "licor_impregnacion"
+      },
+      "destino": {
+        "vaso": "imp",
+        "tope": true
+      }
+    },
+    {
+      "id": "circ_tope_imp",
+      "nombre": "Circulación de tope del impregnador",
+      "origen": {
+        "vaso": "imp",
+        "z": {
+          "valor": 1,
+          "unidad": "m",
+          "origen": "supuesto"
+        }
+      },
+      "destino": {
+        "vaso": "imp",
+        "tope": true
+      }
+    },
+    {
+      "id": "imp_exceso",
+      "nombre": "Exceso de licor del separador del impregnador",
+      "origen": {
+        "vaso": "imp",
+        "z": {
+          "valor": 1,
+          "unidad": "m",
+          "origen": "supuesto"
+        }
+      },
+      "destino": {
+        "sumidero": "estanque_licor_nivel"
+      }
+    },
+    {
+      "id": "transferencia",
+      "nombre": "Línea de transferencia",
+      "origen": {
+        "vaso": "imp",
+        "fondo": true
+      },
+      "destino": {
+        "vaso": "dig",
+        "tope": true
+      }
+    },
+    {
+      "id": "retorno_transf",
+      "nombre": "Retorno de la circulación de transferencia",
+      "origen": {
+        "vaso": "dig",
+        "z": {
+          "valor": 1,
+          "unidad": "m",
+          "origen": "supuesto"
+        }
+      },
+      "destino": {
+        "vaso": "imp",
+        "z": {
+          "valor": 22.5,
+          "unidad": "m",
+          "origen": "supuesto"
+        }
+      }
+    },
+    {
+      "id": "lb_transf",
+      "nombre": "Licor blanco a la transferencia",
+      "origen": {
+        "fuente": "licor_blanco"
+      },
+      "destino": {
+        "unir": "retorno_transf"
+      }
+    },
+    {
+      "id": "ext_superior",
+      "nombre": "Extracción superior",
+      "origen": {
+        "vaso": "dig",
+        "z": {
+          "valor": 3,
+          "unidad": "m",
+          "origen": "supuesto"
+        }
+      },
+      "destino": {
+        "sumidero": "flash"
+      }
+    },
+    {
+      "id": "circ_sup",
+      "nombre": "Circulación de cocción superior",
+      "origen": {
+        "vaso": "dig",
+        "z": {
+          "valor": 9,
+          "unidad": "m",
+          "origen": "supuesto"
+        }
+      },
+      "destino": {
+        "vaso": "dig",
+        "z": {
+          "valor": 9,
+          "unidad": "m",
+          "origen": "supuesto"
+        }
+      }
+    },
+    {
+      "id": "lb_sup",
+      "nombre": "Licor blanco a la circulación superior",
+      "origen": {
+        "fuente": "licor_blanco"
+      },
+      "destino": {
+        "unir": "circ_sup"
+      }
+    },
+    {
+      "id": "fil_sup",
+      "nombre": "Filtrado a la circulación superior",
+      "origen": {
+        "fuente": "filtrado"
+      },
+      "destino": {
+        "unir": "circ_sup"
+      }
+    },
+    {
+      "id": "ext_principal",
+      "nombre": "Extracción principal (inferior)",
+      "origen": {
+        "vaso": "dig",
+        "z": {
+          "valor": 27,
+          "unidad": "m",
+          "origen": "supuesto"
+        }
+      },
+      "destino": {
+        "sumidero": "flash"
+      }
+    },
+    {
+      "id": "circ_inf",
+      "nombre": "Circulación de cocción inferior",
+      "origen": {
+        "vaso": "dig",
+        "z": {
+          "valor": 31,
+          "unidad": "m",
+          "origen": "supuesto"
+        }
+      },
+      "destino": {
+        "vaso": "dig",
+        "z": {
+          "valor": 31,
+          "unidad": "m",
+          "origen": "supuesto"
+        }
+      }
+    },
+    {
+      "id": "lb_inf",
+      "nombre": "Licor blanco a la circulación inferior",
+      "origen": {
+        "fuente": "licor_blanco"
+      },
+      "destino": {
+        "unir": "circ_inf"
+      }
+    },
+    {
+      "id": "fil_inf",
+      "nombre": "Filtrado a la circulación inferior",
+      "origen": {
+        "fuente": "filtrado"
+      },
+      "destino": {
+        "unir": "circ_inf"
+      }
+    },
+    {
+      "id": "ext_final",
+      "nombre": "Extracción final (mallas de lavado)",
+      "origen": {
+        "vaso": "dig",
+        "z": {
+          "valor": 47,
+          "unidad": "m",
+          "origen": "supuesto"
+        }
+      },
+      "destino": {
+        "sumidero": "flash"
+      }
+    },
+    {
+      "id": "fil_fondo",
+      "nombre": "Filtrado frío de lavado (boquillas)",
+      "origen": {
+        "fuente": "filtrado"
+      },
+      "destino": {
+        "vaso": "dig",
+        "z": {
+          "valor": 56,
+          "unidad": "m",
+          "origen": "supuesto"
+        }
+      }
+    },
+    {
+      "id": "dilucion",
+      "nombre": "Dilución del fondo",
+      "origen": {
+        "fuente": "filtrado"
+      },
+      "destino": {
+        "vaso": "dig",
+        "z": {
+          "valor": 56.9,
+          "unidad": "m",
+          "origen": "supuesto"
+        }
+      }
+    },
+    {
+      "id": "soplado",
+      "nombre": "Soplado",
+      "origen": {
+        "vaso": "dig",
+        "fondo": true
+      },
+      "destino": {
+        "sumidero": "estanque_soplado"
+      }
+    }
+  ],
+  "indicadores": {
+    "_descripcion": "Corrientes que definen los indicadores de operación.",
+    "alimentacion": {
+      "vaso": "imp",
+      "astillas": "astillas"
+    },
+    "soplado": "soplado",
+    "salida_impregnador": "transferencia",
+    "dilucion_fondo": [
+      "fil_fondo",
+      "dilucion"
+    ]
+  }
+}

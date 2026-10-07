@@ -1,0 +1,18 @@
+{
+  "name": "simulador-operador-digestor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Simulador de operador de digestor continuo Lo-Solids (eucalipto)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "caso-base": "node herramientas/caso-base.js"
+  },
+  "devDependencies": {
+    "vite": "^8.0.0",
+    "vitest": "^5.0.0"
+  }
+}

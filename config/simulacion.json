@@ -1,0 +1,7 @@
+{
+  "_descripcion": "Parámetros numéricos de integración. No son parámetros de proceso.",
+  "dt_rapido": { "valor": 0.2, "unidad": "s", "origen": "supuesto", "nota": "presión, válvulas, PID (Fase 1c/2)" },
+  "dt_lento": { "valor": 5, "unidad": "s", "origen": "supuesto", "nota": "celdas, transporte, cinética; múltiplo entero de dt_rapido" },
+  "parcelas_por_celda": 3,
+  "semilla": 20261007
+}

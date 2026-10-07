@@ -1,9 +1,7 @@
-# PLAN DE TRABAJO — Fase 0
+# PLAN DE TRABAJO
 
-Estado: **propuesta, pendiente de aprobación**. No se escribe código del
-simulador hasta que apruebes este plan, los supuestos de `docs/MODELO.md` y
-respondas (o aceptes los valores provisionales de) las preguntas de la
-sección 6.
+Estado: **aprobado** con los valores provisionales de la sección 6.
+Fase actual: **1a terminada** (ver sección 8).
 
 Documento rector: `docs/ESPECIFICACION.md`. Si algo de aquí lo contradice,
 manda la especificación y este plan se corrige.
@@ -130,14 +128,16 @@ Cada parámetro de proceso es un objeto:
                       "nota": "eucalipto; reemplazar con datos de nitens" }
 ```
 
-`origen` ∈ {`literatura`, `calibrado`, `supuesto`, `planta`} (`planta` para
-cuando reemplaces con tus datos). Un validador propio (sin dependencias)
-revisa unidades, rangos y que no falte nada al cargar. Archivos previstos:
-`topologia.json`, `equipos.json` (dimensiones), `madera.json`,
-`licores.json`, `cinetica.json`, `hidraulica.json`, `energia.json`,
-`caso_base.json`, `instrumentos.json`, `lazos.json`, `alarmas.json`,
-`enclavamientos.json`, `eventos.json`, `simulacion.json` (pasos de
-integración, número de celdas), y más adelante `sala.json`, `campana.json`.
+`origen` ∈ {`literatura`, `calibrado`, `supuesto`, `especificacion`, `planta`}
+(`especificacion` para los valores del caso base de la especificación;
+`planta` para cuando reemplaces con tus datos). Un validador propio (sin
+dependencias) revisa unidades, orígenes y valores al cargar, y cada módulo
+informa con su ruta el parámetro que falte. Archivos: `simulacion.json`
+(pasos de integración, parcelas), `topologia.json`, `equipos.json`
+(dimensiones), `madera.json`, `licores.json`, `hidraulica.json`,
+`energia.json`, `caso_base.json` (Fase 1a); `cinetica.json` (1b);
+`instrumentos.json`, `lazos.json`, `alarmas.json`, `enclavamientos.json`,
+`eventos.json` (Fases 2 y 5); `sala.json`, `campana.json` (Fases 4 y 5).
 
 ---
 
@@ -272,8 +272,8 @@ reemplazas después.
 
 | # | Pregunta | Provisional |
 |---|----------|-------------|
-| P1 | Dimensiones del impregnador (diámetro, altura útil) | Ø 9 m × 24 m (≈ 1 500 m³) |
-| P2 | Dimensiones del digestor y si es cónico por tramos | Ø 11,5 m arriba / 12,5 m abajo, 62 m útiles (≈ 7 000 m³) |
+| P1 | Dimensiones del impregnador (diámetro, altura útil) | Ø 7,5 m × 23 m (≈ 1 000 m³) — corregido en la Fase 1a para dar 45–60 min |
+| P2 | Dimensiones del digestor y si es cónico por tramos | Ø 9 m (30 m) + Ø 10 m (27 m) (≈ 4 000 m³) — corregido en la Fase 1a: con 40 % de astillas en la columna, el valor de la Fase 0 daba residencias de más de 6 h |
 | P3 | Altura de cada juego de mallas y separadores | Proporcional a los tiempos del caso base (calculado) |
 | P4 | Presión de operación del impregnador y del tope del digestor | Impregnador 6 bar(g), digestor 5,5 bar(g) |
 | P5 | ¿Con qué corriente se controla la presión del digestor en tu planta? | Válvula en la línea de extracción principal a flash 1, con licor de reposición a presión como respaldo |
@@ -299,3 +299,22 @@ reemplazas después.
 Pantallas, 3D, misiones, sonidos, terreno y otras áreas. La Fase 1 deja la
 arquitectura lista para ellas (interfaz única, estados de operación,
 eventos instructor) pero no las implementa.
+
+---
+
+## 8. Avance
+
+### Fase 1a — terminada
+- Proyecto Vite + Vitest; `npm test`, `npm run caso-base`, `npm run build`.
+- Núcleo en `src/sim/` (sin DOM ni Three.js), configuración en `config/`.
+- Columna de astillas lagrangiana (parcelas) en vez del esquema TVD
+  propuesto: flujo pistón exacto (ver MODELO.md §2).
+- Pruebas: balances (masa y energía, ~10⁻¹³), factor H, tiempos muertos vs
+  ritmo, sentido de los flujos, vasos vacíos/parciales/fríos, columna
+  detenida, determinismo con distinta partición del tiempo, guardar/cargar,
+  independencia de capas.
+- Ajustes del caso base provisional para quedar en los rangos de la
+  sección 7 (ver MODELO.md S-16 a S-23). El exceso de licor del impregnador
+  al estanque de nivel (≈ 170 m³/h) es el costo de llevar la impregnación a
+  110–120 °C con licor negro caliente; se revisará con la alimentación
+  completa en la Fase 1c.

@@ -1,0 +1,13 @@
+{
+  "_descripcion": "Energía: ambiente, pérdidas y calentadores (simplificados en la Fase 1a: temperatura de salida con potencia máxima; vapor e incrustación en la Fase 1c).",
+  "T_ambiente": { "valor": 20, "unidad": "°C", "origen": "supuesto" },
+  "UA_perdidas": {
+    "imp": { "valor": 5, "unidad": "kW/K", "origen": "supuesto" },
+    "dig": { "valor": 15, "unidad": "kW/K", "origen": "supuesto" }
+  },
+  "calentadores": {
+    "retorno_transf": { "Q_max": { "valor": 30, "unidad": "MW", "origen": "supuesto" } },
+    "circ_sup": { "Q_max": { "valor": 45, "unidad": "MW", "origen": "supuesto" } },
+    "circ_inf": { "Q_max": { "valor": 45, "unidad": "MW", "origen": "supuesto" } }
+  }
+}

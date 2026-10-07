@@ -1,0 +1,16 @@
+{
+  "_descripcion": "Madera: Eucalyptus nitens (única especie). Todos los valores provisionales (pregunta P10 de docs/PLAN.md). La composición se usa desde la Fase 1b.",
+  "especie": "Eucalyptus nitens",
+  "densidad_basica": { "valor": 480, "unidad": "kg/m3", "origen": "supuesto" },
+  "densidad_pared_celular": { "valor": 1500, "unidad": "kg/m3", "origen": "supuesto", "nota": "S-11" },
+  "cp": { "valor": 1.4, "unidad": "kJ/(kg·K)", "origen": "supuesto", "nota": "madera seca" },
+  "espesor_medio": { "valor": 4, "unidad": "mm", "origen": "supuesto" },
+  "reactividad": { "valor": 1.0, "unidad": "-", "origen": "supuesto" },
+  "composicion": {
+    "lignina": { "valor": 25, "unidad": "%", "origen": "supuesto" },
+    "glucano": { "valor": 46, "unidad": "%", "origen": "supuesto" },
+    "xilano": { "valor": 15, "unidad": "%", "origen": "supuesto" },
+    "otros_carbohidratos": { "valor": 4, "unidad": "%", "origen": "supuesto" },
+    "extraibles": { "valor": 3, "unidad": "%", "origen": "supuesto" }
+  }
+}

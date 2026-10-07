@@ -1,0 +1,57 @@
+{
+  "_descripcion": "Especies disueltas, propiedades físicas del licor y fuentes externas de licor. OH y HS en mol/L; sólidos en g/L (= kg/m³).",
+  "especies": [
+    { "id": "OH", "nombre": "Ion hidróxido (álcali efectivo)", "unidad": "mol/L",
+      "factor_difusion": { "valor": 1.0, "unidad": "-", "origen": "supuesto" } },
+    { "id": "HS", "nombre": "Ion hidrosulfuro", "unidad": "mol/L",
+      "factor_difusion": { "valor": 1.0, "unidad": "-", "origen": "supuesto" } },
+    { "id": "LD", "nombre": "Lignina disuelta", "unidad": "g/L",
+      "factor_difusion": { "valor": 0.3, "unidad": "-", "origen": "supuesto", "nota": "molécula grande" } },
+    { "id": "XD", "nombre": "Xilano disuelto", "unidad": "g/L",
+      "factor_difusion": { "valor": 0.3, "unidad": "-", "origen": "supuesto" } },
+    { "id": "CD", "nombre": "Otros carbohidratos y ácidos disueltos", "unidad": "g/L",
+      "factor_difusion": { "valor": 0.6, "unidad": "-", "origen": "supuesto" } },
+    { "id": "OD", "nombre": "Extraíbles disueltos", "unidad": "g/L",
+      "factor_difusion": { "valor": 0.6, "unidad": "-", "origen": "supuesto" } },
+    { "id": "SI", "nombre": "Sólidos inorgánicos inertes", "unidad": "g/L",
+      "factor_difusion": { "valor": 1.0, "unidad": "-", "origen": "supuesto" } },
+    { "id": "TR", "nombre": "Trazador (pruebas y didáctica)", "unidad": "g/L",
+      "factor_difusion": { "valor": 1.0, "unidad": "-", "origen": "supuesto" } }
+  ],
+  "densidad": { "valor": 1050, "unidad": "kg/m3", "origen": "supuesto", "nota": "constante (S-12)" },
+  "cp": { "valor": 3.8, "unidad": "kJ/(kg·K)", "origen": "supuesto", "nota": "constante (S-12)" },
+  "fuentes": {
+    "licor_blanco": {
+      "tipo": "licor_blanco",
+      "T": { "valor": 90, "unidad": "°C", "origen": "supuesto", "nota": "P13" },
+      "EA": { "valor": 117.5, "unidad": "g/L NaOH", "origen": "especificacion" },
+      "sulfidez": { "valor": 32, "unidad": "%", "origen": "especificacion" },
+      "caustificacion": { "valor": 82, "unidad": "%", "origen": "supuesto", "nota": "P13" },
+      "otros_inertes": { "valor": 5, "unidad": "g/L", "origen": "supuesto", "nota": "Na2SO4, NaCl, etc." }
+    },
+    "filtrado": {
+      "tipo": "licor",
+      "T": { "valor": 75, "unidad": "°C", "origen": "supuesto", "nota": "P12" },
+      "composicion": {
+        "OH": { "valor": 2, "unidad": "g/L NaOH", "origen": "supuesto" },
+        "HS": { "valor": 0.01, "unidad": "mol/L", "origen": "supuesto" },
+        "LD": { "valor": 15, "unidad": "g/L", "origen": "supuesto" },
+        "CD": { "valor": 8, "unidad": "g/L", "origen": "supuesto" },
+        "OD": { "valor": 1, "unidad": "g/L", "origen": "supuesto" },
+        "SI": { "valor": 16, "unidad": "g/L", "origen": "supuesto" }
+      }
+    },
+    "licor_impregnacion": {
+      "tipo": "licor",
+      "T": { "valor": 150, "unidad": "°C", "origen": "supuesto", "nota": "licor negro caliente a la alimentación" },
+      "composicion": {
+        "OH": { "valor": 15, "unidad": "g/L NaOH", "origen": "supuesto" },
+        "HS": { "valor": 0.2, "unidad": "mol/L", "origen": "supuesto" },
+        "LD": { "valor": 60, "unidad": "g/L", "origen": "supuesto" },
+        "CD": { "valor": 30, "unidad": "g/L", "origen": "supuesto" },
+        "OD": { "valor": 3, "unidad": "g/L", "origen": "supuesto" },
+        "SI": { "valor": 40, "unidad": "g/L", "origen": "supuesto" }
+      }
+    }
+  }
+}

@@ -8,6 +8,7 @@ import { reloj, num } from './formato.js'
 import { abrirCaratula } from './caratula.js'
 import { abrirTag } from './tag.js'
 import { abrirInstructor } from './instructor.js'
+import { abrirManual } from './manual.js'
 import { PANTALLAS } from './pantallas/indice.js'
 import { guardarLocal, exportarArchivo } from '../ui/partidas.js'
 
@@ -22,12 +23,18 @@ export function crearApp(raiz, cliente, opciones = {}) {
   let menuAbierto = null
   let pendienteDibujo = false
   let oculto = false // en la sala 3D el DCS se oculta mientras se camina
+  const informados = new Set() // acciones del jugador ya informadas a la misión
+  let resaltado = null
+  function marcarResaltado() {
+    for (const el of contenedor.querySelectorAll('.resaltado')) el.classList.remove('resaltado')
+    if (resaltado) for (const el of contenedor.querySelectorAll(`[data-tag="${resaltado}"]`)) el.classList.add('resaltado')
+  }
 
   // ---- Barra superior ----
   const relojEl = h('span', { class: 'reloj', title: 'Tiempo de planta (día y hora)' }, '—')
   const botonesVel = VELOCIDADES.map(([v, t]) => h('button', {
     'data-vel': v, title: v === 0 ? 'Pausa' : `Velocidad ${t}`,
-    onclick: () => cliente.velocidad(v).catch((e) => avisar(e.message)),
+    onclick: () => { cliente.velocidad(v).catch((e) => avisar(e.message)); app.jugador('velocidad', v) },
   }, t))
   const contadores = [1, 2, 3, 4].map((p) => h('span', { class: `p${p}`, title: `Alarmas de prioridad ${p}` }, '0'))
   const rendimientoEl = h('span', { class: 'suave ocultar-celular' })
@@ -39,6 +46,8 @@ export function crearApp(raiz, cliente, opciones = {}) {
     h('div', { class: 'separador' }),
     h('div', { class: 'contador-alarmas', onclick: () => ir('alarmas') }, contadores),
     h('button', { onclick: () => cliente.comando({ tipo: 'alarma', id: '*', accion: 'reconocer' }).catch((e) => avisar(e.message)), title: 'Reconocer todas las alarmas' }, 'Reconocer'),
+    h('button', { onclick: () => app.radio(), title: 'Radio con el operador de terreno' }, 'Radio'),
+    h('button', { onclick: () => abrirLateral(abrirManual(app)), title: 'Manual de operación (procedimientos)' }, 'Manual'),
     h('button', { onclick: (ev) => menuPartida(ev) }, 'Partida'),
     h('button', { onclick: () => alternarInstructor(), title: 'Panel del instructor' }, 'Instructor'))
 
@@ -63,7 +72,30 @@ export function crearApp(raiz, cliente, opciones = {}) {
         throw e
       })
     },
-    abrirLazo(tag) { abrirLateral(abrirCaratula(app, tag)) },
+    abrirLazo(tag) {
+      abrirLateral(abrirCaratula(app, tag))
+      app.jugador('caratula', tag)
+    },
+    /** Acción del jugador para las misiones (solo con una misión en curso; cada una se informa una vez). */
+    jugador(evento, valor) {
+      const m = estado?.escenario?.mision
+      if (!m || m.terminada) return
+      const clave = `${m.id}|${m.t0}|${evento}:${valor ?? ''}`
+      if (informados.has(clave)) return
+      informados.add(clave)
+      cliente.comando(valor === undefined ? { tipo: 'jugador', evento } : { tipo: 'jugador', evento, valor }).catch(() => {})
+    },
+    /** Radio con el operador de terreno. */
+    radio() {
+      avisar('📻 Luis Paredes, terreno: «Te escucho, sala. Por acá todo normal.»', 5000)
+      app.jugador('radio')
+    },
+    /** Resalta un control en el mímico (pista de una misión). */
+    resaltar(tag) {
+      resaltado = tag
+      marcarResaltado()
+      setTimeout(() => { if (resaltado === tag) { resaltado = null; marcarResaltado() } }, 45000)
+    },
     abrirTag(tag) {
       const lazo = estado && Object.entries(estado.control.lazos).find(([, l]) => l.transmisor === tag)
       if (lazo) app.abrirLazo(lazo[0])
@@ -111,6 +143,8 @@ export function crearApp(raiz, cliente, opciones = {}) {
     reemplazar(contenedor, pantalla.elemento)
     for (const b of nav.querySelectorAll('button')) b.classList.toggle('activo', b.dataset.pantalla === def.id)
     if (estado) pantalla.actualizar(estado)
+    marcarResaltado()
+    app.jugador('pantalla', def.id)
     try { localStorage.setItem('digestor:pantalla', def.id) } catch { /* sin almacenamiento */ }
   }
 
@@ -209,6 +243,8 @@ export function crearApp(raiz, cliente, opciones = {}) {
     estado = e
     // La primera pantalla se arma con el primer estado (algunas lo necesitan para construirse).
     if (!pantalla) ir(inicial)
+    // Sin sala 3D, el operador ya está frente al DCS (objetivo «acércate a la consola»).
+    if (!opciones.alVolver) app.jugador('dcs')
     if (!pendienteDibujo) {
       pendienteDibujo = true
       requestAnimationFrame(dibujar)

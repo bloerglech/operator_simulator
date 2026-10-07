@@ -119,3 +119,27 @@ tendencias, un ventanal hacia la planta y el escritorio del supervisor.
 - La sala se describe en `config/sala.json` (objetos, anclajes con nombre,
   colisiones, efectos y niveles de calidad). Cambiar el arte no cambia la
   simulación.
+
+## Campaña y operación libre
+
+- **Campaña:** el menú inicial muestra los capítulos en orden; cada uno se
+  desbloquea al superar el anterior (el avance y las medallas quedan en este
+  navegador). Al empezar aparece el título del capítulo; las instrucciones
+  llegan por teléfono (jefa de turno), radio (operador de terreno) y
+  llamadas del laboratorio o de otras áreas, como subtítulos. La lista de
+  objetivos está arriba a la izquierda (clic para plegarla).
+- **Pistas:** si te demoras, primero un comentario por radio, luego una
+  indicación directa y, a veces, el control se resalta en azul en el mímico.
+- **Aceleración:** vuelve sola a ×1 cuando llega un mensaje del guion o una
+  alarma crítica.
+- **Informe:** al terminar, calificación (bronce, plata, oro), objetivos y
+  criterios, tendencia de kappa y producción, indicadores del turno, resumen
+  económico y la respuesta ideal. Si fallas, puedes volver al último punto
+  de control (cada objetivo principal cumplido guarda uno).
+- **Operación libre:** turno con el caso base y eventos aleatorios según la
+  dificultad. El botón «Informe de turno» (pantalla 6) muestra los
+  indicadores acumulados.
+- **Libro de novedades** (pantalla 8): eventos, mensajes y tus notas.
+- **Manual** (barra superior): procedimientos de operación genéricos.
+- **Instructor:** además de fallas, puede iniciar cualquier evento del
+  catálogo o activar el generador aleatorio.

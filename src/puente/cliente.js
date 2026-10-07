@@ -46,6 +46,8 @@ export function crearCliente() {
     velocidad: (valor) => pedir('velocidad', { valor }),
     comando: (cmd) => pedir('comando', { cmd }),
     guardar: () => pedir('guardar'),
+    reintentar: () => pedir('reintentar'),
+    catalogo: () => pedir('catalogo'),
     tendencia: (nombres, t0, t1, max) => pedir('tendencia', { nombres, t0, t1, max }),
     perfiles: (activo) => pedir('perfiles', { activo }),
     suscribir(f) {

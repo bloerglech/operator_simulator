@@ -20,6 +20,7 @@ npm run calibrar       # recalibra la cinética al caso base (escribe config/cin
 npm run sensibilidades # efecto de cambios típicos de operación
 npm run tabla-parametros  # regenera el Anexo A del manual
 npm run sintonia       # pruebas de escalón de los 29 lazos (escribe docs/SINTONIA.md)
+npm run documentar     # regenera docs/EVENTOS.md y docs/MISIONES.md
 ```
 
 Manual de estudio: [`docs/manual/`](docs/manual/README.md).

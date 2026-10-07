@@ -35,11 +35,22 @@ export function abrirInstructor(app) {
   const selCal = seleccion(Object.keys(e0.equipos.calentadores).map((c) => [c]))
   const incr = numero(1, 0.1)
   const enclav = h('div')
+  const catalogo = e0.escenario?.catalogo ?? []
+  const selEvento = h('select', {}, catalogo.map((e) => h('option', { value: e.id }, `${e.categoria}: ${e.nombre}`)))
+  const activos = h('div', { class: 'suave' })
+  const selDif = h('select', {}, [1, 2, 3].map((d) => h('option', { value: d }, `dificultad ${d}`)))
 
   const seccion = (titulo, ...hijos) => h('div', { class: 'panel' }, h('h3', {}, titulo), ...hijos)
   const elemento = h('div', {},
     h('div', { class: 'panel' }, h('button', { class: 'cerrar', style: 'float:right', onclick: () => app.cerrarLateral() }, '✕'),
       h('h3', {}, 'Instructor'), h('div', { class: 'suave' }, 'Lo que haga aquí el operador no lo ve como acción propia: aparece como una perturbación del proceso.')),
+    seccion('Eventos del catálogo',
+      h('div', { class: 'fila' }, selEvento,
+        h('button', { onclick: () => enviar({ tipo: 'evento', accion: 'iniciar', id: selEvento.value }, 'Evento iniciado') }, 'Iniciar')),
+      activos,
+      h('div', { class: 'fila' }, 'Generador aleatorio', selDif,
+        h('button', { onclick: () => enviar({ tipo: 'generador', activo: true, dificultad: Number(selDif.value) }, 'Generador activo') }, 'Activar'),
+        h('button', { onclick: () => enviar({ tipo: 'generador', activo: false }, 'Generador detenido') }, 'Detener'))),
     seccion('Falla de instrumento',
       h('div', { class: 'fila' }, selTag, selFalla),
       h('button', { onclick: () => enviar({ tipo: 'instrumento', id: selTag.value, falla: selFalla.value || null }) }, 'Aplicar')),
@@ -77,6 +88,13 @@ export function abrirInstructor(app) {
   return {
     elemento,
     actualizar(estado) {
+      const act = estado.escenario?.eventosActivos ?? []
+      const firmaAct = act.map((a) => a.id + a.fase).join()
+      if (activos.dataset.f !== firmaAct) {
+        activos.dataset.f = firmaAct
+        reemplazar(activos, act.length ? act.map((a) => h('div', { class: 'fila' }, `${a.nombre} (${a.fase})`,
+          a.fase === 'activo' ? h('button', { onclick: () => enviar({ tipo: 'evento', accion: 'terminar', id: a.id }, 'Evento terminado') }, 'Terminar') : null)) : 'Sin eventos activos')
+      }
       const nueva = JSON.stringify(Object.values(estado.control.enclavamientos).map((e) => [e.puenteado, e.disparado]))
       if (nueva === firma) return
       firma = nueva

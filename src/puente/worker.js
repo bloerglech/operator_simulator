@@ -2,7 +2,7 @@
 // publica instantáneas del estado unas 5 veces por segundo real.
 //
 // Mensajes de entrada: { id, tipo, ... } con tipo
-//   iniciar { semilla, guardado, horasPrevias } · velocidad { valor }
+//   iniciar { semilla, guardado, horasPrevias, mision, generador } · velocidad { valor } · reintentar
 //   comando { cmd } · guardar · tendencia { nombres, t0, t1, max } · perfiles { activo }
 // Mensajes de salida:
 //   { tipo: 'progreso', fraccion } · { tipo: 'estado', estado, rendimiento }
@@ -10,6 +10,7 @@
 
 import { crearMotor } from './motor.js'
 import { configuracion } from './configuracion.js'
+import { MISIONES } from '../misiones/campana.js'
 
 const motor = crearMotor(configuracion())
 const TIC_MS = 50 // ciclo del worker
@@ -37,6 +38,8 @@ self.onmessage = (ev) => {
           semilla: m.semilla ?? 1,
           guardado: m.guardado ?? null,
           horasPrevias: m.horasPrevias ?? 8,
+          mision: m.mision ?? null,
+          generador: m.generador ?? null,
           progreso: (f) => self.postMessage({ tipo: 'progreso', fraccion: f }),
         })
         motor.fijarVelocidad(m.velocidad ?? 1)
@@ -51,6 +54,23 @@ self.onmessage = (ev) => {
       case 'comando':
         motor.comando(m.cmd)
         responder(m.id, true)
+        break
+      case 'catalogo': {
+        const cfg = configuracion()
+        responder(m.id, true, {
+          misiones: cfg.campana.orden.map((id) => {
+            const d = MISIONES[id]
+            return { id, capitulo: d.capitulo, titulo: d.titulo, resumen: d.resumen, ensena: d.ensena }
+          }),
+          dificultades: cfg.campana.dificultades,
+        })
+        break
+      }
+      case 'reintentar':
+        motor.reintentar()
+        motor.fijarVelocidad(1)
+        responder(m.id, true)
+        publicar()
         break
       case 'guardar':
         responder(m.id, true, motor.guardar())

@@ -7,30 +7,57 @@ import { crearCliente } from './puente/cliente.js'
 import { crearApp } from './hmi/app.js'
 import { mostrarMenu, mostrarCarga } from './ui/menu.js'
 import { crearHUD } from './ui/hud.js'
+import { crearCapaMision } from './ui/mision.js'
 import { avisar } from './hmi/dom.js'
+
+/** Prepara la planta (caso base, misión u operación libre) con la pantalla de espera. */
+async function arrancar(cliente, op) {
+  const cerrar = mostrarCarga(cliente, op.mision ? 'Preparando la situación inicial de la misión…' : undefined)
+  try {
+    await cliente.perfiles(true)
+    await cliente.iniciar({ semilla: op.semilla, guardado: op.guardado, mision: op.mision, generador: op.generador, velocidad: 1 })
+  } finally {
+    cerrar()
+  }
+}
 
 async function iniciar() {
   const cliente = crearCliente()
+  const catalogo = await cliente.catalogo().catch(() => null)
   let op
   for (;;) {
-    op = await mostrarMenu()
-    const cerrar = mostrarCarga(cliente)
+    op = await mostrarMenu(catalogo)
     try {
-      await cliente.perfiles(true)
-      await cliente.iniciar({ semilla: op.semilla, guardado: op.guardado, velocidad: 1 })
-      cerrar()
+      await arrancar(cliente, op)
       break
     } catch (e) {
-      cerrar()
       avisar(`No se pudo iniciar: ${e.message}`, 10000) // se vuelve al menú
     }
   }
   const raiz = document.getElementById('raiz')
-  if (op.modo !== 'sala') {
-    window.__app = crearApp(raiz, cliente)
-    return
-  }
-  await iniciarSala(raiz, cliente)
+  const app = op.modo !== 'sala' ? crearApp(raiz, cliente) : await iniciarSala(raiz, cliente)
+  window.__app = app
+  // Misiones: diálogos, objetivos, pistas e informe; acciones al terminar.
+  const misiones = catalogo?.misiones ?? []
+  const capa = crearCapaMision(cliente, {
+    resaltar: (tag) => app.resaltar(tag),
+    alTerminar: async (accion, mision) => {
+      if (accion === 'menu') return location.reload()
+      if (accion === 'seguir') return
+      try {
+        if (accion === 'reintentar') await cliente.reintentar()
+        else {
+          const i = misiones.findIndex((m) => m.id === mision.id)
+          const id = accion === 'siguiente' ? misiones[i + 1]?.id : mision.id
+          if (!id) return avisar('Completaste todas las misiones disponibles.', 6000)
+          await arrancar(cliente, { mision: id, semilla: 1000 + misiones.findIndex((m) => m.id === id) })
+        }
+        capa.reiniciar()
+      } catch (e) {
+        avisar(e.message, 8000)
+      }
+    },
+  })
 }
 
 async function iniciarSala(raiz, cliente) {
@@ -56,6 +83,7 @@ async function iniciarSala(raiz, cliente) {
     capaDCS.classList.add('abierto')
     app.mostrar(true)
     if (pantalla) app.ir(pantalla)
+    app.jugador('dcs')
   }
   function cerrarDCS() {
     app.cerrarLateral()
@@ -73,9 +101,12 @@ async function iniciarSala(raiz, cliente) {
       alInteractuar: (a) => {
         if (a.pantalla) abrirDCS(a.pantalla)
         else if (a.tipo === 'telefono') avisar('Teléfono: sin llamadas pendientes.')
-        else if (a.tipo === 'radio') avisar('Radio: el operador de terreno no informa novedades.')
+        else if (a.tipo === 'radio') app.radio()
       },
-      alCambiarCercana: (a) => hud?.cercana(a),
+      alCambiarCercana: (a) => {
+        hud?.cercana(a)
+        if (a) app.jugador('cerca', a.id)
+      },
     })
     window.__mundo = mundo
   }
@@ -100,6 +131,7 @@ async function iniciarSala(raiz, cliente) {
     const editando = e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement || e.target instanceof HTMLTextAreaElement
     if (e.key === 'Escape' && capaDCS.classList.contains('abierto') && !editando) cerrarDCS()
   })
+  return app
 }
 
 iniciar()

@@ -572,7 +572,7 @@ Analizadores: periodo de muestreo / tiempo de análisis (s) / error (desv. est.)
 | FFC-503 | Coordinación del lavado: la extracción final sigue los cambios del filtrado de lavado | seguimiento | sí | `{"fuente":"lazo:FIC-601","esclavo":"FIC-503","ganancia":1}` |
 | FFC-602 | Coordinación del fondo: la dilución sigue los cambios del licor de soplado | seguimiento | sí | `{"fuente":"corriente:soplado","esclavo":"FIC-602","ganancia":1}` |
 | RC-700 | Coordinación de cambios de ritmo (control avanzado) | ritmo | no | `{"produccion":3000,"rampa":150,"rendimiento":53.5}` |
-| HIC-703 | Control de factor H con corrección por ritmo (control avanzado) | factor_h | no | `{"objetivo":460,"tiempo_superior":1,"tiempo_inferior":1.2,"H_resto":60,"ganancia":0.004,"bias_max":8}` |
+| HIC-703 | Control de factor H con corrección por ritmo (control avanzado) | factor_h | no | `{"objetivo":460,"tiempo_superior":1,"tiempo_inferior":1.2,"H_resto":60,"ganancia":0.0015,"bias_max":8}` |
 | AIC-701 | Control de kappa con el analizador (control avanzado) | kappa | no | `{"objetivo":17,"ganancia":6,"Ti":10800}` |
 
 ### Enclavamientos (rearme manual)

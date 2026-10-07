@@ -76,3 +76,22 @@ describe('motor del puente', () => {
     expect(n.estado().control.lazos['TIC-402'].sp).toBe(157)
   })
 })
+
+describe('motor del puente con misiones', () => {
+  it('inicia una misión con punto de control, vuelve a ×1 ante un diálogo y reintenta', () => {
+    const m = crearMotor(config())
+    m.iniciar({ semilla: 5, horasPrevias: 1, mision: 'turno_noche' })
+    expect(m.estado().escenario.mision.id).toBe('turno_noche')
+    expect(m.estado().puntosControl).toBe(1)
+    m.fijarVelocidad(60)
+    m.tic(0.5, 1e6) // el guion manda el saludo de la jefa de turno: vuelve a ×1
+    expect(m.velocidad()).toBe(1)
+    const t = m.tiempo()
+    m.fijarVelocidad(300)
+    m.tic(1, 1e6)
+    expect(m.tiempo()).toBeGreaterThan(t)
+    m.reintentar()
+    expect(m.tiempo()).toBeLessThan(t + 1)
+    expect(m.estado().escenario.mision.terminada).toBe(false)
+  })
+})

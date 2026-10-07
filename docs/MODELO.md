@@ -769,6 +769,24 @@ condición desaparece antes. Se generan solas las alarmas de enclavamiento
 prioridad 1). Se cuenta la tasa de activaciones en 10 min (criterio de
 inundación: < 10).
 
+### 12.7 Escenarios, eventos y misiones (`src/escenarios/`, `src/misiones/`)
+
+El **director** es una segunda extensión de la planta (`crearJuego`):
+aplica los eventos del catálogo `config/eventos.json` (rampas de una
+variable, comandos directos, duración y reversión; parámetros sorteados con
+el flujo aleatorio `eventos`), el generador aleatorio de la operación libre,
+los indicadores del turno (producción en especificación, estadística de
+kappa, consumos específicos, alarmas y respuesta, paradas, economía), el
+libro de novedades y la misión en curso. Las misiones son datos
+(`src/misiones/campana.js`) con condiciones declarativas (`condiciones.js`).
+Todo vive en `estado.escenario` (determinista y guardable). Detalle de cada
+evento en `docs/EVENTOS.md` y de cada misión en `docs/MISIONES.md`.
+
+Perturbaciones nuevas en el simulador para los eventos: impregnabilidad del
+lote (astillas con sobre espesor), límite de suministro de licor blanco,
+canalización (fracción del contacto licor-astilla que se pierde en el
+intercambio de calor y especies) y taponamiento directo de mallas.
+
 ## 13. Calibración
 
 Rutina `herramientas/calibrar.js` (Fase 1b):
@@ -859,6 +877,11 @@ mínimas).
 | S-38 | El licor de la lechada de soplado es un caudal fijado (CIC-605 lo manipula); la dilución lo sigue con el bloque FFC-602. Equivale a controlar la consistencia con la dilución a caudal total de soplado constante. |
 | S-39 | El nivel de astillas del digestor se controla con el caudal de pulpa del soplado (LIC-302) y el del impregnador con la transferencia (LIC-202); el raspador no se manipula. |
 | S-40 | Factor H previsto del bloque HIC-703 con tiempos de zona fijos (1,0 h y 1,2 h) más una corrección tomada al activarse. |
+| S-41 | Astillas con sobre espesor: un factor de impregnabilidad del lote multiplica la velocidad de impregnación de todas las clases (no se cambia la distribución de tamaños por parcela). |
+| S-42 | Falta de licor blanco: un límite de suministro reparte en proporción el caudal pedido por las cuatro adiciones. |
+| S-43 | Canalización: el licor que pasa por caminos preferentes no intercambia con las astillas; se representa reduciendo el intercambio libre ↔ retenido del vaso. |
+| S-44 | Indicadores del turno con valores verdaderos del proceso; la pulpa fuera de especificación se valoriza con 40 % de descuento; precios en `config/campana.json` (supuestos). |
+| S-45 | Consignas de LIC-202 (22,1 m) y PIC-201 (6,1 bar) iguales al estado estacionario sin control, para que el control no desplace el punto calibrado; las circulaciones de cocción no se escalan con el ritmo. |
 | S-23 | Una tubería entre vasos entrega en cada paso el volumen que se le ingresó en el paso anterior (desfase de un paso lento, 5 s), lo que evita lazos algebraicos. |
 
 ## 16. Limitaciones conocidas
@@ -876,6 +899,8 @@ mínimas).
 | L-09 | Dispersión numérica de primer orden en el licor libre (no en las astillas). |
 | L-11 | No se modela el nivel de licor del tubo de astillas: el lazo "nivel del tubo de astillas" de la especificación queda pendiente (el tubo solo acumula astillas, WI-104). |
 | L-12 | Los enclavamientos y alarmas son un conjunto mínimo representativo, no una lista de una planta real. |
+| L-13 | El kappa es muy sensible al factor H (≈ −0,045 kappa por unidad de H cerca del caso base, unas dos veces lo habitual en eucalipto, por verificar con datos de planta): los cambios de ritmo o de temperatura mueven el kappa más que en la práctica. Consecuencia del calibrado a un solo punto (L-03, L-04). |
+| L-14 | El control de factor H predice el H con las temperaturas de zona, que responden en 1–2 h: su ganancia es baja a propósito para no oscilar. |
 | L-10 | Resolución de la columna: una parcela ≈ 1/3 de celda (≈ 1,5 min de residencia en el impregnador, ≈ 2,5 min en el digestor). |
 
 ## 17. Estado de implementación
@@ -907,6 +932,8 @@ mínimas).
 | Bloques de relación, seguimiento, ritmo, factor H, kappa | Fase 2 ✔ |
 | Enclavamientos (10) y alarmas (43 + generadas) | Fase 2 ✔ |
 | Nivel de licor del tubo de astillas | Pendiente (L-11) |
+| Eventos (27), generador aleatorio, director, indicadores del turno | Fase 5 ✔ |
+| Motor de misiones, tutorial y capítulos 1 a 3 | Fase 5 ✔ |
 
 ## 18. Referencias (a verificar al implementar)
 

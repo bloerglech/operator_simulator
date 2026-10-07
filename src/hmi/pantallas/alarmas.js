@@ -12,6 +12,13 @@ export function crearAlarmas(app) {
   const historial = h('tbody')
   const eventos = h('tbody')
   const archivadas = h('div', { class: 'suave' })
+  const libro = h('tbody')
+  const nota = h('input', { type: 'text', placeholder: 'Nota para el libro de novedades', style: 'flex: 1; min-width: 200px', maxlength: 500 })
+  const anotar = () => {
+    if (!nota.value.trim()) return
+    app.comando({ tipo: 'nota', texto: nota.value.trim() }).then(() => { nota.value = '' }).catch(() => {})
+  }
+  nota.addEventListener('keydown', (e) => { if (e.key === 'Enter') anotar() })
   const elemento = h('div', {},
     h('div', { class: 'panel' },
       h('div', { class: 'fila' }, h('h3', { style: 'margin:0' }, 'Alarmas activas'),
@@ -24,6 +31,9 @@ export function crearAlarmas(app) {
         h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Id'), h('th', {}, 'Descripción'), h('th', {}, 'Condición'), h('th', {}, 'Estado'), h('th', {}, ''))), enclav)),
       h('div', { class: 'panel' }, h('h3', {}, 'Eventos del proceso'),
         h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Hora'), h('th', {}, 'Evento'), h('th', {}, 'Detalle'))), eventos))),
+    h('div', { class: 'panel' }, h('h3', {}, 'Libro de novedades'),
+      h('div', { class: 'fila' }, nota, h('button', { onclick: anotar }, 'Anotar')),
+      h('table', {}, h('tbody', {}), libro)),
     h('div', { class: 'panel' }, h('h3', {}, 'Historial de alarmas'),
       h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Hora'), h('th', {}, 'P'), h('th', {}, 'Alarma'), h('th', {}, 'Acción'), h('th', {}, 'Mensaje'))), historial)))
 
@@ -36,6 +46,12 @@ export function crearAlarmas(app) {
       const nueva = JSON.stringify([c.alarmas.lista.map((a) => [a.id, a.activa, a.reconocida]),
         Object.values(c.enclavamientos).map((e) => [e.disparado, e.presente, e.puenteado]), c.alarmas.registro.length, estado.eventos.length, estado.eventos.at(-1)?.n])
       const valorAlarma = (a) => (typeof a.valor === 'number' ? `${num(a.valor, 2)} ${a.unidad ?? ''}` : '')
+      const lib = estado.escenario?.libro ?? []
+      if (libro.dataset.n !== String(lib.length) + (lib.at(-1)?.t ?? '')) {
+        libro.dataset.n = String(lib.length) + (lib.at(-1)?.t ?? '')
+        reemplazar(libro, [...lib].reverse().slice(0, 60).map((x) => h('tr', {},
+          h('td', { class: 'num' }, reloj(x.t)), h('td', { class: 'suave' }, x.tipo), h('td', {}, x.texto))))
+      }
       if (nueva === firma) {
         // Solo cambian los valores: se actualizan en su lugar (los botones no se recrean).
         for (const a of c.alarmas.lista) {

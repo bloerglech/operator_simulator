@@ -232,3 +232,40 @@ tr.sin-reconocer td { font-weight: 600; }
 .hud-ayuda { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); font-size: 12px; opacity: 0.8; text-shadow: 0 1px 2px #000; text-align: center; width: 90%; }
 .hud-palanca-base { position: absolute; width: 100px; height: 100px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.5); display: none; }
 .hud-palanca-pomo { position: absolute; width: 44px; height: 44px; border-radius: 50%; background: rgba(255, 255, 255, 0.5); display: none; }
+
+/* ---- Misiones ---- */
+.capa-mision { position: fixed; inset: 0; pointer-events: none; z-index: 45; }
+.mision-titulo { position: absolute; top: 30%; left: 0; right: 0; text-align: center; color: #f4f4f4; text-shadow: 0 2px 8px #000; opacity: 0; transition: opacity 1s; }
+.mision-titulo.visible { opacity: 1; }
+.mision-titulo .capitulo { font-size: 18px; letter-spacing: 0.2em; text-transform: uppercase; }
+.mision-titulo .nombre { font-size: 42px; font-weight: 600; }
+.mision-objetivos { position: absolute; top: 118px; left: 10px; max-width: 340px; background: rgba(30, 32, 34, 0.78); color: #ececec; border-radius: 4px; font-size: 13px; pointer-events: auto; }
+.mision-objetivos:empty { display: none; }
+.mision-objetivos .cabecera { padding: 5px 8px; font-weight: 600; cursor: pointer; border-bottom: 1px solid rgba(255, 255, 255, 0.15); }
+.mision-objetivos .objetivo { padding: 3px 8px; display: flex; gap: 6px; }
+.mision-objetivos .objetivo.secundario { opacity: 0.8; font-size: 12px; }
+.mision-objetivos .objetivo.cumplido { color: #9fd89f; }
+.mision-objetivos .objetivo.fallido { color: #f0a0a0; }
+.mision-dialogo { position: absolute; left: 50%; bottom: 46px; transform: translateX(-50%); width: min(720px, 94vw); opacity: 0; transition: opacity 0.4s; }
+.mision-dialogo.visible { opacity: 1; }
+.mision-dialogo .globo { background: rgba(24, 26, 28, 0.88); color: #f2f2f2; padding: 10px 14px; border-radius: 6px; font-size: 15px; line-height: 1.4; }
+.mision-dialogo .globo.pista { border-left: 4px solid var(--p4); }
+.mision-dialogo .globo.objetivo { border-left: 4px solid #6fbf6f; }
+.mision-dialogo .quien { font-size: 12px; color: #c9c9c9; margin-bottom: 3px; }
+.mimico .resaltado .caja { stroke: #1e7bff; stroke-width: 4; animation: parpadeo 0.8s steps(1) infinite; }
+.menu-inicial button.mision { text-align: left; }
+.menu-inicial button.mision .cap { font-weight: 600; }
+.informe { width: min(760px, 100%); }
+.informe .calificacion { font-size: 18px; font-weight: 600; margin: 8px 0; padding: 8px; border-radius: 4px; }
+.informe .calificacion.exito { background: #d5ead5; }
+.informe .calificacion.falla { background: #f2d6d6; }
+.informe .criterios { padding-left: 18px; }
+.informe .criterios .cumplido { color: #2e6b2e; }
+.informe .criterios .fallido { color: #9b2c2c; }
+.informe canvas { width: 100%; height: auto; border: 1px solid var(--borde); }
+.manual h2 { font-size: 18px; } .manual h3 { font-size: 15px; margin-top: 14px; }
+.manual li { margin: 3px 0; } .manual code { background: var(--valor-fondo); padding: 0 3px; }
+@media (max-width: 760px) {
+  .mision-objetivos { top: auto; bottom: 150px; right: 6px; max-width: 70vw; }
+  .mision-titulo .nombre { font-size: 30px; }
+}

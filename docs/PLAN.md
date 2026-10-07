@@ -1,7 +1,7 @@
 # PLAN DE TRABAJO
 
 Estado: **aprobado** con los valores provisionales de la sección 6.
-Fase actual: **4 terminada** (ver sección 8).
+Fase actual: **5 terminada** (ver sección 8).
 
 Documento rector: `docs/ESPECIFICACION.md`. Si algo de aquí lo contradice,
 manda la especificación y este plan se corrige.
@@ -431,3 +431,34 @@ eventos instructor) pero no las implementa.
 - Pendiente: medir 60/30 cuadros por segundo en equipos reales con GPU (en
   esta máquina solo hay render por software); scripts de Blender
   (opcionales); modelos GLB.
+
+### Fase 5 — terminada
+- `config/eventos.json`: 27 eventos con causa, síntomas y respuesta
+  (`docs/EVENTOS.md`, generado por `npm run documentar`); generador
+  aleatorio con semilla por dificultad. Perturbaciones nuevas en el
+  simulador: impregnabilidad del lote, límite de licor blanco, canalización y
+  taponamiento de mallas.
+- La planta admite varias extensiones; el **director** (`src/escenarios/`)
+  maneja eventos, indicadores del turno con resumen económico, mensajes,
+  libro de novedades y la misión. **Motor de misiones** (`src/misiones/`):
+  condiciones como datos, guion, objetivos principales y secundarios,
+  pistas graduales, fallas, evaluación con medallas.
+- Campaña: tutorial (capítulo 0) y capítulos 1 a 3 (`docs/MISIONES.md`).
+  Calibradas jugándolas en Node: la respuesta esperada aprueba y no hacer
+  nada falla (`tests/misiones.test.js`).
+- Puente: preparación de misiones, puntos de control (reintentar), vuelta a
+  ×1 ante diálogos del guion o alarmas críticas. Interfaz: menú de campaña
+  con desbloqueo y operación libre con dificultad; títulos de capítulo,
+  diálogos de radio y teléfono, objetivos, pistas que resaltan controles,
+  informe de misión y de turno; libro de novedades con notas; manual de
+  procedimientos (`docs/PROCEDIMIENTOS.md`) dentro del juego; eventos y
+  generador en el panel del instructor.
+- Hallazgos al calibrar (corregidos): con control el kappa estacionario
+  quedaba 0,6 sobre el calibrado (consigna del nivel del impregnador); la
+  coordinación de ritmo escalaba las circulaciones (redistribuía el álcali);
+  el control de factor H oscilaba (ganancia bajada a 0,0015). Limitaciones
+  nuevas L-13 y L-14.
+- Aceptación: 26 verificaciones en `npm run e2e` (incluye el tutorial
+  completo en el navegador hasta el informe) y las pruebas de Vitest.
+- Pendiente: ayuda contextual por variable, sonidos, modo turno completo de
+  8–12 h con meta (Fase 6/7), capítulos 4 a 11 (Fase 6).

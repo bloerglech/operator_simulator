@@ -3,6 +3,7 @@
 
 import { h, reemplazar } from '../dom.js'
 import { num, hora } from '../formato.js'
+import { mostrarInformeTurno } from '../../ui/informe.js'
 
 export const INDICADORES = [
   ['AI-701', 'Kappa (analizador)', '16–18'],
@@ -33,7 +34,8 @@ export function crearCalidad(app) {
     h('button', { onclick: () => app.comando({ tipo: 'laboratorio', analisis: id }).catch(() => {}) }, a.nombre)) : []
 
   const elemento = h('div', { class: 'rejilla' },
-    h('div', { class: 'panel' }, h('h3', {}, 'Calidad y operación'),
+    h('div', { class: 'panel' }, h('div', { class: 'fila' }, h('h3', { style: 'margin:0; flex:1' }, 'Calidad y operación'),
+      h('button', { onclick: () => { const t = app.estado()?.escenario?.turno; if (t) mostrarInformeTurno(t) } }, 'Informe de turno')),
       h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Tag'), h('th', {}, 'Variable'), h('th', { class: 'num' }, 'Valor'), h('th', {}, 'Referencia'))), tablaInd)),
     h('div', { class: 'panel' }, h('h3', {}, 'Laboratorio'),
       h('div', { class: 'suave' }, 'Los resultados llegan entre 20 y 40 minutos después de tomada la muestra.'),

@@ -23,7 +23,7 @@ export function crearTendencias(app) {
     ...Object.keys(e0.control.lazos).flatMap((t) => [`${t}.sp`, `${t}.out`]),
   ] : []
   const selects = Array.from({ length: 6 }, (_, i) => {
-    const sel = h('select', { onchange: () => { memoria.series = selects.map((x) => x.value).filter(Boolean); refrescar(true) } },
+    const sel = h('select', { onchange: () => { memoria.series = selects.map((x) => x.value).filter(Boolean); informar(); refrescar(true) } },
       h('option', { value: '' }, '—'), nombres.map((n) => h('option', { value: n }, n)))
     sel.value = memoria.series[i] ?? ''
     sel.style.borderLeft = `6px solid ${COLORES[i]}`
@@ -37,8 +37,10 @@ export function crearTendencias(app) {
   const grupos = Object.keys(GRUPOS).map((g) => h('button', { onclick: () => {
     memoria.series = GRUPOS[g]
     selects.forEach((s, i) => { s.value = memoria.series[i] ?? '' })
+    informar()
     refrescar(true)
   } }, g))
+  const informar = () => { for (const n of memoria.series) app.jugador('tendencia', n) }
   const canvas = h('canvas')
   const leyenda = h('div', { class: 'leyenda' })
   const elemento = h('div', { class: 'tendencia' },

@@ -84,7 +84,7 @@ const DIBUJAR = {
     const w = e.w ?? 116
     const caja = s('rect', { class: 'caja', x: e.x, y: e.y, width: w, height: ALTO_VALOR, rx: 2 })
     const valor = s('text', { class: 'valor', x: e.x + w - 5, y: e.y + 28, 'text-anchor': 'end' })
-    const nodo = s('g', { class: 'clic', onclick: () => app.abrirTag(e.tag) },
+    const nodo = s('g', { class: 'clic', 'data-tag': e.tag, onclick: () => app.abrirTag(e.tag) },
       caja,
       s('text', { class: 'suave', x: e.x + 4, y: e.y + 12, texto: e.etiqueta ?? e.tag }),
       valor)
@@ -105,7 +105,7 @@ const DIBUJAR = {
     const modo = s('text', { x: e.x + ANCHO_LAZO - 5, y: e.y + 13, 'text-anchor': 'end', 'font-weight': 700 })
     const pv = s('text', { class: 'valor', x: e.x + ANCHO_LAZO - 5, y: e.y + 30, 'text-anchor': 'end' })
     const sp = s('text', { class: 'suave', x: e.x + 4, y: e.y + 46 })
-    const nodo = s('g', { class: 'clic', onclick: () => app.abrirLazo(e.tag) },
+    const nodo = s('g', { class: 'clic', 'data-tag': e.tag, onclick: () => app.abrirLazo(e.tag) },
       caja,
       s('text', { x: e.x + 4, y: e.y + 13, 'font-weight': 600, texto: e.tag }),
       modo, pv, sp)

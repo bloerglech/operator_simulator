@@ -14,7 +14,10 @@ const PERMITIDO = {
   puente: ['src/puente', 'src/sim', 'src/control', 'config'],
   hmi: ['src/hmi', 'src/ui'],
   ui: ['src/ui', 'src/hmi'],
+  mundo3d: ['src/mundo3d', 'src/hmi'],
 }
+// Paquetes externos permitidos por capa (sim y control no usan ninguno).
+const EXTERNOS = { mundo3d: ['three'] }
 const SIN_NAVEGADOR = ['sim', 'control']
 const PROHIBIDO_TEXTO = [/\bwindow\b/, /\bdocument\b/, /Math\.random/, /Date\.now/, /\bperformance\b/, /localStorage/, /\bfetch\(/]
 
@@ -36,7 +39,11 @@ describe('independencia de capas', () => {
         const imports = [...src.matchAll(/(?:import|export)[^'"]*?from\s*['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]\s*\)/g)]
         for (const m of imports) {
           const ruta = m[1] ?? m[2]
-          expect(ruta.startsWith('.'), `${archivo}: importa el paquete externo "${ruta}"`).toBe(true)
+          if (!ruta.startsWith('.')) {
+            const ok = (EXTERNOS[capa] ?? []).some((p) => ruta === p || ruta.startsWith(`${p}/`))
+            expect(ok, `${archivo}: importa el paquete externo "${ruta}"`).toBe(true)
+            continue
+          }
           const destino = relative(raiz, resolve(dirname(archivo), ruta))
           const ok = permitidas.some((p) => destino.startsWith(p))
           expect(ok, `${archivo}: importa ${destino}`).toBe(true)

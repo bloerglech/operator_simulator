@@ -92,3 +92,30 @@ lazo, cambio de ritmo con la coordinación de ritmo, ×300 sin bloquear la
 interfaz (≈ 300 s simulados por segundo, 60 cuadros por segundo), responder
 a una alarma con enclavamiento (reconocer, rearmar, volver a partir la
 bomba) y guardar la partida.
+
+## Sala de control 3D
+
+En el menú inicial elija **Sala de control 3D** (o **Solo pantallas DCS**).
+La sala tiene tres consolas con tres monitores cada una (los monitores
+muestran las mismas pantallas del DCS, actualizadas cada 0,5–1,5 s según la
+calidad), una pantalla mural con el resumen del proceso, las alarmas y
+tendencias, un ventanal hacia la planta y el escritorio del supervisor.
+
+| Acción | Computador | Celular |
+|--------|-----------|---------|
+| Mirar | clic en la sala para capturar el mouse; mover el mouse | arrastrar en la mitad derecha |
+| Caminar | W A S D o flechas (Shift: correr) | joystick en la mitad izquierda |
+| Operar una consola | acercarse y presionar E | acercarse y tocar **Operar** |
+| Volver a la sala | Esc o **◀ Sala** | **◀ Sala** |
+| Abrir el DCS desde cualquier lugar | botón **Pantallas DCS** | ídem |
+
+- Consola 1: alimentación e impregnación · consola 2: digestor · consola 3:
+  alarmas y tendencias · pantalla mural: tendencias.
+- Efectos conectados al proceso: balizas rojas con una alarma de prioridad 1,
+  vapor sobre el digestor cuando abre el alivio, parpadeo de luces y
+  vibración ante la apertura de la válvula de seguridad o la caída de la
+  columna.
+- **Calidad gráfica** (bajo, medio, alto) en el HUD; en celular parte en bajo.
+- La sala se describe en `config/sala.json` (objetos, anclajes con nombre,
+  colisiones, efectos y niveles de calidad). Cambiar el arte no cambia la
+  simulación.

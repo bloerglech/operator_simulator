@@ -18,13 +18,19 @@ const verificar = (ok, texto) => {
 
 await build({ logLevel: 'warn' })
 const servidor = await preview({ preview: { port: 4174, strictPort: true }, logLevel: 'warn' })
+// Las pantallas 2D se prueban con el navegador normal; la sala 3D con WebGL por
+// software (sirve sin GPU, p. ej. en integración continua, pero es lento: no
+// se miden cuadros por segundo en 3D).
 const navegador = await chromium.launch(ejecutable ? { executablePath: ejecutable } : {})
+const args3d = ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader']
+const navegador3d = await chromium.launch(ejecutable ? { executablePath: ejecutable, args: args3d } : { args: args3d })
 try {
   const pag = await navegador.newPage({ viewport: { width: 1366, height: 800 } })
   const errores = []
   pag.on('pageerror', (e) => errores.push(e.message))
   pag.on('console', (m) => { if (m.type() === 'error') errores.push(m.text()) })
   await pag.goto('http://localhost:4174/')
+  await pag.getByRole('button', { name: 'Solo pantallas DCS' }).click()
   await pag.getByText('Nueva partida').click()
   await pag.waitForSelector('#nav', { timeout: 120000 })
   const lazoSVG = (tag) => pag.locator('svg text', { hasText: tag }).first()
@@ -100,7 +106,8 @@ try {
   await pag.locator('tr', { hasText: 'I-09' }).getByRole('button', { name: 'Rearmar' }).click()
   await pag.waitForTimeout(1000)
   verificar(await leer(() => !window.__app.estado().control.enclavamientos['I-09'].disparado), 'enclavamiento I-09 rearmado desde la pantalla de alarmas')
-  verificar(await leer(() => window.__app.estado().control.alarmas.lista.every((a) => a.reconocida)), 'todas las alarmas reconocidas')
+  // Las alarmas que había al reconocer quedan reconocidas (el proceso puede generar otras nuevas).
+  verificar(await leer(() => window.__app.estado().control.alarmas.registro.some((r) => r.id === 'ENC-I-09' && r.accion === 'reconocida')), 'alarma del enclavamiento reconocida')
   // Volver a operar: partir la bomba y poner TIC-402 en automático.
   await pag.click('#nav button[data-pantalla="circulaciones"]')
   await pag.waitForTimeout(600)
@@ -115,8 +122,49 @@ try {
   await pag.waitForTimeout(800)
   verificar(await leer(() => (localStorage.getItem('digestor:partida') ?? '').length > 100000), 'partida guardada en el navegador')
   verificar(errores.length === 0, `sin errores de la página (${errores.join('; ')})`)
+
+  // 7. Sala de control 3D (computador): render dentro del presupuesto, consola → DCS → sala.
+  const sala = await navegador3d.newPage({ viewport: { width: 1280, height: 720 } })
+  const errores3d = []
+  sala.on('pageerror', (e) => errores3d.push(e.message))
+  await sala.goto('http://localhost:4174/')
+  await sala.getByRole('button', { name: 'Sala de control 3D' }).click()
+  await sala.getByText('Nueva partida').click()
+  await sala.waitForFunction(() => window.__mundo, null, { timeout: 120000 })
+  await sala.waitForTimeout(2500)
+  const info = await sala.evaluate(() => window.__mundo.info())
+  verificar(info.llamadas > 0 && info.llamadas < 100 && info.triangulos < 150000, `sala 3D dibujada: ${info.llamadas} llamadas de dibujo, ${info.triangulos} triángulos`)
+  await sala.evaluate(() => window.__mundo.ubicar(0, 2.5, 0))
+  await sala.keyboard.down('KeyW'); await sala.waitForTimeout(2500); await sala.keyboard.up('KeyW')
+  const z = await sala.evaluate(() => window.__mundo.info().jugador.z)
+  verificar(z >= 0.74 && z < 2.4, `caminar con WASD y chocar con la consola (z = ${z.toFixed(2)})`)
+  await sala.waitForFunction(() => document.querySelector('.hud-aviso')?.textContent.includes('Consola 2'), null, { timeout: 5000 })
+  await sala.keyboard.press('KeyE')
+  await sala.waitForTimeout(1200)
+  verificar(await sala.evaluate(() => document.getElementById('dcs').classList.contains('abierto') && document.querySelector('#nav button.activo')?.dataset.pantalla === 'digestor'), 'la consola 2 abre el DCS en la pantalla del digestor')
+  await sala.keyboard.press('Escape')
+  await sala.waitForTimeout(800)
+  verificar(await sala.evaluate(() => !document.getElementById('dcs').classList.contains('abierto')), 'Esc vuelve a la sala')
+  verificar(errores3d.length === 0, `sala sin errores (${errores3d.join('; ')})`)
+  await sala.close()
+
+  // 8. Celular (táctil, vertical): joystick y botón Operar.
+  const cel = await navegador3d.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
+  await cel.goto('http://localhost:4174/')
+  await cel.getByRole('button', { name: 'Sala de control 3D' }).tap()
+  await cel.getByText('Nueva partida').tap()
+  await cel.waitForFunction(() => window.__mundo, null, { timeout: 120000 })
+  verificar(await cel.evaluate(() => window.__mundo.esTactil), 'celular detectado como táctil')
+  await cel.evaluate(() => window.__mundo.ubicar(3.2, 1.9, 0))
+  await cel.waitForSelector('.hud-operar', { state: 'visible', timeout: 5000 })
+  await cel.tap('.hud-operar')
+  await cel.waitForTimeout(1200)
+  verificar(await cel.evaluate(() => document.getElementById('dcs').classList.contains('abierto')), 'botón Operar abre el DCS en el celular')
+  if (salidaCapturas) await cel.screenshot({ path: `${salidaCapturas}/celular-dcs.png` })
+  await cel.close()
 } finally {
   await navegador.close()
+  await navegador3d.close()
   await new Promise((r) => servidor.httpServer.close(r))
 }
 console.log(fallas === 0 ? 'Prueba de pantallas: todo correcto' : `Prueba de pantallas: ${fallas} fallas`)

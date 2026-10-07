@@ -8,9 +8,17 @@ export function mostrarMenu() {
   return new Promise((resolver) => {
     const guardada = leerLocal()
     const error = h('div', { class: 'error' })
+    let modo = 'sala'
+    try { modo = localStorage.getItem('digestor:modo') ?? modo } catch { /* sin almacenamiento */ }
+    const botonesModo = [['sala', 'Sala de control 3D'], ['pantallas', 'Solo pantallas DCS']].map(([m, t]) => {
+      const b = h('button', { onclick: () => { modo = m; for (const x of botonesModo) x.classList.toggle('activo', x === b) } }, t)
+      b.classList.toggle('activo', m === modo)
+      return b
+    })
     const velo = h('div', { class: 'velo' }, h('div', { class: 'dialogo' },
       h('h1', {}, 'Sala de control — Digestor continuo Lo-Solids'),
       h('div', { class: 'suave' }, 'Simulador de operador. Fibra de eucalipto (E. nitens), 3 000 ADt/d.'),
+      h('div', { class: 'fila', style: 'margin-top: 10px' }, 'Modo:', botonesModo),
       h('div', { class: 'botones' },
         h('button', { onclick: () => elegir({ semilla: Math.floor(Math.random() * 1e9) }) }, 'Nueva partida: caso base en operación'),
         guardada ? h('button', { onclick: () => elegir({ guardado: guardada.datos }) }, `Continuar la partida guardada (${new Date(guardada.fecha).toLocaleString('es-CL')})`) : null,
@@ -21,7 +29,8 @@ export function mostrarMenu() {
     document.body.append(velo)
     function elegir(op) {
       velo.remove()
-      resolver(op)
+      try { localStorage.setItem('digestor:modo', modo) } catch { /* sin almacenamiento */ }
+      resolver({ ...op, modo })
     }
   })
 }

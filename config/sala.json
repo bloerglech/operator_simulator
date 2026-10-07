@@ -1,0 +1,1158 @@
+{
+ "_descripcion": "Sala de control descrita como datos (capa de presentación, no afecta a la simulación). 1 unidad = 1 m, Y hacia arriba, origen en el piso. Objetos: tipo caja|cilindro|esfera|plano|vidrio, pos (centro; en cilindros, la base), tam o radio/alto, rot en grados [x,y,z], color, glb opcional (ruta en public/modelos: si existe se carga en lugar de la forma), repetir {n, paso} para instancias. Anclajes con nombre: pantalla (superficie con textura del DCS: contenido = id de pantalla o 'mural'), interaccion (radio de cercanía, pantalla DCS que abre), telefono, radio, baliza, luz, vapor. Colisiones: cajas alineadas a los ejes, independientes del modelo visual.",
+ "jugador": {
+  "inicio": [
+   0,
+   0,
+   4.6
+  ],
+  "mirada": 0,
+  "altura_ojos": 1.65,
+  "radio": 0.3,
+  "velocidad": 1.7,
+  "velocidad_correr": 3.2
+ },
+ "ambiente": {
+  "fondo": "#8d979f",
+  "niebla": {
+   "color": "#8d979f",
+   "cerca": 30,
+   "lejos": 220
+  },
+  "luz_ambiente": 0.55,
+  "luz_cielo": 0.6,
+  "luz_ventanal": 1.1
+ },
+ "calidad": {
+  "bajo": {
+   "pixelRatio": 0.75,
+   "antialias": false,
+   "textura": 512,
+   "textura_mural": 1024,
+   "refresco_pantallas": 1.5
+  },
+  "medio": {
+   "pixelRatio": 1,
+   "antialias": true,
+   "textura": 1024,
+   "textura_mural": 1536,
+   "refresco_pantallas": 1.0
+  },
+  "alto": {
+   "pixelRatio": 2,
+   "antialias": true,
+   "textura": 1024,
+   "textura_mural": 2048,
+   "refresco_pantallas": 0.5
+  }
+ },
+ "objetos": [
+  {
+   "id": "piso",
+   "tipo": "caja",
+   "pos": [
+    0,
+    -0.05,
+    0
+   ],
+   "tam": [
+    16,
+    0.1,
+    12
+   ],
+   "color": "#3b3e42"
+  },
+  {
+   "id": "cielo",
+   "tipo": "caja",
+   "pos": [
+    0,
+    3.65,
+    0
+   ],
+   "tam": [
+    16,
+    0.1,
+    12
+   ],
+   "color": "#2b2d30"
+  },
+  {
+   "id": "muro_frente",
+   "tipo": "caja",
+   "pos": [
+    0,
+    1.8,
+    -6.05
+   ],
+   "tam": [
+    16,
+    3.6,
+    0.1
+   ],
+   "color": "#55595e"
+  },
+  {
+   "id": "muro_atras",
+   "tipo": "caja",
+   "pos": [
+    0,
+    1.8,
+    6.05
+   ],
+   "tam": [
+    16,
+    3.6,
+    0.1
+   ],
+   "color": "#55595e"
+  },
+  {
+   "id": "muro_derecho",
+   "tipo": "caja",
+   "pos": [
+    8.05,
+    1.8,
+    0
+   ],
+   "tam": [
+    0.1,
+    3.6,
+    12
+   ],
+   "color": "#55595e"
+  },
+  {
+   "id": "muro_izq_bajo",
+   "tipo": "caja",
+   "pos": [
+    -8.05,
+    0.5,
+    0
+   ],
+   "tam": [
+    0.1,
+    1.0,
+    12
+   ],
+   "color": "#55595e"
+  },
+  {
+   "id": "muro_izq_alto",
+   "tipo": "caja",
+   "pos": [
+    -8.05,
+    3.3,
+    0
+   ],
+   "tam": [
+    0.1,
+    0.6,
+    12
+   ],
+   "color": "#55595e"
+  },
+  {
+   "id": "muro_izq_a",
+   "tipo": "caja",
+   "pos": [
+    -8.05,
+    2.0,
+    -5.25
+   ],
+   "tam": [
+    0.1,
+    2.0,
+    1.5
+   ],
+   "color": "#55595e"
+  },
+  {
+   "id": "muro_izq_b",
+   "tipo": "caja",
+   "pos": [
+    -8.05,
+    2.0,
+    5.25
+   ],
+   "tam": [
+    0.1,
+    2.0,
+    1.5
+   ],
+   "color": "#55595e"
+  },
+  {
+   "id": "ventanal",
+   "tipo": "vidrio",
+   "pos": [
+    -8.04,
+    2.0,
+    0
+   ],
+   "tam": [
+    0.02,
+    2.0,
+    9.0
+   ],
+   "color": "#9fb4c4",
+   "opacidad": 0.18
+  },
+  {
+   "id": "puerta",
+   "tipo": "caja",
+   "pos": [
+    7.98,
+    1.05,
+    3.5
+   ],
+   "tam": [
+    0.04,
+    2.1,
+    1.0
+   ],
+   "color": "#3c3f44"
+  },
+  {
+   "id": "zocalo_mural",
+   "tipo": "caja",
+   "pos": [
+    0,
+    0.5,
+    -5.75
+   ],
+   "tam": [
+    7,
+    1.0,
+    0.5
+   ],
+   "color": "#45494e"
+  },
+  {
+   "id": "consola_1",
+   "tipo": "caja",
+   "pos": [
+    -3.2,
+    0.38,
+    0
+   ],
+   "tam": [
+    2.4,
+    0.76,
+    0.9
+   ],
+   "color": "#4a4f55"
+  },
+  {
+   "id": "consola_1_alza",
+   "tipo": "caja",
+   "pos": [
+    -3.2,
+    0.85,
+    -0.38
+   ],
+   "tam": [
+    2.4,
+    0.18,
+    0.14
+   ],
+   "color": "#40454b"
+  },
+  {
+   "id": "silla_1_asiento",
+   "tipo": "caja",
+   "pos": [
+    -3.2,
+    0.47,
+    0.95
+   ],
+   "tam": [
+    0.55,
+    0.08,
+    0.55
+   ],
+   "color": "#26292d"
+  },
+  {
+   "id": "silla_1_respaldo",
+   "tipo": "caja",
+   "pos": [
+    -3.2,
+    0.85,
+    1.2
+   ],
+   "tam": [
+    0.55,
+    0.7,
+    0.07
+   ],
+   "color": "#26292d"
+  },
+  {
+   "id": "silla_1_pie",
+   "tipo": "cilindro",
+   "pos": [
+    -3.2,
+    0.22,
+    0.95
+   ],
+   "radio": 0.04,
+   "alto": 0.44,
+   "color": "#1d1f22"
+  },
+  {
+   "id": "consola_2",
+   "tipo": "caja",
+   "pos": [
+    0,
+    0.38,
+    0
+   ],
+   "tam": [
+    2.4,
+    0.76,
+    0.9
+   ],
+   "color": "#4a4f55"
+  },
+  {
+   "id": "consola_2_alza",
+   "tipo": "caja",
+   "pos": [
+    0,
+    0.85,
+    -0.38
+   ],
+   "tam": [
+    2.4,
+    0.18,
+    0.14
+   ],
+   "color": "#40454b"
+  },
+  {
+   "id": "silla_2_asiento",
+   "tipo": "caja",
+   "pos": [
+    0,
+    0.47,
+    0.95
+   ],
+   "tam": [
+    0.55,
+    0.08,
+    0.55
+   ],
+   "color": "#26292d"
+  },
+  {
+   "id": "silla_2_respaldo",
+   "tipo": "caja",
+   "pos": [
+    0,
+    0.85,
+    1.2
+   ],
+   "tam": [
+    0.55,
+    0.7,
+    0.07
+   ],
+   "color": "#26292d"
+  },
+  {
+   "id": "silla_2_pie",
+   "tipo": "cilindro",
+   "pos": [
+    0,
+    0.22,
+    0.95
+   ],
+   "radio": 0.04,
+   "alto": 0.44,
+   "color": "#1d1f22"
+  },
+  {
+   "id": "consola_3",
+   "tipo": "caja",
+   "pos": [
+    3.2,
+    0.38,
+    0
+   ],
+   "tam": [
+    2.4,
+    0.76,
+    0.9
+   ],
+   "color": "#4a4f55"
+  },
+  {
+   "id": "consola_3_alza",
+   "tipo": "caja",
+   "pos": [
+    3.2,
+    0.85,
+    -0.38
+   ],
+   "tam": [
+    2.4,
+    0.18,
+    0.14
+   ],
+   "color": "#40454b"
+  },
+  {
+   "id": "silla_3_asiento",
+   "tipo": "caja",
+   "pos": [
+    3.2,
+    0.47,
+    0.95
+   ],
+   "tam": [
+    0.55,
+    0.08,
+    0.55
+   ],
+   "color": "#26292d"
+  },
+  {
+   "id": "silla_3_respaldo",
+   "tipo": "caja",
+   "pos": [
+    3.2,
+    0.85,
+    1.2
+   ],
+   "tam": [
+    0.55,
+    0.7,
+    0.07
+   ],
+   "color": "#26292d"
+  },
+  {
+   "id": "silla_3_pie",
+   "tipo": "cilindro",
+   "pos": [
+    3.2,
+    0.22,
+    0.95
+   ],
+   "radio": 0.04,
+   "alto": 0.44,
+   "color": "#1d1f22"
+  },
+  {
+   "id": "escritorio_supervisor",
+   "tipo": "caja",
+   "pos": [
+    4.6,
+    0.38,
+    4.3
+   ],
+   "tam": [
+    2.0,
+    0.76,
+    0.9
+   ],
+   "color": "#4a4f55"
+  },
+  {
+   "id": "telefono",
+   "tipo": "caja",
+   "pos": [
+    4.1,
+    0.8,
+    4.15
+   ],
+   "tam": [
+    0.22,
+    0.08,
+    0.18
+   ],
+   "color": "#1a1a1a"
+  },
+  {
+   "id": "radio",
+   "tipo": "caja",
+   "pos": [
+    5.1,
+    0.83,
+    4.15
+   ],
+   "tam": [
+    0.12,
+    0.14,
+    0.08
+   ],
+   "color": "#202020"
+  },
+  {
+   "id": "gabinete",
+   "tipo": "caja",
+   "pos": [
+    -6.5,
+    1.0,
+    5.65
+   ],
+   "tam": [
+    0.8,
+    2.0,
+    0.6
+   ],
+   "color": "#5e646b",
+   "repetir": {
+    "n": 5,
+    "paso": [
+     0.85,
+     0,
+     0
+    ]
+   }
+  },
+  {
+   "id": "suelo_exterior",
+   "tipo": "plano",
+   "pos": [
+    -70,
+    -6,
+    0
+   ],
+   "tam": [
+    140,
+    140
+   ],
+   "color": "#4d4f49"
+  },
+  {
+   "id": "impregnador_ext",
+   "tipo": "cilindro",
+   "pos": [
+    -55,
+    -6,
+    -14
+   ],
+   "radio": 3.75,
+   "alto": 23,
+   "color": "#6b6f73"
+  },
+  {
+   "id": "digestor_ext_bajo",
+   "tipo": "cilindro",
+   "pos": [
+    -66,
+    -6,
+    6
+   ],
+   "radio": 5.0,
+   "alto": 27,
+   "color": "#6f7377"
+  },
+  {
+   "id": "digestor_ext_alto",
+   "tipo": "cilindro",
+   "pos": [
+    -66,
+    21,
+    6
+   ],
+   "radio": 4.5,
+   "alto": 30,
+   "color": "#6f7377"
+  },
+  {
+   "id": "estanque_soplado_ext",
+   "tipo": "cilindro",
+   "pos": [
+    -48,
+    -6,
+    26
+   ],
+   "radio": 6,
+   "alto": 12,
+   "color": "#676b6f"
+  },
+  {
+   "id": "chimenea",
+   "tipo": "cilindro",
+   "pos": [
+    -140,
+    -6,
+    -50
+   ],
+   "radio": 2.5,
+   "alto": 60,
+   "color": "#7a7d80"
+  },
+  {
+   "id": "caneria_1",
+   "tipo": "caja",
+   "pos": [
+    -60,
+    15,
+    -4
+   ],
+   "tam": [
+    1,
+    0.8,
+    18
+   ],
+   "color": "#5c6064"
+  },
+  {
+   "id": "caneria_2",
+   "tipo": "caja",
+   "pos": [
+    -58,
+    4,
+    14
+   ],
+   "tam": [
+    16,
+    0.6,
+    0.6
+   ],
+   "color": "#5c6064"
+  },
+  {
+   "id": "edificio_ext",
+   "tipo": "caja",
+   "pos": [
+    -95,
+    4,
+    30
+   ],
+   "tam": [
+    30,
+    20,
+    20
+   ],
+   "color": "#5f6266"
+  },
+  {
+   "id": "digestor_cupula",
+   "tipo": "esfera",
+   "pos": [
+    -66,
+    51,
+    6
+   ],
+   "radio": 4.5,
+   "color": "#6f7377"
+  }
+ ],
+ "anclajes": [
+  {
+   "id": "monitor_1a",
+   "tipo": "pantalla",
+   "pos": [
+    -3.92,
+    1.17,
+    -0.24
+   ],
+   "rot": [
+    -6,
+    14,
+    0
+   ],
+   "tam": [
+    0.66,
+    0.4
+   ],
+   "contenido": "alimentacion",
+   "marco": true
+  },
+  {
+   "id": "monitor_1b",
+   "tipo": "pantalla",
+   "pos": [
+    -3.2,
+    1.17,
+    -0.32
+   ],
+   "rot": [
+    -6,
+    0,
+    0
+   ],
+   "tam": [
+    0.66,
+    0.4
+   ],
+   "contenido": "circulaciones",
+   "marco": true
+  },
+  {
+   "id": "monitor_1c",
+   "tipo": "pantalla",
+   "pos": [
+    -2.4800000000000004,
+    1.17,
+    -0.24
+   ],
+   "rot": [
+    -6,
+    -14,
+    0
+   ],
+   "tam": [
+    0.66,
+    0.4
+   ],
+   "contenido": "extracciones",
+   "marco": true
+  },
+  {
+   "id": "monitor_2a",
+   "tipo": "pantalla",
+   "pos": [
+    -0.72,
+    1.17,
+    -0.24
+   ],
+   "rot": [
+    -6,
+    14,
+    0
+   ],
+   "tam": [
+    0.66,
+    0.4
+   ],
+   "contenido": "fondo",
+   "marco": true
+  },
+  {
+   "id": "monitor_2b",
+   "tipo": "pantalla",
+   "pos": [
+    0,
+    1.17,
+    -0.32
+   ],
+   "rot": [
+    -6,
+    0,
+    0
+   ],
+   "tam": [
+    0.66,
+    0.4
+   ],
+   "contenido": "digestor",
+   "marco": true
+  },
+  {
+   "id": "monitor_2c",
+   "tipo": "pantalla",
+   "pos": [
+    0.72,
+    1.17,
+    -0.24
+   ],
+   "rot": [
+    -6,
+    -14,
+    0
+   ],
+   "tam": [
+    0.66,
+    0.4
+   ],
+   "contenido": "calidad",
+   "marco": true
+  },
+  {
+   "id": "monitor_3a",
+   "tipo": "pantalla",
+   "pos": [
+    2.4800000000000004,
+    1.17,
+    -0.24
+   ],
+   "rot": [
+    -6,
+    14,
+    0
+   ],
+   "tam": [
+    0.66,
+    0.4
+   ],
+   "contenido": "alarmas",
+   "marco": true
+  },
+  {
+   "id": "monitor_3b",
+   "tipo": "pantalla",
+   "pos": [
+    3.2,
+    1.17,
+    -0.32
+   ],
+   "rot": [
+    -6,
+    0,
+    0
+   ],
+   "tam": [
+    0.66,
+    0.4
+   ],
+   "contenido": "tendencias",
+   "marco": true
+  },
+  {
+   "id": "monitor_3c",
+   "tipo": "pantalla",
+   "pos": [
+    3.92,
+    1.17,
+    -0.24
+   ],
+   "rot": [
+    -6,
+    -14,
+    0
+   ],
+   "tam": [
+    0.66,
+    0.4
+   ],
+   "contenido": "perfiles",
+   "marco": true
+  },
+  {
+   "id": "mural",
+   "tipo": "pantalla",
+   "pos": [
+    0,
+    2.05,
+    -5.96
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "tam": [
+    6.4,
+    2.0
+   ],
+   "contenido": "mural",
+   "marco": true
+  },
+  {
+   "id": "interaccion_consola_1",
+   "tipo": "interaccion",
+   "pos": [
+    -3.2,
+    0,
+    0.9
+   ],
+   "radio": 1.6,
+   "pantalla": "alimentacion",
+   "etiqueta": "Consola 1: alimentación e impregnación"
+  },
+  {
+   "id": "interaccion_consola_2",
+   "tipo": "interaccion",
+   "pos": [
+    0,
+    0,
+    0.9
+   ],
+   "radio": 1.6,
+   "pantalla": "digestor",
+   "etiqueta": "Consola 2: digestor"
+  },
+  {
+   "id": "interaccion_consola_3",
+   "tipo": "interaccion",
+   "pos": [
+    3.2,
+    0,
+    0.9
+   ],
+   "radio": 1.6,
+   "pantalla": "alarmas",
+   "etiqueta": "Consola 3: alarmas y tendencias"
+  },
+  {
+   "id": "mural_interaccion",
+   "tipo": "interaccion",
+   "pos": [
+    0,
+    0,
+    -4.6
+   ],
+   "radio": 1.6,
+   "pantalla": "tendencias",
+   "etiqueta": "Pantalla mural: tendencias"
+  },
+  {
+   "id": "interaccion_telefono",
+   "tipo": "telefono",
+   "pos": [
+    4.1,
+    0,
+    3.5
+   ],
+   "radio": 1.2,
+   "etiqueta": "Teléfono"
+  },
+  {
+   "id": "interaccion_radio",
+   "tipo": "radio",
+   "pos": [
+    5.1,
+    0,
+    3.5
+   ],
+   "radio": 1.2,
+   "etiqueta": "Radio"
+  },
+  {
+   "id": "baliza_mural",
+   "tipo": "baliza",
+   "pos": [
+    3.6,
+    3.25,
+    -5.85
+   ]
+  },
+  {
+   "id": "baliza_mural_2",
+   "tipo": "baliza",
+   "pos": [
+    -3.6,
+    3.25,
+    -5.85
+   ]
+  },
+  {
+   "id": "luz_1",
+   "tipo": "luz",
+   "pos": [
+    -4,
+    3.4,
+    -2
+   ],
+   "intensidad": 5,
+   "color": "#f2efe6"
+  },
+  {
+   "id": "luz_2",
+   "tipo": "luz",
+   "pos": [
+    4,
+    3.4,
+    -2
+   ],
+   "intensidad": 5,
+   "color": "#f2efe6"
+  },
+  {
+   "id": "luz_3",
+   "tipo": "luz",
+   "pos": [
+    -4,
+    3.4,
+    3
+   ],
+   "intensidad": 4,
+   "color": "#f2efe6"
+  },
+  {
+   "id": "luz_4",
+   "tipo": "luz",
+   "pos": [
+    4,
+    3.4,
+    3
+   ],
+   "intensidad": 4,
+   "color": "#f2efe6"
+  },
+  {
+   "id": "vapor_digestor",
+   "tipo": "vapor",
+   "pos": [
+    -66,
+    55,
+    6
+   ]
+  },
+  {
+   "id": "vapor_estanque",
+   "tipo": "vapor",
+   "pos": [
+    -48,
+    6,
+    26
+   ]
+  }
+ ],
+ "colisiones": [
+  {
+   "min": [
+    -8.2,
+    0,
+    -6.3
+   ],
+   "max": [
+    8.2,
+    3.6,
+    -6.0
+   ]
+  },
+  {
+   "min": [
+    -8.2,
+    0,
+    6.0
+   ],
+   "max": [
+    8.2,
+    3.6,
+    6.3
+   ]
+  },
+  {
+   "min": [
+    8.0,
+    0,
+    -6.3
+   ],
+   "max": [
+    8.3,
+    3.6,
+    6.3
+   ]
+  },
+  {
+   "min": [
+    -8.3,
+    0,
+    -6.3
+   ],
+   "max": [
+    -8.0,
+    3.6,
+    6.3
+   ]
+  },
+  {
+   "min": [
+    -3.5,
+    0,
+    -5.95
+   ],
+   "max": [
+    3.5,
+    1.0,
+    -5.5
+   ]
+  },
+  {
+   "min": [
+    -4.4,
+    0,
+    -0.45
+   ],
+   "max": [
+    -2.0,
+    0.8,
+    0.45
+   ]
+  },
+  {
+   "min": [
+    -1.2,
+    0,
+    -0.45
+   ],
+   "max": [
+    1.2,
+    0.8,
+    0.45
+   ]
+  },
+  {
+   "min": [
+    2.0,
+    0,
+    -0.45
+   ],
+   "max": [
+    4.4,
+    0.8,
+    0.45
+   ]
+  },
+  {
+   "min": [
+    3.6,
+    0,
+    3.85
+   ],
+   "max": [
+    5.6,
+    0.8,
+    4.75
+   ]
+  },
+  {
+   "min": [
+    -6.9,
+    0,
+    5.35
+   ],
+   "max": [
+    -2.5,
+    2.0,
+    5.95
+   ]
+  }
+ ],
+ "efectos": [
+  {
+   "tipo": "baliza",
+   "anclajes": [
+    "baliza_mural",
+    "baliza_mural_2"
+   ],
+   "condicion": "alarma_prioridad_1"
+  },
+  {
+   "tipo": "parpadeo_luces",
+   "condicion": "evento_reciente:apertura_seguridad",
+   "duracion": 8
+  },
+  {
+   "tipo": "vapor",
+   "anclaje": "vapor_digestor",
+   "condicion": "alivio:dig"
+  },
+  {
+   "tipo": "vapor",
+   "anclaje": "vapor_estanque",
+   "condicion": "evento_reciente:vaporizacion_subita",
+   "duracion": 30
+  },
+  {
+   "tipo": "vibracion",
+   "condicion": "evento_reciente:apertura_seguridad",
+   "duracion": 2,
+   "amplitud": 0.03
+  },
+  {
+   "tipo": "vibracion",
+   "condicion": "evento_reciente:caida_columna",
+   "duracion": 1.5,
+   "amplitud": 0.02
+  }
+ ]
+}

@@ -21,6 +21,7 @@ export function crearApp(raiz, cliente, opciones = {}) {
   let lateral = null // { actualizar, cerrar }
   let menuAbierto = null
   let pendienteDibujo = false
+  let oculto = false // en la sala 3D el DCS se oculta mientras se camina
 
   // ---- Barra superior ----
   const relojEl = h('span', { class: 'reloj', title: 'Tiempo de planta (día y hora)' }, '—')
@@ -31,6 +32,7 @@ export function crearApp(raiz, cliente, opciones = {}) {
   const contadores = [1, 2, 3, 4].map((p) => h('span', { class: `p${p}`, title: `Alarmas de prioridad ${p}` }, '0'))
   const rendimientoEl = h('span', { class: 'suave ocultar-celular' })
   const barra = h('div', { id: 'barra' },
+    opciones.alVolver ? h('button', { onclick: () => opciones.alVolver(), title: 'Volver a la sala de control (Esc)' }, '◀ Sala') : null,
     relojEl,
     h('div', { class: 'grupo' }, botonesVel),
     rendimientoEl,
@@ -69,6 +71,11 @@ export function crearApp(raiz, cliente, opciones = {}) {
     },
     cerrarLateral,
     menu,
+    /** Muestra u oculta el DCS (en la sala 3D); oculto no se redibuja. */
+    mostrar(si) {
+      oculto = !si
+      if (si && estado) dibujar()
+    },
     menuBomba(id, ev) {
       const b = estado?.bombas[id]
       menu(`Bomba ${id}`, [
@@ -166,7 +173,7 @@ export function crearApp(raiz, cliente, opciones = {}) {
   // ---- Actualización con cada instantánea (agrupada por cuadro) ----
   function dibujar() {
     pendienteDibujo = false
-    if (!estado) return
+    if (!estado || oculto) return
     relojEl.textContent = reloj(estado.t)
     for (const b of botonesVel) b.classList.toggle('activo', Number(b.dataset.vel) === estado.velocidad)
     const r = cliente.rendimiento()

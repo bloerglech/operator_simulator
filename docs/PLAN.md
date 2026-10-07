@@ -1,7 +1,7 @@
 # PLAN DE TRABAJO
 
 Estado: **aprobado** con los valores provisionales de la sección 6.
-Fase actual: **3 terminada** (ver sección 8).
+Fase actual: **4 terminada** (ver sección 8).
 
 Documento rector: `docs/ESPECIFICACION.md`. Si algo de aquí lo contradice,
 manda la especificación y este plan se corrige.
@@ -405,3 +405,29 @@ eventos instructor) pero no las implementa.
 - Pendiente para fases siguientes: textura del DCS en los monitores 3D
   (Fase 4: los mímicos son SVG, convertibles a imagen), eventos con guion y
   misiones (Fase 5), historial de tendencias dentro del archivo guardado.
+
+### Fase 4 — terminada
+- `config/sala.json`: la sala como datos (objetos con forma simple o GLB
+  opcional, instancias, anclajes con nombre: pantallas, interacción,
+  teléfono, radio, balizas, luces, vapor; colisiones en cajas aparte;
+  efectos; tres niveles de calidad).
+- `src/mundo3d/`: escena Three.js sin sombras dinámicas (59 llamadas de
+  dibujo, ≈ 900 triángulos), jugador en primera persona con colisiones y
+  deslizamiento (probado en Node), entradas de teclado/mouse con bloqueo del
+  puntero y táctiles (joystick y arrastre), monitores con los mímicos del DCS
+  rasterizados como textura (repintado por turnos), pantalla mural, efectos
+  conectados al proceso. Three.js se carga solo en modo sala.
+- Integración: menú con modo sala o solo pantallas; al operar una consola se
+  abre el DCS en 2D a pantalla completa y Esc vuelve a la sala.
+- Aceptación (`npm run e2e`, 19 verificaciones): las de la Fase 3 más
+  presupuesto de dibujo, caminar y chocar, consola → DCS → sala, y celular
+  táctil (botón Operar). Pruebas nuevas en `tests/sala.test.js`.
+- Doble revisión: revisión independiente de las pantallas (6 defectos y 5
+  menores corregidos: botones que perdían clics por redibujos, valores
+  escritos que se sobrescribían, primera pantalla sin estado, errores de
+  guardado silenciosos); en la sala se corrigieron la ubicación del exterior,
+  el contraste del HUD y la medición de cuadros (el render por software
+  distorsionaba la prueba 2D).
+- Pendiente: medir 60/30 cuadros por segundo en equipos reales con GPU (en
+  esta máquina solo hay render por software); scripts de Blender
+  (opcionales); modelos GLB.

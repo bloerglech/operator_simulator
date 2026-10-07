@@ -94,7 +94,11 @@ function leerActuador(l, ctx, lz, ce) {
       return c.aperturaVapor !== null && c.aperturaVapor !== undefined ? c.aperturaVapor * 100 : Math.min(100, (c.Q / Qv) * 100)
     }
     case 'servicio': return pct(desdeInterno(estado.servicios[s.id], s.unidad))
-    case 'flash': return pct(desdeInterno(estado.equipos.flash[s.id].salida, s.unidad))
+    case 'flash': {
+      // Se lee la consigna escrita (la salida real puede quedar limitada aguas abajo).
+      const f = estado.equipos.flash[s.id]
+      return pct(desdeInterno(f.salidaConsigna ?? f.salida, s.unidad))
+    }
     case 'lazo': {
       const esc = lz.lazos[s.id]
       return ((ce.lazos[s.id].sp - esc.pvMin) / (esc.pvMax - esc.pvMin)) * 100
@@ -280,8 +284,8 @@ function pasoBloques(lz, inst, ctx, ce, dt) {
       if (sb.base === null) sb.base = { sup: ce.lazos['TIC-402'].sp, inf: ce.lazos['TIC-404'].sp, correccion: lectura_('HI-703') - Hp }
       sb.Hprevisto = Hp + sb.base.correccion
       sb.bias = Math.min(pr.bias_max, Math.max(-pr.bias_max, sb.bias + (pr.ganancia * (pr.objetivo - sb.Hprevisto) * dt) / 60))
-      ce.lazos['TIC-402'].sp = sb.base.sup + sb.bias
-      ce.lazos['TIC-404'].sp = sb.base.inf + sb.bias
+      fijarConsignaAuto(ce, lz, 'TIC-402', sb.base.sup + sb.bias)
+      fijarConsignaAuto(ce, lz, 'TIC-404', sb.base.inf + sb.bias)
       sb.salida = sb.bias
     } else if (b.tipo === 'kappa') {
       // PI muestreado: actúa solo cuando el analizador entrega un valor nuevo.
@@ -311,13 +315,29 @@ function pasoRitmo(lz, ctx, ce, b, sb, dt) {
     sb.base = { W: wic.sp, sps: {} }
     for (const l of Object.values(lz.lazos)) if (l.escala_ritmo) sb.base.sps[l.tag] = ce.lazos[l.tag].sp
   }
-  // Rampa limitada de la consigna de madera.
-  const rampa = (pr.rampa * 0.9 / (pr.rendimiento / 100)) / 24 / 3600 // t/h por s
-  const d = Wobj - wic.sp
-  wic.sp += Math.sign(d) * Math.min(Math.abs(d), rampa * dt)
+  if (!(sb.base.W > 1)) return // sin ritmo base no hay a qué escalar (planta detenida)
+  // Rampa limitada de la consigna de madera (solo con WIC-101 en AUTO).
+  if (wic.modo === 'AUTO') {
+    const rampa = (pr.rampa * 0.9 / (pr.rendimiento / 100)) / 24 / 3600 // t/h por s
+    const d = Wobj - wic.sp
+    fijarConsignaAuto(ce, lz, 'WIC-101', wic.sp + Math.sign(d) * Math.min(Math.abs(d), rampa * dt))
+  }
   const r = wic.sp / sb.base.W
-  for (const [tag, sp0] of Object.entries(sb.base.sps)) if (ce.lazos[tag].modo === 'AUTO') ce.lazos[tag].sp = sp0 * r
+  for (const tag of Object.keys(sb.base.sps)) {
+    // Los lazos en AUTO siguen el ritmo; los demás renuevan su base para
+    // que al volver a AUTO no salten a una consigna vieja.
+    if (ce.lazos[tag].modo === 'AUTO') fijarConsignaAuto(ce, lz, tag, sb.base.sps[tag] * r)
+    else if (r > 0) sb.base.sps[tag] = ce.lazos[tag].sp / r
+  }
   sb.salida = r
+}
+
+/** Un bloque fija la consigna de un lazo solo si está en AUTO, dentro del rango del PV. */
+function fijarConsignaAuto(ce, lz, tag, valor) {
+  const st = ce.lazos[tag]
+  const l = lz.lazos[tag]
+  if (st.modo !== 'AUTO' || st.forzado || !Number.isFinite(valor)) return
+  st.sp = Math.min(l.pvMax, Math.max(l.pvMin, valor))
 }
 
 export { cambiarModo }

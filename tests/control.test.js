@@ -318,3 +318,61 @@ describe('determinismo con control', () => {
     expect(JSON.stringify(c.estadoInterno())).toBe(ea)
   })
 })
+
+describe('regresiones de la revisión del control', () => {
+  it('un comando enviado justo al crear el sistema desde un guardado no se pierde', () => {
+    const s = crearSistema(config(), { semilla: 7 })
+    s.cargar(caliente)
+    s.enviarComando({ tipo: 'lazo', id: 'PIC-301', accion: 'consigna', valor: 6.2 })
+    s.avanzar(10)
+    expect(lazo(s, 'PIC-301').sp).toBe(6.2)
+  })
+
+  it('RC-700 no se activa con la alimentación detenida y los parámetros tienen rango', () => {
+    const s = sistema()
+    expect(() => s.enviarComando({ tipo: 'bloque', id: 'RC-700', accion: 'parametro', campo: 'rendimiento', valor: 0 })).toThrow()
+    expect(() => s.enviarComando({ tipo: 'bloque', id: 'FFC-110', accion: 'parametro', campo: 'EA_licor_blanco', valor: 0 })).toThrow()
+    s.enviarComando({ tipo: 'lazo', id: 'WIC-101', accion: 'consigna', valor: 0 })
+    s.avanzar(1)
+    expect(() => s.enviarComando({ tipo: 'bloque', id: 'RC-700', accion: 'activar' })).toThrow()
+  })
+
+  it('un lazo de nivel de flash en MAN mantiene la salida del operador', () => {
+    const s = sistema()
+    s.enviarComando({ tipo: 'lazo', id: 'LIC-511', accion: 'modo', valor: 'MAN' })
+    s.avanzar(1)
+    s.enviarComando({ tipo: 'lazo', id: 'LIC-511', accion: 'salida', valor: 95 })
+    s.avanzar(30)
+    expect(lazo(s, 'LIC-511').salida).toBe(95)
+  })
+
+  it('el control de factor H no pisa la consigna de un calentador en MAN', () => {
+    const s = sistema()
+    s.enviarComando({ tipo: 'lazo', id: 'TIC-402', accion: 'modo', valor: 'MAN' })
+    s.avanzar(1)
+    const sp = lazo(s, 'TIC-402').sp
+    s.enviarComando({ tipo: 'bloque', id: 'HIC-703', accion: 'parametro', campo: 'objetivo', valor: 520 })
+    s.enviarComando({ tipo: 'bloque', id: 'HIC-703', accion: 'activar' })
+    s.avanzar(10 * MIN)
+    expect(lazo(s, 'TIC-402').sp).toBe(sp)
+  })
+
+  it('archivo: duración no numérica rechazada; una alarma de evento sale del archivo al vencer', () => {
+    const s = sistema()
+    expect(() => s.enviarComando({ tipo: 'alarma', id: 'EV-detencion_bomba', accion: 'archivar', duracion: '100' })).toThrow()
+    s.enviarComando({ tipo: 'alarma', id: 'EV-detencion_bomba', accion: 'archivar', duracion: 60 })
+    s.avanzar(2 * MIN)
+    expect(ctl(s).alarmas.archivadas).toEqual([])
+  })
+
+  it('la deriva de un analizador lo desplaza en vez de congelarlo', () => {
+    const s = sistema()
+    s.enviarComando({ tipo: 'instrumento', id: 'AI-504', falla: 'deriva' })
+    s.avanzar(3 * HORA)
+    const conDeriva = ctl(s).transmisores['AI-504'].valor
+    const b = sistema()
+    b.avanzar(3 * HORA)
+    // 1 % del rango (40 g/L) por hora durante ≈ 3 h ≈ 1,2 g/L.
+    expect(conDeriva - ctl(b).transmisores['AI-504'].valor).toBeGreaterThan(0.8)
+  })
+})

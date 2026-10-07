@@ -118,12 +118,12 @@ export function pasoAlarmas(al, inst, lz, ce, ctx, dt) {
     }
   }
   for (const def of al.lista) {
-    if (def.clase === 'evento') continue
     const s = ca.a[def.id]
     if (s.archivadaHasta !== null && t >= s.archivadaHasta) {
       s.archivadaHasta = null
       anotar(ca, t, def, 'desarchivada')
     }
+    if (def.clase === 'evento') continue
     const suprimida = (ca.supresion.activa && def.grupo === 'proceso') || s.archivadaHasta !== null
     let entra = false
     let sale = true
@@ -197,7 +197,7 @@ export function validarComandoAlarma(al, cmd) {
   if (!(cmd.accion === 'reconocer' && cmd.id === '*') && !al.porId[cmd.id]) throw new Error(`Alarma desconocida: ${cmd.id}`)
   if (cmd.accion === 'archivar') {
     if (al.porId[cmd.id].prioridad === 1) throw new Error('Las alarmas críticas no se pueden archivar')
-    if (cmd.duracion !== undefined && !(cmd.duracion > 0 && cmd.duracion <= 8 * 3600)) throw new Error('Duración de archivo inválida (máx. 8 h)')
+    if (cmd.duracion !== undefined && !(typeof cmd.duracion === 'number' && cmd.duracion > 0 && cmd.duracion <= 8 * 3600)) throw new Error('Duración de archivo inválida (máx. 8 h)')
   }
 }
 
@@ -209,7 +209,7 @@ export function listaAlarmas(al, ce) {
     const s = ca.a[def.id]
     if (!s.activa && s.reconocida) continue
     r.push({
-      id: def.id, prioridad: def.prioridad, mensaje: def.mensaje, grupo: def.grupo, activa: s.activa, reconocida: s.reconocida,
+      id: def.id, tag: def.tag ?? def.lazo ?? def.enclavamiento ?? null, prioridad: def.prioridad, mensaje: def.mensaje, grupo: def.grupo, activa: s.activa, reconocida: s.reconocida,
       t: s.tActivacion, valor: s.valor, limite: def.limite ?? null, unidad: def.unidad ?? null,
     })
   }

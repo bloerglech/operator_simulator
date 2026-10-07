@@ -31,6 +31,16 @@ const TIPOS = new Set(['lazo', 'bloque', 'enclavamiento', 'alarma', 'laboratorio
 const FALLAS = [null, 'congelado', 'alto', 'bajo', 'deriva']
 const copiar = (x) => JSON.parse(JSON.stringify(x))
 
+// Rangos admisibles de los parámetros que el operador puede cambiar en los bloques.
+const RANGOS_BLOQUE = {
+  carga_alcali: { carga: [8, 30], EA_licor_blanco: [60, 180] },
+  licor_madera: { relacion: [2, 6], humedad: [20, 70] },
+  seguimiento: { ganancia: [0, 2] },
+  ritmo: { produccion: [500, 4000], rampa: [10, 600], rendimiento: [40, 65] },
+  factor_h: { objetivo: [200, 900], tiempo_superior: [0.2, 4], tiempo_inferior: [0.2, 4], H_resto: [0, 300], ganancia: [0, 0.05], bias_max: [0, 15] },
+  kappa: { objetivo: [8, 40], ganancia: [0, 30], Ti: [600, 86400] },
+}
+
 /** Fábrica de la extensión de control para crearPlanta(config, { extension }). */
 export function extensionControl(config) {
   let sis = null
@@ -54,7 +64,8 @@ export function extensionControl(config) {
       ce.alarmas = estadoAlarmas(al, ctx.estado)
       // Hasta el primer paso lento no existen los diagnósticos del proceso
       // (niveles, temperaturas de salida): el control arranca después.
-      ce.listo = false
+      // Si se parte de un estado guardado, ya existen y el control arranca de inmediato.
+      ce.listo = !!ctx.estado.diag?.dig
     },
 
     pasoRapido(ctx) {
@@ -79,6 +90,7 @@ export function extensionControl(config) {
     validar(ctx, cmd) {
       const { inst, lz, enc, al } = construir(ctx.modelo)
       const ce = ctx.estado.control
+      if (!ce.listo) throw new Error('El sistema de control todavía está arrancando: intente en unos segundos')
       const numero = (v, nombre = 'valor') => {
         if (typeof v !== 'number' || !Number.isFinite(v)) throw new Error(`El ${nombre} debe ser un número`)
       }
@@ -115,7 +127,12 @@ export function extensionControl(config) {
             throw new Error(`El bloque ${cmd.id} no tiene el parámetro numérico "${cmd.campo}"`)
           }
           numero(cmd.valor)
-        } else if (!['activar', 'desactivar'].includes(cmd.accion)) throw new Error(`Acción de bloque inválida: ${cmd.accion}`)
+          const r = RANGOS_BLOQUE[b.tipo]?.[cmd.campo]
+          if (r && (cmd.valor < r[0] || cmd.valor > r[1])) throw new Error(`${cmd.campo} debe estar entre ${r[0]} y ${r[1]}`)
+          if (!r && !(cmd.valor > 0)) throw new Error(`${cmd.campo} debe ser positivo`)
+        } else if (cmd.accion === 'activar') {
+          if (b.tipo === 'ritmo' && !(ce.lazos['WIC-101'].sp > 1)) throw new Error('Con la alimentación detenida no hay ritmo que coordinar: fije antes la consigna de WIC-101')
+        } else if (cmd.accion !== 'desactivar') throw new Error(`Acción de bloque inválida: ${cmd.accion}`)
       } else if (cmd.tipo === 'enclavamiento') validarComandoEnclavamiento(enc, ce, cmd)
       else if (cmd.tipo === 'alarma') validarComandoAlarma(al, cmd)
       else if (cmd.tipo === 'laboratorio') {
@@ -158,6 +175,7 @@ export function extensionControl(config) {
           sb.bias = 0
           delete sb.ultimo
           delete sb.Wbase
+          delete sb.filtros // los filtros parten del valor actual, no del de la última activación
         } else if (cmd.accion === 'desactivar') sb.activo = false
         else if (cmd.accion === 'parametro') sb.parametros[cmd.campo] = cmd.valor
       } else if (cmd.tipo === 'enclavamiento') comandoEnclavamiento(enc, ce, ctx, cmd)

@@ -94,8 +94,9 @@ export function pasoInstrumentos(inst, ce, modelo, estado, dt) {
         s.pendiente = { t: t0 + t.analisis, valor: v + t.error * normal(rng) }
         s.proximaMuestra = t0 + t.periodo
       }
+      if (s.falla === 'deriva') s.deriva += ((t.rango[1] - t.rango[0]) * 0.01 * dt) / 3600
       if (s.pendiente && t0 >= s.pendiente.t) {
-        if (!s.falla) s.valor = s.pendiente.valor
+        if (s.falla !== 'congelado') s.valor = s.pendiente.valor + s.deriva
         s.pendiente = null
       }
     } else {

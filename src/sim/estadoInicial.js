@@ -10,6 +10,7 @@ import { crearTubo } from './tubo.js'
 import { ubicarColumna } from './columna.js'
 import { cantidadesVacias, inventario } from './contabilidad.js'
 import { estadoInicial as estadoAleatorio } from './aleatorio.js'
+import { camposCineticos } from './cinetica.js'
 
 /** Caudal de madera seca (kg/s) para una producción (ADt/d) y un rendimiento. */
 export function maderaDesdeProduccion(produccion, rendimiento) {
@@ -55,6 +56,8 @@ export function fuentesIniciales(modelo) {
     T: p(cb.astillas, 'T', 'caso_base.astillas.T'),
     humedad: p(cb.astillas, 'humedad', 'caso_base.astillas.humedad'),
     densidad: modelo.densidadBasica,
+    reactividad: modelo.cin.reactividad,
+    vaporizacion: p(cb.astillas, 'vaporizacion', 'caso_base.astillas.vaporizacion'),
     marca: 0,
   }
   return fuentes
@@ -75,6 +78,7 @@ export function parcelaFresca(modelo, astillas, m) {
     H: 0,
     edad: 0,
     marca: astillas.marca,
+    ...camposCineticos(modelo.cin, m, { reactividad: astillas.reactividad, vaporizacion: astillas.vaporizacion }),
   }
 }
 
@@ -148,6 +152,7 @@ export function crearEstadoInicial(modelo, { modo = 'operacion', semilla } = {})
     inv0,
     entra: cantidadesVacias(nEsp),
     sale: cantidadesVacias(nEsp),
+    produccion: cantidadesVacias(nEsp), // generado (+) o consumido (−) por las reacciones
     calentadores: 0, // kJ entregados
     perdidas: 0, // kJ perdidos al ambiente
     sumideros: {}, // volumen de licor por sumidero (m³)

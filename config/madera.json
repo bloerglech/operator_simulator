@@ -1,16 +1,34 @@
 {
-  "_descripcion": "Madera: Eucalyptus nitens (única especie). Todos los valores provisionales (pregunta P10 de docs/PLAN.md). La composición se usa desde la Fase 1b.",
+  "_descripcion": "Madera: Eucalyptus nitens (única especie). Todos los valores provisionales (pregunta P10 de docs/PLAN.md). La composición debe sumar 100 %.",
   "especie": "Eucalyptus nitens",
   "densidad_basica": { "valor": 480, "unidad": "kg/m3", "origen": "supuesto" },
   "densidad_pared_celular": { "valor": 1500, "unidad": "kg/m3", "origen": "supuesto", "nota": "S-11" },
   "cp": { "valor": 1.4, "unidad": "kJ/(kg·K)", "origen": "supuesto", "nota": "madera seca" },
-  "espesor_medio": { "valor": 4, "unidad": "mm", "origen": "supuesto" },
-  "reactividad": { "valor": 1.0, "unidad": "-", "origen": "supuesto" },
+  "espesor_medio": { "valor": 4, "unidad": "mm", "origen": "supuesto", "nota": "para la difusión libre-retenido" },
+  "reactividad": { "valor": 1.0, "unidad": "-", "origen": "supuesto", "nota": "multiplica la deslignificación; representa lotes más o menos fáciles de cocer" },
   "composicion": {
-    "lignina": { "valor": 25, "unidad": "%", "origen": "supuesto" },
-    "glucano": { "valor": 46, "unidad": "%", "origen": "supuesto" },
-    "xilano": { "valor": 15, "unidad": "%", "origen": "supuesto" },
-    "otros_carbohidratos": { "valor": 4, "unidad": "%", "origen": "supuesto" },
-    "extraibles": { "valor": 3, "unidad": "%", "origen": "supuesto" }
-  }
+    "lignina": { "valor": 24.5, "unidad": "%", "origen": "supuesto" },
+    "glucano": { "valor": 46, "unidad": "%", "origen": "supuesto", "nota": "celulosa" },
+    "xilano": { "valor": 17, "unidad": "%", "origen": "supuesto", "nota": "incluye los grupos urónicos" },
+    "otros_carbohidratos": { "valor": 6, "unidad": "%", "origen": "supuesto", "nota": "glucomanano, galactano, arabinano, etc." },
+    "extraibles": { "valor": 3, "unidad": "%", "origen": "supuesto" },
+    "acetilos": { "valor": 3, "unidad": "%", "origen": "supuesto", "nota": "en el xilano; importante en eucalipto" },
+    "cenizas": { "valor": 0.5, "unidad": "%", "origen": "supuesto", "nota": "inertes, quedan en la pulpa" }
+  },
+  "MeGlcA": { "valor": 110, "unidad": "mmol/kg", "origen": "supuesto", "nota": "ácido 4-O-metilglucurónico en el xilano, por kg de madera" },
+  "DP_inicial": { "valor": 3500, "unidad": "-", "origen": "supuesto", "nota": "grado de polimerización de la celulosa de la madera (equivalente viscosimétrico)" },
+  "clases_tamano": [
+    { "id": "sobre_espesor", "nombre": "Sobre espesor",
+      "fraccion": { "valor": 4, "unidad": "%", "origen": "supuesto" },
+      "espesor": { "valor": 8, "unidad": "mm", "origen": "supuesto" } },
+    { "id": "aceptadas", "nombre": "Aceptadas",
+      "fraccion": { "valor": 86, "unidad": "%", "origen": "supuesto" },
+      "espesor": { "valor": 4, "unidad": "mm", "origen": "supuesto" } },
+    { "id": "palillos", "nombre": "Palillos",
+      "fraccion": { "valor": 4, "unidad": "%", "origen": "supuesto" },
+      "espesor": { "valor": 3, "unidad": "mm", "origen": "supuesto" } },
+    { "id": "finos", "nombre": "Finos",
+      "fraccion": { "valor": 6, "unidad": "%", "origen": "supuesto" },
+      "espesor": { "valor": 1.5, "unidad": "mm", "origen": "supuesto" } }
+  ]
 }

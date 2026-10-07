@@ -9,18 +9,24 @@
 import { alturaDesdeFondo } from './geometria.js'
 import { fundirParcela, partirParcela } from './materia.js'
 
-/** Retira `masa` kg de astillas por el fondo. Devuelve las porciones retiradas. */
+/**
+ * Retira por el fondo astillas equivalentes a `masa` kg de madera original
+ * (base madera alimentada, m0). Como el volumen de la astilla no cambia al
+ * cocinarse, esto equivale a retirar un volumen fijo de columna: el nivel no
+ * depende del rendimiento. Devuelve las porciones retiradas.
+ */
 export function retirarFondo(parcelas, masa) {
   const retiradas = []
   let resto = masa
   while (resto > 1e-9 && parcelas.length > 0) {
     const par = parcelas[0]
-    if (par.m <= resto * (1 + 1e-12)) {
+    const m0 = par.m0 ?? par.m
+    if (m0 <= resto * (1 + 1e-12)) {
       retiradas.push(par)
       parcelas.shift()
-      resto -= par.m
+      resto -= m0
     } else {
-      retiradas.push(partirParcela(par, resto / par.m))
+      retiradas.push(partirParcela(par, resto / m0))
       resto = 0
     }
   }

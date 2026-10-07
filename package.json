@@ -9,7 +9,10 @@
     "build": "vite build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "caso-base": "node herramientas/caso-base.js"
+    "caso-base": "node herramientas/caso-base.js",
+    "calibrar": "node herramientas/calibrar.js",
+    "tabla-parametros": "node herramientas/tabla-parametros.js",
+    "sensibilidades": "node herramientas/sensibilidades.js"
   },
   "devDependencies": {
     "vite": "^8.0.0",

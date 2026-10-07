@@ -5,10 +5,11 @@
 import { p, validarParametros } from './parametros.js'
 import { crearGeometria, celdaDeAltura } from './geometria.js'
 import { indicesEspecies } from './licor.js'
+import { construirCinetica } from './cinetica.js'
 
 /**
  * La configuración es un objeto con una entrada por archivo de config/:
- * { simulacion, topologia, equipos, madera, licores, hidraulica, energia, caso_base }
+ * { simulacion, topologia, equipos, madera, licores, hidraulica, energia, cinetica, caso_base }
  */
 export function construirModelo(config) {
   const errores = validarParametros(config)
@@ -159,7 +160,10 @@ export function construirModelo(config) {
     }
   }
 
+  const cin = construirCinetica(config)
+
   return {
+    cin,
     dtR,
     dtL,
     pasosPorLento,

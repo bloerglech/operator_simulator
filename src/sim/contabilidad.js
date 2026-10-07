@@ -55,18 +55,22 @@ export function inventario(modelo, estado) {
  */
 export function cierreBalances(modelo, estado) {
   const inv = inventario(modelo, estado)
-  const { inv0, entra, sale } = estado.contabilidad
-  const rel = (actual, inicial, e, s) => {
-    const err = actual - inicial - (e - s)
-    const escala = Math.max(Math.abs(e) + Math.abs(s), Math.abs(actual), Math.abs(inicial), 1e-12)
+  const { inv0, entra, sale, produccion: pr } = estado.contabilidad
+  // error = Δinventario − (entradas − salidas + producción por reacción)
+  const rel = (actual, inicial, e, s, g) => {
+    const err = actual - inicial - (e - s + g)
+    const escala = Math.max(Math.abs(e) + Math.abs(s), Math.abs(g), Math.abs(actual), Math.abs(inicial), 1e-12)
     return { error: err, relativo: Math.abs(err) / escala }
   }
+  // Materia orgánica: lo que pierde la madera aparece disuelto en el licor.
+  const org = ['LD', 'XD', 'CD', 'OD'].reduce((s, id) => s + pr.esp[modelo.idx[id]], 0)
   return {
-    licor: rel(inv.licor, inv0.licor, entra.licor, sale.licor),
-    madera: rel(inv.madera, inv0.madera, entra.madera, sale.madera),
-    energia: rel(inv.energia, inv0.energia, entra.energia, sale.energia),
+    licor: rel(inv.licor, inv0.licor, entra.licor, sale.licor, pr.licor),
+    madera: rel(inv.madera, inv0.madera, entra.madera, sale.madera, pr.madera),
+    energia: rel(inv.energia, inv0.energia, entra.energia, sale.energia, pr.energia),
     especies: Object.fromEntries(
-      modelo.especies.map((e, k) => [e.id, rel(inv.esp[k], inv0.esp[k], entra.esp[k], sale.esp[k])]),
+      modelo.especies.map((e, k) => [e.id, rel(inv.esp[k], inv0.esp[k], entra.esp[k], sale.esp[k], pr.esp[k])]),
     ),
+    organica: { error: pr.madera + org, relativo: Math.abs(pr.madera + org) / Math.max(Math.abs(pr.madera), 1e-12) },
   }
 }

@@ -2,7 +2,6 @@
 // referencias al estado interno). Incluye indicadores de operación (KPI) y,
 // si se pide, los perfiles por celda de cada vaso.
 
-import { p } from './parametros.js'
 import { cierreBalances } from './contabilidad.js'
 
 /**
@@ -66,6 +65,10 @@ function perfil(modelo, v, ev, d) {
   const Tast = new Array(n).fill(0)
   const OHr = new Array(n).fill(0)
   const vr = new Array(n).fill(0)
+  const lig = new Array(n).fill(0)
+  const hexa = new Array(n).fill(0)
+  const m0 = new Array(n).fill(0)
+  const cin = modelo.cin
   // Se reconstruye la ubicación de las parcelas recorriendo la columna.
   let base = 0
   let j = n - 1
@@ -83,6 +86,11 @@ function perfil(modelo, v, ev, d) {
       Tast[j] += f * par.m * par.T
       OHr[j] += f * par.vr * par.cr[modelo.idx.OH]
       vr[j] += f * par.vr
+      if (par.s) {
+        lig[j] += f * (par.s[0] + par.s[1] + par.s[2])
+        hexa[j] += f * par.HexA
+        m0[j] += f * par.m0
+      }
       a = b
       if (b >= fin - 1e-12) j--
     }
@@ -100,14 +108,15 @@ function perfil(modelo, v, ev, d) {
     H: div(H, masa),
     edad: div(edad, masa),
     OHRetenido: div(OHr, vr),
+    kappa: masa.map((m, j) => (m > 0 ? lig[j] / m / cin.ligPorKappa + hexa[j] / m / cin.hexaPorKappa : null)),
+    rendimiento: div(masa, m0),
+    solidosOrganicos: ev.vf.map((_, j) => ['LD', 'XD', 'CD', 'OD'].reduce((s, id) => s + ev.c[modelo.idx[id]][j], 0)),
   }
 }
 
 /** Indicadores de operación (en unidades internas). */
 function indicadores(modelo, estado) {
   const cfgInd = modelo.config.topologia.indicadores ?? {}
-  const cb = modelo.config.caso_base
-  const rend = p(cb, 'rendimiento_nominal', 'caso_base.rendimiento_nominal')
   const k = {}
   const vasoSoplado = modelo.corrientePorId[cfgInd.soplado]?.origen.vaso
   const dSop = vasoSoplado ? estado.diag[vasoSoplado] : null
@@ -115,7 +124,7 @@ function indicadores(modelo, estado) {
   const dImp = vasoImp ? estado.diag[vasoImp] : null
   const madera = estado.ajustes[cfgInd.alimentacion?.astillas]?.caudalMadera ?? 0
   k.maderaAlimentada = madera // kg/s
-  k.produccion = dSop ? (dSop.maderaSalida * rend * 86400) / 1000 / 0.9 : 0 // ADt/d
+  k.produccion = dSop ? (dSop.maderaSalida * 86400) / 1000 / 0.9 : 0 // ADt/d de pulpa (incluye rechazos)
   k.residenciaImpregnador = dImp?.edadSalida ?? null // s (edad media de lo que sale)
   k.residenciaTotal = dSop?.edadSalida ?? null // s, desde el medidor de astillas
   k.HSoplado = dSop?.HSalida ?? null
@@ -135,9 +144,36 @@ function indicadores(modelo, estado) {
   if (cfgInd.dilucion_fondo && dSop && k.produccion > 0) {
     const entra = cfgInd.dilucion_fondo.reduce((s, id) => s + estado.corrientes[id].caudalReal, 0)
     const sopl = estado.corrientes[cfgInd.soplado]
-    const licorPulpa = sopl.caudalReal - dSop.maderaSalida / estado.fuentes.astillas.densidad + dSop.retenidoSalida
+    const licorPulpa = sopl.caudalReal - dSop.maderaOriginalSalida / estado.fuentes.astillas.densidad + dSop.retenidoSalida
     k.factorDilucion = (entra - licorPulpa) / (k.produccion / 86400) // m³/ADt
     k.TSoplado = sopl.T
+  }
+  // Calidad de la pulpa en el soplado y álcali residual.
+  const q = dSop?.calidadSalida
+  if (q) {
+    k.kappa = q.kappa
+    k.kappaLignina = q.kappaLignina
+    k.kappaHexA = q.kappaHexA
+    k.rendimiento = q.rendimiento
+    k.rendimientoDepurado = q.rendimientoDepurado
+    k.rechazos = q.rechazos
+    k.viscosidad = q.viscosidad
+    k.lignina = q.lignina
+    k.xilano = q.xilano
+  }
+  const { OH, LD, XD, CD, OD, SI } = modelo.idx
+  if (dSop?.licorSalida) k.alcaliResidualSoplado = dSop.licorSalida.c[OH] // mol/L (EA)
+  k.extracciones = {}
+  for (const c of modelo.corrientes) {
+    if (c.tipo !== 'extraccion' || !c.destino.sumidero) continue
+    const ec = estado.corrientes[c.id]
+    if (!ec.c) continue
+    k.extracciones[c.id] = {
+      caudal: ec.caudalReal,
+      alcali: ec.c[OH], // mol/L como EA
+      solidosOrganicos: ec.c[LD] + ec.c[XD] + ec.c[CD] + ec.c[OD], // g/L
+      solidos: ec.c[LD] + ec.c[XD] + ec.c[CD] + ec.c[OD] + ec.c[SI],
+    }
   }
   return k
 }

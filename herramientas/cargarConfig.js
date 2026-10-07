@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 
 export const ARCHIVOS_CONFIG = [
-  'simulacion', 'topologia', 'equipos', 'madera', 'licores', 'hidraulica', 'energia', 'caso_base',
+  'simulacion', 'topologia', 'equipos', 'madera', 'licores', 'hidraulica', 'energia', 'cinetica', 'caso_base',
 ]
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), '..', 'config')

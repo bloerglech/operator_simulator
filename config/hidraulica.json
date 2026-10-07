@@ -7,7 +7,7 @@
     "E": { "valor": 15, "unidad": "kJ/mol", "origen": "supuesto" }
   },
   "difusion": {
-    "D_ref": { "valor": 1.1e-9, "unidad": "m2/s", "origen": "supuesto", "nota": "≈ 20 min de constante de tiempo a 150 °C con 4 mm" },
+    "D_ref": { "valor": 2.5e-9, "unidad": "m2/s", "origen": "supuesto", "nota": "≈ 9 min de constante de tiempo a 150 °C con 4 mm (Fase 1b: con 20 min el interior de la astilla quedaba sin álcali)" },
     "T_ref": { "valor": 150, "unidad": "°C", "origen": "supuesto" },
     "E": { "valor": 20, "unidad": "kJ/mol", "origen": "supuesto" },
     "eccsa_min": { "valor": 0.3, "unidad": "-", "origen": "supuesto" },

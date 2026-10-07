@@ -22,6 +22,6 @@ export function tieneNoFinitos(x) {
 
 /** Máximo error relativo de todos los balances. */
 export function peorBalance(b) {
-  const errores = [b.licor.relativo, b.madera.relativo, ...Object.values(b.especies).map((e) => e.relativo)]
+  const errores = [b.licor.relativo, b.madera.relativo, b.organica.relativo, ...Object.values(b.especies).map((e) => e.relativo)]
   return { masa: Math.max(...errores), energia: b.energia.relativo }
 }

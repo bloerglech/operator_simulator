@@ -12,6 +12,12 @@
 //   H     factor H acumulado (h)
 //   edad  tiempo desde que entró al sistema (s)
 //   marca trazador de sólido (adimensional, para medir tiempos muertos)
+//   Campos cinéticos (Fase 1b, ver cinetica.js):
+//   m0    masa de madera seca original (kg)      s     componentes sólidos (kg)
+//   M     MeGlcA (mol)   HexA  ácidos hexenurónicos (mol)   Rp  lignina reprecipitada (kg)
+//   invDP 1/DP de la celulosa   reac  reactividad del lote   vap  calidad de vaporización
+//   phi   fracción no impregnada por clase de tamaño
+//   phiIni  phi al alcanzar la temperatura de cocción (−1 si aún no la alcanza)
 // Paquete: licor + lista de parcelas (lo que viaja por una tubería).
 //
 // Propiedades térmicas: `fis` = { cpMadera kJ/(kg·K), rcpLicor kJ/(m³·K) }.
@@ -35,17 +41,33 @@ export function capacidadParcela(par, fis) {
 }
 
 export function clonarParcela(par) {
-  return { ...par, cr: par.cr.slice() }
+  const c = { ...par, cr: par.cr.slice() }
+  if (par.s) {
+    c.s = par.s.slice()
+    c.phi = par.phi.slice()
+    c.phiIni = par.phiIni.slice()
+  }
+  return c
+}
+
+/** Campos extensivos (proporcionales a la cantidad de astilla). */
+const EXTENSIVOS = ['m', 'vol', 'vp', 'vr', 'm0', 'M', 'HexA', 'Rp']
+
+function escalar(par, f) {
+  for (const k of EXTENSIVOS) if (par[k] !== undefined) par[k] *= f
+  if (par.s) for (let i = 0; i < par.s.length; i++) par.s[i] *= f
 }
 
 /** Separa una fracción f de la parcela: devuelve la parte separada y reduce el original. */
 export function partirParcela(par, f) {
   const parte = clonarParcela(par)
-  parte.m *= f; parte.vol *= f; parte.vp *= f; parte.vr *= f
-  const r = 1 - f
-  par.m *= r; par.vol *= r; par.vp *= r; par.vr *= r
+  escalar(parte, f)
+  escalar(par, 1 - f)
   return parte
 }
+
+/** Promedio ponderado de un campo intensivo. */
+const pond = (xa, wa, xb, wb) => (wa + wb > 0 ? (xa * wa + xb * wb) / (wa + wb) : xa)
 
 /** Funde la parcela b dentro de a (b deja de existir). */
 export function fundirParcela(a, b, fis) {
@@ -59,6 +81,24 @@ export function fundirParcela(a, b, fis) {
   a.H = (a.H * a.m + b.H * b.m) / m
   a.edad = (a.edad * a.m + b.edad * b.m) / m
   a.marca = (a.marca * a.m + b.marca * b.m) / m
+  if (a.s && b.s) {
+    // 1/DP se promedia con la masa de celulosa (promedio en número de cadenas).
+    const celA = a.s[3] + a.s[4]
+    const celB = b.s[3] + b.s[4]
+    a.invDP = pond(a.invDP, celA, b.invDP, celB)
+    a.reac = pond(a.reac, a.m0, b.reac, b.m0)
+    a.vap = pond(a.vap, a.m0, b.vap, b.m0)
+    for (let i = 0; i < a.phi.length; i++) {
+      // Si solo una de las dos alcanzó la temperatura de cocción, la otra aporta su phi actual.
+      const ia = a.phiIni[i] >= 0 ? a.phiIni[i] : a.phi[i]
+      const ib = b.phiIni[i] >= 0 ? b.phiIni[i] : b.phi[i]
+      const algunaIni = a.phiIni[i] >= 0 || b.phiIni[i] >= 0
+      a.phiIni[i] = algunaIni ? pond(ia, a.m0, ib, b.m0) : -1
+      a.phi[i] = pond(a.phi[i], a.m0, b.phi[i], b.m0)
+    }
+    for (let i = 0; i < a.s.length; i++) a.s[i] += b.s[i]
+    a.m0 += b.m0; a.M += b.M; a.HexA += b.HexA; a.Rp += b.Rp
+  }
   a.m = m; a.vol += b.vol; a.vp += b.vp; a.vr = vr
 }
 

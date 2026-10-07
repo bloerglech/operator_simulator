@@ -23,13 +23,14 @@ describe('balances de masa y energía', () => {
   })
 })
 
-describe('caso base (sin cinética)', () => {
-  it('residencias, factor H, temperaturas y relaciones dentro de lo esperado', () => {
+describe('caso base en estado estacionario (sección 7 de la especificación)', () => {
+  it('residencias, factor H, temperaturas, relaciones y calidad dentro de los rangos', () => {
     const planta = plantaBase()
-    planta.avanzar(12 * HORA)
+    planta.avanzar(16 * HORA)
     const s = planta.leerEstado()
     const k = s.kpi
-    expect(k.produccion).toBeCloseTo(3000, 0)
+    expect(k.produccion).toBeGreaterThan(2950)
+    expect(k.produccion).toBeLessThan(3050)
     expect(k.residenciaImpregnador / 60).toBeGreaterThan(45)
     expect(k.residenciaImpregnador / 60).toBeLessThan(60)
     expect(k.residenciaTotal / HORA).toBeGreaterThan(4)
@@ -46,6 +47,26 @@ describe('caso base (sin cinética)', () => {
     expect(z.coccion_superior.T).toBeLessThan(150)
     expect(z.coccion_inferior.T).toBeGreaterThan(147)
     expect(z.coccion_inferior.T).toBeLessThan(152)
+    expect(s.vasos.imp.zonas.impregnacion.T).toBeGreaterThan(110)
+    expect(s.vasos.imp.zonas.impregnacion.T).toBeLessThan(120)
+    // Calidad (calibrada).
+    expect(k.kappa).toBeGreaterThan(16)
+    expect(k.kappa).toBeLessThan(18)
+    expect(k.kappaHexA).toBeGreaterThan(4)
+    expect(k.kappaHexA).toBeLessThan(6)
+    expect(k.rendimiento * 100).toBeGreaterThan(53)
+    expect(k.rendimiento * 100).toBeLessThan(54)
+    expect(k.rechazos * 100).toBeLessThan(0.5)
+    expect(k.viscosidad).toBeGreaterThan(1100)
+    expect(k.viscosidad).toBeLessThan(1200)
+    // Álcali residual: 6-10 g/L en las extracciones de cocción, 4-7 g/L en el soplado.
+    // (La extracción superior saca licor de impregnación gastado, con más álcali.)
+    for (const id of ['ext_principal', 'ext_final']) {
+      expect(k.extracciones[id].alcali * 40).toBeGreaterThan(6)
+      expect(k.extracciones[id].alcali * 40).toBeLessThan(10)
+    }
+    expect(k.alcaliResidualSoplado * 40).toBeGreaterThan(4)
+    expect(k.alcaliResidualSoplado * 40).toBeLessThan(7)
   })
 
   it('el sentido del licor resulta del balance: contracorriente en la zona de lavado', () => {
@@ -78,7 +99,7 @@ function transitoTeorico(planta) {
   const est = planta.estadoInterno()
   const mod = planta.modelo()
   const W = est.ajustes.astillas.caudalMadera
-  const masa = (id) => est.vasos[id].parcelas.reduce((s, q) => s + q.m, 0)
+  const masa = (id) => est.vasos[id].parcelas.reduce((s, q) => s + q.m0, 0) // base madera alimentada
   const tr = mod.corrientePorId.transferencia
   const qTr = est.ajustes.transferencia.caudal + W / est.fuentes.astillas.densidad
   return masa('imp') / W + masa('dig') / W + tr.volumenTubo / qTr + 2 * mod.dtL

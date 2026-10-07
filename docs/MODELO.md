@@ -1,7 +1,8 @@
 # MODELO DE PROCESO — Digestor continuo Lo-Solids, eucalipto
 
-Versión: Fase 1a (transporte, hidráulica y energía implementados; la cinética
-de cocción es de la Fase 1b). La sección 18 resume qué está implementado.
+Versión: Fase 1b (transporte, hidráulica, energía y cinética de cocción
+calibrada). La sección 17 resume qué está implementado. Explicación
+didáctica en `docs/manual/`.
 Este documento se actualiza en cada cambio del modelo. Cada parámetro
 mencionado vive en `config/*.json` con su unidad y su origen
 (`literatura`, `calibrado`, `supuesto`, `especificacion`, `planta`). Los
@@ -342,7 +343,7 @@ r_r = k_r(T) · [OH]^a_r · L_r · f_DS                           (residual)
 r_cond = k_c(T) · g(OH) · L_p        (principal → residual, a bajo álcali)
 g(OH)  = 1 / (1 + ([OH]/OH_c)^n_c)
 
-r_rep  = k_rep · max(0, OH_rep − [OH]) · LD_r · V_r  (reprecipitación de lignina disuelta)
+r_rep  = k_rep · max(0, OH_rep − [OH]) · LD_r · V_r  (reprecipitación de la lignina disuelta en el licor retenido)
 
 dL_f/dt = −r_f
 dL_p/dt = −r_p − r_cond
@@ -396,11 +397,11 @@ Xilano: además de peeling e hidrólisis, **disolución** de xilano
 álcali baja al final de la cocción,
 
 ```
-r_red = k_red · max(0, OH_red − [OH_f]) · XD_f · V_f   → suma a X_b
+r_red = k_red · max(0, OH_red − [OH_r]) · XD_r · V_r   → suma a X_b  (desde el licor retenido)
 ```
 
-El xilano redepositado trae HexA en la proporción HexA/X del xilano
-disuelto (supuesto S-09; se sigue HexA disuelto con el xilano disuelto).
+El xilano redepositado trae HexA en la proporción HexA/X del xilano que
+queda en la fibra (supuesto S-09; el HexA disuelto no se sigue).
 
 Rendimiento: `Y = (Σ lignina + Σ carbohidratos + E_restante) / madera
 alimentada`, calculado en el soplado.
@@ -447,7 +448,7 @@ aporte de los hemicelulosas a la viscosidad medida se ignora
 ```
 dOH_r (mol/s) = − r_ac                              desacetilación (1 mol OH/mol acetilo)
                 − α_L · (r_f + r_p + r_r)          por kg de lignina disuelta
-                − α_C · (Σ r_pe + Σ r_h + r_dx)    ácidos de los carbohidratos
+                − α_C · (Σ r_pe + Σ r_h + r_dx)    ácidos de los carbohidratos (incluye el xilano disuelto)
                 − α_E · r_E                        neutralización de extraíbles
                 − α_DS · k_DS(T) · [OH] · DS_org,r · V_r   reacciones de sólidos disueltos
 r_ac = k_ac(T) · [OH] · Ac                          rápida, baja E (importante en eucalipto)
@@ -467,9 +468,11 @@ S_vap = 1 − exp(−(vapor/madera) · t_silo / τ_vap)   (calidad de vaporizaci
 ```
 
 - Lo no impregnado reacciona solo con la fracción ψ (S-08).
-- **Rechazos** en el soplado: `R = Σ_k w_k · φ_k,soplado · Y_núcleo`,
-  más un término por álcali residual muy bajo (lignina reprecipitada sobre
-  astillas mal cocidas).
+- **Rechazos** en el soplado: `R = Σ_k w_k · φ_k(T = T_inicio_cocción) · Y_núcleo`:
+  lo que no estaba impregnado cuando la astilla llegó a 140 °C termina como
+  astilla mal cocida (la impregnación química sigue después, pero la cocción
+  de ese núcleo ya quedó atrasada). Con álcali bajo, h(OH) frena la
+  impregnación y suben los rechazos.
 - Sobre espesor y mala vaporización ⇒ más rechazos y más kappa.
 
 ### 6.10 Efecto Lo-Solids (resumen)
@@ -659,11 +662,13 @@ Rutina `herramientas/calibrar.js` (Fase 1b):
    kappa 17; kappa HexA 5; rendimiento 53,5 %; viscosidad 1 150 mL/g;
    álcali residual 8 g/L en las extracciones y 5,5 g/L en el soplado;
    rechazos 0,3 %.
-3. Parámetros ajustables: A_f, A_p1, A_p2, A_r, A_pe,·, A_h,·, A_dx, A_HF,
-   A_HD, A_v, α_L, α_C, α_DS. Energías de activación y órdenes **fijos**.
-4. Método: por etapas (primero álcali, luego lignina, carbohidratos, HexA,
-   viscosidad) y refinamiento conjunto por Levenberg–Marquardt con
-   diferencias finitas.
+3. Parámetros ajustables (S-27): seis factores multiplicativos, uno por
+   mecanismo — deslignificación (A de las tres fracciones), α_L, degradación
+   de carbohidratos (A de peeling, hidrólisis y disolución de xilano), A_HF,
+   A_v y A de impregnación. Energías de activación y órdenes **fijos**.
+4. Método: Levenberg–Marquardt sobre el logaritmo de los factores, con
+   jacobiano por diferencias finitas; cada evaluación parte del estado
+   estacionario anterior.
 5. Comprobación: H en el soplado dentro de 350–500 y temperaturas del caso
    base respetadas. Si no se alcanza un objetivo dentro de su rango, la
    rutina lo informa en vez de forzar parámetros fuera de límites físicos.
@@ -710,6 +715,12 @@ mínimas).
 | S-20 | Calentadores como temperatura de salida con potencia máxima hasta la Fase 1c (vapor, incrustación). |
 | S-21 | El caso base inicial parte con astillas ya impregnadas con el licor inicial del vaso; el estado estacionario se alcanza en ≈ 2 residencias (≈ 9 h). |
 | S-22 | El licor de impregnación (licor negro caliente a 150 °C) entra como fuente externa; en la Fase 1c se conecta a la extracción correspondiente. |
+| S-24 | Con ρ·cp del licor constante, el calor sensible de la madera que se disuelve (cp_madera·Δm·T) se registra como término aparte del balance de energía en vez de pasar al licor. |
+| S-25 | Las salidas de astillas (raspador, soplado) se especifican en base madera alimentada (m0): equivale a retirar un volumen fijo de columna, porque la astilla no cambia de volumen al cocinarse (hasta la compactación de la Fase 1c). Sin control de nivel (Fase 2), así el nivel no depende del rendimiento. |
+| S-26 | Filtrado de lavado con 5 g/L de álcali efectivo (antes 2), para que el álcali residual del soplado quede en 4–7 g/L. |
+| S-27 | Solo se calibran 6 factores (deslignificación, consumo de álcali por lignina, degradación de carbohidratos, formación de HexA, escisión de celulosa, impregnación); el resto de las constantes cinéticas son supuestos de orden de magnitud. |
+| S-28 | Caso base: filtrado de lavado al fondo 1 180 m³/h con extracción final 790 m³/h (ambos +70 respecto de la Fase 1a) para un factor de dilución de 2,2 m³/ADt sin que el filtrado frío suba a la zona de cocción. |
+| S-29 | Difusión libre ↔ retenido con τ ≈ 9 min a 150 °C (D_ref = 2,5·10⁻⁹ m²/s); condensación (OH_c) y reprecipitación de lignina centradas en 3 g/L de álcali dentro de la astilla. Con valores más lentos o umbrales más altos, el interior de la astilla quedaba sin álcali y la temperatura dejaba de bajar el kappa. |
 | S-23 | Una tubería entre vasos entrega en cada paso el volumen que se le ingresó en el paso anterior (desfase de un paso lento, 5 s), lo que evita lazos algebraicos. |
 
 ## 16. Limitaciones conocidas
@@ -743,8 +754,9 @@ mínimas).
 | Factor H por parcela | Fase 1a ✔ |
 | Contabilidad y cierre de balances | Fase 1a ✔ |
 | Guardar/cargar, determinismo, comandos con registro | Fase 1a ✔ |
-| Cinética (lignina, carbohidratos, HexA, viscosidad, álcali, impregnación por clase) | Fase 1b |
-| Calibración | Fase 1b |
+| Cinética (lignina, carbohidratos, HexA, viscosidad, álcali, impregnación por clase) | Fase 1b ✔ |
+| Calibración (`npm run calibrar`, resultado en `docs/CALIBRACION.md`) | Fase 1b ✔ |
+| Índices de blanqueabilidad y color (§6.11) | Fase 5 (puntaje) |
 | Presión, alivio, vapor, flash, mallas, compactación, alimentación, propiedades del licor | Fase 1c |
 
 ## 18. Referencias (a verificar al implementar)

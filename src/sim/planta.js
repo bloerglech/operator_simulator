@@ -16,6 +16,7 @@ import { empujar, extraer } from './tubo.js'
 import { paqueteVacio, sumarPaquete, volumenPaquete } from './materia.js'
 import { sumarPaqueteA, cierreBalances } from './contabilidad.js'
 import { incrementoH } from './factorH.js'
+import { reaccionarParcela, calidadPulpa } from './cinetica.js'
 import { instantanea } from './instantanea.js'
 
 const copiar = (x) => JSON.parse(JSON.stringify(x))
@@ -129,7 +130,7 @@ function pasoLento(modelo, estado) {
       const paq = paqueteVacio(nEsp)
       paq.licor = { v: a.caudal * dt, T: f.T, c: f.c.slice() }
       sumarPaqueteA(cont.entra, paq, fis)
-      registrarCaudal(estado, c.id, a.caudal, f.T)
+      registrarCaudal(estado, c.id, a.caudal, f.T, f.c)
       paquetes[c.id] = paq
     } else if (c.volumenTubo > 0) {
       paquetes[c.id] = extraer(estado.tubos[c.id], estado.corrientes[c.id].vUltimo, nEsp)
@@ -164,7 +165,7 @@ function pasoLento(modelo, estado) {
     const e = entradas[c.destino.vaso]
     if (paq.licor.v > 0) e.adiciones.push({ j: c.destino.j, licor: paq.licor })
     for (const par of paq.parcelas) e.parcelasTope.push(par)
-    if (c.tipo !== 'astillas' && c.tipo !== 'fuente') registrarCaudal(estado, c.id, volumenPaquete(paq) / dt, paq.licor.T)
+    if (c.tipo !== 'astillas' && c.tipo !== 'fuente') registrarCaudal(estado, c.id, volumenPaquete(paq) / dt, paq.licor.T, paq.licor.c)
   }
   // 5. Extracciones y salidas solicitadas.
   for (const c of modelo.corrientes) {
@@ -198,24 +199,35 @@ function pasoLento(modelo, estado) {
       HSalida: promedioMasa(res.fondo.parcelas, 'H'),
       marcaSalida: promedioMasa(res.fondo.parcelas, 'marca'),
       maderaSalida: res.fondo.parcelas.reduce((s, q) => s + q.m, 0) / dt,
+      maderaOriginalSalida: res.fondo.parcelas.reduce((s, q) => s + (q.m0 ?? q.m), 0) / dt,
       retenidoSalida: res.fondo.parcelas.reduce((s, q) => s + q.vr, 0) / dt,
+      calidadSalida: calidadPulpa(res.fondo.parcelas, modelo.cin),
+      licorSalida: licorTotal(res.fondo, nEsp),
     }
   }
 
-  // 7. Envejecimiento y factor H de todas las parcelas (vasos y tuberías).
-  const envejecer = (par) => {
+  // 7. Reacciones de cocción, envejecimiento y factor H de todas las parcelas
+  //    (en los vasos y en las tuberías).
+  const pr = cont.produccion
+  const procesar = (par) => {
+    const d = reaccionarParcela(par, modelo.cin, dt, modelo.idx, nEsp, modelo.densidadPared, fis.cpMadera)
+    if (d) {
+      pr.madera += d.madera
+      pr.energia += d.energia
+      for (let k = 0; k < nEsp; k++) pr.esp[k] += d.esp[k]
+    }
     par.H += incrementoH(par.T, dt)
     par.edad += dt
   }
-  for (const v of modelo.vasos) estado.vasos[v.id].parcelas.forEach(envejecer)
-  for (const tubo of Object.values(estado.tubos)) for (const q of tubo.paquetes) q.parcelas.forEach(envejecer)
+  for (const v of modelo.vasos) estado.vasos[v.id].parcelas.forEach(procesar)
+  for (const tubo of Object.values(estado.tubos)) for (const q of tubo.paquetes) q.parcelas.forEach(procesar)
 }
 
 /** Lo que sale de un vaso por una corriente va a su tubería o a su sumidero. */
 function salidaCorriente(modelo, estado, id, paq) {
   const c = modelo.corrientePorId[id]
   const vol = volumenPaquete(paq)
-  registrarCaudal(estado, id, vol / modelo.dtL, paq.licor.v > 0 ? paq.licor.T : estado.corrientes[id].T)
+  registrarCaudal(estado, id, vol / modelo.dtL, paq.licor.v > 0 ? paq.licor.T : estado.corrientes[id].T, paq.licor.v > 0 ? paq.licor.c : null)
   if (c.volumenTubo > 0) {
     empujar(estado.tubos[id], paq)
     estado.corrientes[id].vUltimo = vol
@@ -230,10 +242,22 @@ function aSumidero(modelo, estado, nombre, paq) {
   cont.sumideros[nombre] = (cont.sumideros[nombre] ?? 0) + paq.licor.v
 }
 
-function registrarCaudal(estado, id, q, T) {
+function registrarCaudal(estado, id, q, T, c) {
   const ec = estado.corrientes[id]
   ec.caudalReal = q
   ec.T = T
+  if (c) ec.c = c.slice()
+}
+
+/** Licor total (libre + retenido en las astillas) de un paquete. */
+function licorTotal(paq, nEsp) {
+  let v = paq.licor.v
+  const c = paq.licor.c.map((x) => x * paq.licor.v)
+  for (const par of paq.parcelas) {
+    v += par.vr
+    for (let k = 0; k < nEsp; k++) c[k] += par.cr[k] * par.vr
+  }
+  return { v, c: v > 0 ? c.map((x) => x / v) : c }
 }
 
 function promedioMasa(parcelas, campo) {

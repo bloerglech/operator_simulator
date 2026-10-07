@@ -1,0 +1,458 @@
+{
+  "_descripcion": "Cinética de cocción kraft para eucalipto (E. nitens). Forma de las ecuaciones en docs/MODELO.md §6. Constantes de velocidad A a T_ref, en 1/s · (mol/L)^-(órdenes). Energías de activación y órdenes: supuestos hasta tener datos de nitens (P19). Los parámetros marcados 'calibrado' los escribe herramientas/calibrar.js.",
+  "T_ref": {
+    "valor": 150,
+    "unidad": "°C",
+    "origen": "supuesto",
+    "nota": "temperatura de referencia de las constantes A"
+  },
+  "reparto_lignina": {
+    "rapida": {
+      "valor": 20,
+      "unidad": "%",
+      "origen": "supuesto"
+    },
+    "principal": {
+      "valor": 72,
+      "unidad": "%",
+      "origen": "supuesto"
+    },
+    "residual": {
+      "valor": 8,
+      "unidad": "%",
+      "origen": "supuesto"
+    }
+  },
+  "fraccion_reactiva": {
+    "celulosa": {
+      "valor": 5,
+      "unidad": "%",
+      "origen": "supuesto",
+      "nota": "accesible al peeling"
+    },
+    "xilano": {
+      "valor": 50,
+      "unidad": "%",
+      "origen": "supuesto",
+      "nota": "disoluble"
+    },
+    "otros_carbohidratos": {
+      "valor": 70,
+      "unidad": "%",
+      "origen": "supuesto",
+      "nota": "accesible al peeling"
+    }
+  },
+  "reacciones": {
+    "lignina_rapida": {
+      "A": {
+        "valor": 0.009112,
+        "unidad": "1/s",
+        "origen": "calibrado",
+        "nota": "calibrado 2026-10-07 (objetivo: kappa)"
+      },
+      "E": {
+        "valor": 50,
+        "unidad": "kJ/mol",
+        "origen": "supuesto"
+      },
+      "a_OH": {
+        "valor": 0,
+        "unidad": "-",
+        "origen": "supuesto"
+      }
+    },
+    "lignina_principal_OH": {
+      "A": {
+        "valor": 0.0009112,
+        "unidad": "1/s",
+        "origen": "calibrado",
+        "nota": "calibrado 2026-10-07 (objetivo: kappa)"
+      },
+      "E": {
+        "valor": 130,
+        "unidad": "kJ/mol",
+        "origen": "supuesto"
+      },
+      "a_OH": {
+        "valor": 1,
+        "unidad": "-",
+        "origen": "supuesto"
+      }
+    },
+    "lignina_principal_HS": {
+      "A": {
+        "valor": 0.001215,
+        "unidad": "1/s",
+        "origen": "calibrado",
+        "nota": "calibrado 2026-10-07 (objetivo: kappa)"
+      },
+      "E": {
+        "valor": 120,
+        "unidad": "kJ/mol",
+        "origen": "supuesto"
+      },
+      "a_OH": {
+        "valor": 0.5,
+        "unidad": "-",
+        "origen": "supuesto"
+      },
+      "b_HS": {
+        "valor": 0.4,
+        "unidad": "-",
+        "origen": "supuesto"
+      }
+    },
+    "lignina_residual": {
+      "A": {
+        "valor": 0.0004252,
+        "unidad": "1/s",
+        "origen": "calibrado",
+        "nota": "calibrado 2026-10-07 (objetivo: kappa)"
+      },
+      "E": {
+        "valor": 117,
+        "unidad": "kJ/mol",
+        "origen": "supuesto"
+      },
+      "a_OH": {
+        "valor": 0.7,
+        "unidad": "-",
+        "origen": "supuesto"
+      }
+    },
+    "condensacion": {
+      "A": {
+        "valor": 0.00005,
+        "unidad": "1/s",
+        "origen": "supuesto",
+        "nota": "lignina principal → residual con álcali bajo"
+      },
+      "E": {
+        "valor": 100,
+        "unidad": "kJ/mol",
+        "origen": "supuesto"
+      },
+      "OH_c": {
+        "valor": 3,
+        "unidad": "g/L NaOH",
+        "origen": "supuesto"
+      },
+      "n": {
+        "valor": 4,
+        "unidad": "-",
+        "origen": "supuesto"
+      }
+    },
+    "reprecipitacion": {
+      "k": {
+        "valor": 0.0005,
+        "unidad": "1/s",
+        "origen": "supuesto",
+        "nota": "por mol/L bajo el umbral"
+      },
+      "OH_umbral": {
+        "valor": 3,
+        "unidad": "g/L NaOH",
+        "origen": "supuesto"
+      }
+    },
+    "celulosa_peeling": {
+      "A": {
+        "valor": 0.0004134,
+        "unidad": "1/s",
+        "origen": "calibrado",
+        "nota": "calibrado 2026-10-07 (objetivo: rendimiento)"
+      },
+      "E": {
+        "valor": 100,
+        "unidad": "kJ/mol",
+        "origen": "supuesto"
+      }
+    },
+    "celulosa_hidrolisis": {
+      "A": {
+        "valor": 0.00003675,
+        "unidad": "1/s",
+        "origen": "calibrado",
+        "nota": "calibrado 2026-10-07 (objetivo: rendimiento)"
+      },
+      "E": {
+        "valor": 150,
+        "unidad": "kJ/mol",
+        "origen": "supuesto"
+      }
+    },
+    "xilano_disolucion": {
+      "A": {
+        "valor": 0.0006473,
+        "unidad": "1/s",
+        "origen": "calibrado",
+        "nota": "calibrado 2026-10-07 (objetivo: rendimiento)"
+      },
+      "E": {
+        "valor": 80,
+        "unidad": "kJ/mol",
+        "origen": "supuesto"
+      },
+      "a_OH": {
+        "valor": 1,
+        "unidad": "-",
+        "origen": "supuesto"
+      }
+    },
+    "xilano_hidrolisis": {
+      "A": {
+        "valor": 0.00004593,
+        "unidad": "1/s",
+        "origen": "calibrado",
+        "nota": "calibrado 2026-10-07 (objetivo: rendimiento)"
+      },
+      "E": {
+        "valor": 120,
+        "unidad": "kJ/mol",
+        "origen": "supuesto"
+      }
+    },
+    "otros_peeling": {
+      "A": {
+        "valor": 0.0006887,
+        "unidad": "1/s",
+        "origen": "calibrado",
+        "nota": "calibrado 2026-10-07 (objetivo: rendimiento)"
+      },
+      "E": {
+        "valor": 90,
+        "unidad": "kJ/mol",
+        "origen": "supuesto"
+      }
+    },
+    "otros_hidrolisis": {
+      "A": {
+        "valor": 0.00004593,
+        "unidad": "1/s",
+        "origen": "calibrado",
+        "nota": "calibrado 2026-10-07 (objetivo: rendimiento)"
+      },
+      "E": {
+        "valor": 120,
+        "unidad": "kJ/mol",
+        "origen": "supuesto"
+      }
+    },
+    "extraibles": {
+      "A": {
+        "valor": 0.001,
+        "unidad": "1/s",
+        "origen": "supuesto"
+      },
+      "E": {
+        "valor": 40,
+        "unidad": "kJ/mol",
+        "origen": "supuesto"
+      }
+    },
+    "acetilos": {
+      "A": {
+        "valor": 0.005,
+        "unidad": "1/s",
+        "origen": "supuesto",
+        "nota": "desacetilación rápida"
+      },
+      "E": {
+        "valor": 40,
+        "unidad": "kJ/mol",
+        "origen": "supuesto"
+      }
+    },
+    "hexa_formacion": {
+      "A": {
+        "valor": 0.0003761,
+        "unidad": "1/s",
+        "origen": "calibrado",
+        "nota": "calibrado 2026-10-07 (objetivo: kappaHexA)"
+      },
+      "E": {
+        "valor": 110,
+        "unidad": "kJ/mol",
+        "origen": "supuesto"
+      },
+      "a_OH": {
+        "valor": 1,
+        "unidad": "-",
+        "origen": "supuesto"
+      }
+    },
+    "hexa_degradacion": {
+      "A": {
+        "valor": 0.00003,
+        "unidad": "1/s",
+        "origen": "supuesto"
+      },
+      "E": {
+        "valor": 120,
+        "unidad": "kJ/mol",
+        "origen": "supuesto"
+      },
+      "a_OH": {
+        "valor": 0,
+        "unidad": "-",
+        "origen": "supuesto",
+        "nota": "sobre todo térmica"
+      }
+    },
+    "viscosidad": {
+      "A": {
+        "valor": 6.766e-8,
+        "unidad": "1/s",
+        "origen": "calibrado",
+        "nota": "calibrado 2026-10-07 (objetivo: viscosidad)"
+      },
+      "E": {
+        "valor": 179,
+        "unidad": "kJ/mol",
+        "origen": "especificacion",
+        "nota": "Kubes et al. (1983), factor G; verificar"
+      },
+      "a_OH": {
+        "valor": 1,
+        "unidad": "-",
+        "origen": "supuesto"
+      },
+      "beta_DS": {
+        "valor": 0.005,
+        "unidad": "L/g",
+        "origen": "supuesto",
+        "nota": "daño extra por sólidos orgánicos disueltos (efecto Lo-Solids)"
+      }
+    },
+    "redeposito_xilano": {
+      "activo": true,
+      "k": {
+        "valor": 0.0001,
+        "unidad": "1/s",
+        "origen": "supuesto",
+        "nota": "por mol/L bajo el umbral"
+      },
+      "OH_umbral": {
+        "valor": 10,
+        "unidad": "g/L NaOH",
+        "origen": "supuesto"
+      }
+    }
+  },
+  "solidos_disueltos": {
+    "kappa_DS": {
+      "valor": 0.002,
+      "unidad": "L/g",
+      "origen": "supuesto",
+      "nota": "freno de la deslignificación: f = 1/(1 + kappa_DS·DS_org)"
+    }
+  },
+  "consumo_alcali": {
+    "alfa_lignina": {
+      "valor": 5.401,
+      "unidad": "mol/kg",
+      "origen": "calibrado",
+      "nota": "calibrado 2026-10-07 (objetivo: alcaliExtraccion)"
+    },
+    "alfa_carbohidratos": {
+      "valor": 6,
+      "unidad": "mol/kg",
+      "origen": "supuesto",
+      "nota": "OH⁻ por kg de carbohidrato degradado (ácidos)"
+    },
+    "alfa_extraibles": {
+      "valor": 3,
+      "unidad": "mol/kg",
+      "origen": "supuesto"
+    },
+    "A_DS": {
+      "valor": 0.00009,
+      "unidad": "1/s",
+      "origen": "supuesto",
+      "nota": "mol OH⁻ por kg de sólido orgánico disuelto, por s y por mol/L de OH⁻"
+    },
+    "E_DS": {
+      "valor": 100,
+      "unidad": "kJ/mol",
+      "origen": "supuesto"
+    },
+    "beta_HS_lignina": {
+      "valor": 0.5,
+      "unidad": "mol/kg",
+      "origen": "supuesto",
+      "nota": "HS⁻ por kg de lignina disuelta"
+    }
+  },
+  "impregnacion": {
+    "A": {
+      "valor": 0.006442,
+      "unidad": "1/s",
+      "origen": "calibrado",
+      "nota": "calibrado 2026-10-07 (objetivo: rechazos)"
+    },
+    "E": {
+      "valor": 30,
+      "unidad": "kJ/mol",
+      "origen": "supuesto"
+    },
+    "K_OH": {
+      "valor": 2,
+      "unidad": "g/L NaOH",
+      "origen": "supuesto"
+    },
+    "espesor_ref": {
+      "valor": 4,
+      "unidad": "mm",
+      "origen": "supuesto"
+    },
+    "psi": {
+      "valor": 10,
+      "unidad": "%",
+      "origen": "supuesto",
+      "nota": "velocidad relativa de reacción en lo no impregnado (S-08)"
+    },
+    "T_inicio_coccion": {
+      "valor": 140,
+      "unidad": "°C",
+      "origen": "supuesto",
+      "nota": "lo no impregnado al pasar esta temperatura termina como rechazo"
+    },
+    "rendimiento_nucleo": {
+      "valor": 85,
+      "unidad": "%",
+      "origen": "supuesto",
+      "nota": "fracción de la madera no impregnada que sale como rechazo"
+    }
+  },
+  "kappa": {
+    "lignina_por_kappa": {
+      "valor": 0.13,
+      "unidad": "%",
+      "origen": "supuesto",
+      "nota": "% de lignina en pulpa por unidad de kappa (eucalipto)"
+    },
+    "HexA_por_kappa": {
+      "valor": 11.6,
+      "unidad": "mmol/kg",
+      "origen": "especificacion"
+    }
+  },
+  "viscosidad": {
+    "exponente": {
+      "valor": 0.905,
+      "unidad": "-",
+      "origen": "literatura",
+      "fuente": "SCAN-CM 15: DP^0,905 = 0,75·[η]",
+      "nota": "verificar"
+    },
+    "factor": {
+      "valor": 0.75,
+      "unidad": "-",
+      "origen": "literatura",
+      "fuente": "SCAN-CM 15",
+      "nota": "verificar"
+    }
+  }
+}

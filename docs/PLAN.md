@@ -1,7 +1,7 @@
 # PLAN DE TRABAJO
 
 Estado: **aprobado** con los valores provisionales de la sección 6.
-Fase actual: **1a terminada** (ver sección 8).
+Fase actual: **1b terminada** (ver sección 8).
 
 Documento rector: `docs/ESPECIFICACION.md`. Si algo de aquí lo contradice,
 manda la especificación y este plan se corrige.
@@ -318,3 +318,17 @@ eventos instructor) pero no las implementa.
   al estanque de nivel (≈ 170 m³/h) es el costo de llevar la impregnación a
   110–120 °C con licor negro caliente; se revisará con la alimentación
   completa en la Fase 1c.
+
+### Fase 1b — terminada
+- Cinética en `src/sim/cinetica.js`: lignina en tres fracciones paralelas
+  (con condensación y reprecipitación), celulosa, xilano (con redepósito) y
+  otros carbohidratos, acetilos, extraíbles, HexA, viscosidad (factor G),
+  consumo de álcali, efecto de sólidos disueltos, impregnación por clase de
+  tamaño y rechazos.
+- Calibración (`npm run calibrar`): Levenberg–Marquardt sobre 6 factores; los
+  6 objetivos del caso base dentro de tolerancia (`docs/CALIBRACION.md`).
+- Pruebas nuevas: cinética de una parcela, caso base en los rangos de la
+  sección 7, respuestas cualitativas de la sección 13
+  (`npm run sensibilidades` muestra las magnitudes).
+- Manual por capítulos en `docs/manual/` (capítulos 1–4 y anexos A y B).
+- Supuestos nuevos S-24 a S-29 en MODELO.md.

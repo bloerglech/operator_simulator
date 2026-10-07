@@ -58,6 +58,11 @@ const UNIDADES = {
   'kJ/mol': { f: 1 },
   // transporte
   'm2/s': { f: 1 },
+  // cinética y calidad
+  'mol/kg': { f: 1 }, // mol por kg (de madera, lignina o carbohidrato)
+  'mmol/kg': { f: 1e-3 },
+  'L/g': { f: 1 }, // inverso de g/L (= m³/kg)
+  'mL/g': { f: 1 }, // viscosidad intrínseca
 }
 
 /** Lista de unidades reconocidas (para el validador y la documentación). */

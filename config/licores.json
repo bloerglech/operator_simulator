@@ -33,7 +33,7 @@
       "tipo": "licor",
       "T": { "valor": 75, "unidad": "°C", "origen": "supuesto", "nota": "P12" },
       "composicion": {
-        "OH": { "valor": 2, "unidad": "g/L NaOH", "origen": "supuesto" },
+        "OH": { "valor": 5, "unidad": "g/L NaOH", "origen": "supuesto", "nota": "álcali residual del lavado; ajustado para que el soplado quede en 4-7 g/L" },
         "HS": { "valor": 0.01, "unidad": "mol/L", "origen": "supuesto" },
         "LD": { "valor": 15, "unidad": "g/L", "origen": "supuesto" },
         "CD": { "valor": 8, "unidad": "g/L", "origen": "supuesto" },

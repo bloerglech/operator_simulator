@@ -59,8 +59,9 @@ $$P_{ebullición} = \max_j \left[P_{sat}(T_j) - \rho\,g\,z_j\right]$$
 **Ejemplo 5.2.** Tope a 130 °C: $P_{sat}$ = 2,70 bar(a). Retorno de la
 circulación superior a 9,5 m de profundidad con licor a ≈ 152 °C:
 $P_{sat}$ = 5,02 bar(a) − 1 050·9,81·9,5 Pa (= 0,98 bar) = 4,04 bar(a). El
-segundo manda: el tope no puede bajar de ≈ 3 bar(g). Con 5,5 bar(g) de
-operación, el margen es ≈ 2,5 bar.
+segundo manda: el tope no puede bajar de ≈ 3 bar(g). En el caso base las
+celdas de retorno están algo más frías y el simulador informa un piso de
+2,6 bar(g); con ≈ 5,6 bar(g) de operación, el margen es ≈ 3 bar.
 
 Si la presión cae bajo ese piso, el licor hierve en la zona caliente
 (**vaporización súbita**): el vapor sostiene la presión en ese valor, el
@@ -160,7 +161,7 @@ $$\frac{d\sigma}{dz} = \gamma - \frac{\sigma}{\lambda},\qquad \lambda = \frac{D}
 
 con γ el peso sumergido de la columna por unidad de volumen más el arrastre
 del licor. Con D = 10 m y μK = 0,08, λ ≈ 31 m: en un digestor de 50 m el
-esfuerzo se satura cerca del fondo. La fracción de astillas sube de ≈ 0,37
+esfuerzo se satura cerca del fondo. La fracción de astillas sube de ≈ 0,39
 en el tope a ≈ 0,44 en el fondo.
 
 El esfuerzo en el fondo empuja el **raspador**: su torque y su corriente

@@ -886,6 +886,7 @@ mínimas).
 | S-47 | Estanque de soplado: el lavado toma pulpa a su tasa, con un caudal volumétrico de descarga de hasta 1,5 veces el nominal (consistencia de descarga 100 kg/m³); con solo licor en el estanque, la descarga sigue. |
 | S-48 | Alivio y seguridad descargan el licor libre más alto del vaso: si el tope está lleno de astillas, el licor llega a la válvula a través del lecho. |
 | S-49 | La coordinación de ritmo (RC-700) conserva su base al desactivarse; mientras está inactiva y hay madera la renueva con el estado actual, así al partir después de una parada escala desde un estado coherente. |
+| S-50 | Energía eléctrica como servicio (0/1): durante un apagón las bombas no pueden partir; el DCS y las válvulas siguen operando (UPS). |
 | S-23 | Una tubería entre vasos entrega en cada paso el volumen que se le ingresó en el paso anterior (desfase de un paso lento, 5 s), lo que evita lazos algebraicos. |
 
 ## 16. Limitaciones conocidas
@@ -905,6 +906,8 @@ mínimas).
 | L-12 | Los enclavamientos y alarmas son un conjunto mínimo representativo, no una lista de una planta real. |
 | L-13 | El kappa es muy sensible al factor H (≈ −0,045 kappa por unidad de H cerca del caso base, unas dos veces lo habitual en eucalipto, por verificar con datos de planta): los cambios de ritmo o de temperatura mueven el kappa más que en la práctica. Consecuencia del calibrado a un solo punto (L-03, L-04). Por lo mismo, en una parada de 2,5 h las astillas detenidas en la zona de cocción salen con kappa 8–12 aunque se bajen 10–20 °C las temperaturas (en la práctica la caída es menor). |
 | L-14 | El control de factor H predice el H con las temperaturas de zona, que responden en 1–2 h: su ganancia es baja a propósito para no oscilar. |
+| L-15 | Con la válvula de soplado cerrada (LIC-302 en 0) sigue saliendo el licor de la lechada que fija CIC-605 (≈ 100 m³/h). En la planta real no saldría nada; las misiones de parada están calibradas con este comportamiento y corregirlo exige recalibrarlas. |
+| L-16 | Al detenerse o partir todas las bombas a la vez la presión de los vasos tiene un transitorio de segundos (puede abrir el alivio y la seguridad) porque las bombas no tienen inercia hidráulica coherente entre sí. |
 | L-10 | Resolución de la columna: una parcela ≈ 1/3 de celda (≈ 1,5 min de residencia en el impregnador, ≈ 2,5 min en el digestor). |
 
 ## 17. Estado de implementación

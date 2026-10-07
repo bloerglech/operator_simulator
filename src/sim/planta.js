@@ -156,7 +156,7 @@ function anotarComando(estado, cmd) {
  *   { tipo: 'calentador', id, accion: 'conmutar' | 'lavado_acido' }  (unidad de respaldo; limpieza)
  *   { tipo: 'calentador', id, accion: 'vapor', valor }  (apertura de la válvula de vapor 0–1; null = consigna ideal)
  *   { tipo: 'flash', id, valor }  (caudal de salida m³/s; null = control de nivel ideal)
- *   { tipo: 'servicio', id, valor }  (presionVaporMP, presionVaporBP, vaporBPMax, limiteEvaporadores,
+ *   { tipo: 'servicio', id, valor }  (presionVaporMP, presionVaporBP, vaporBPMax, limiteEvaporadores, energia (0/1),
  *                                     transportadorSilo, lavado, Tpatio, vaporFlashSilo — también perturbaciones)
  *   { tipo: 'mallas', id, accion: 'retrolavar' | 'conmutacion_on' | 'conmutacion_off' | 'lavado_acido' }
  *   { tipo: 'perturbar', id: 'colgamiento', vaso, valor: altura (m) } · { id: 'soltar_columna', vaso }
@@ -190,6 +190,7 @@ function validarComando(modelo, estado, cmd) {
   } else if (cmd.tipo === 'bomba') {
     if (!modelo.bombas[cmd.id]) throw new Error(`Bomba desconocida: ${cmd.id}`)
     if (!['partir', 'detener'].includes(cmd.accion)) throw new Error('Acción de bomba: partir o detener')
+    if (cmd.accion === 'partir' && (estado.servicios.energia ?? 1) <= 0) throw new Error('Sin energía eléctrica: la bomba no puede partir')
   } else if (cmd.tipo === 'venteo') {
     if (!modelo.vasoPorId[cmd.id]) throw new Error(`Vaso desconocido: ${cmd.id}`)
     if (!['abrir', 'cerrar'].includes(cmd.accion)) throw new Error('Acción de venteo: abrir o cerrar')
@@ -201,7 +202,7 @@ function validarComando(modelo, estado, cmd) {
     if (!modelo.equipos.flash[cmd.id]) throw new Error(`Ciclón flash desconocido: ${cmd.id}`)
     if (cmd.valor !== null) numero()
   } else if (cmd.tipo === 'servicio') {
-    if (!(cmd.id in estado.servicios)) throw new Error(`Servicio desconocido: ${cmd.id}`)
+    if (!(cmd.id in estado.servicios) && cmd.id !== 'energia') throw new Error(`Servicio desconocido: ${cmd.id}`)
     numero()
   } else if (cmd.tipo === 'mallas') {
     if (!modelo.mallas[cmd.id]) throw new Error(`Mallas desconocidas: ${cmd.id}`)

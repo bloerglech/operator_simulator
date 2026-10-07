@@ -138,6 +138,7 @@ export function estadoEquiposInicial(modelo, { modo, fuentes, ajustes, licorTipi
       lavado: operando ? ajustes.astillas.caudalMadera * 0.535 : 0, // kg/s de pulpa seca
       Tpatio: eq.Tpatio,
       vaporFlashSilo: 1, // fracción del vapor flash que llega al silo (el resto se ventea)
+      energia: 1, // 0 durante un apagón: las bombas no pueden partir
       licorBlancoMax: 1, // m³/s de licor blanco disponible (1 m³/s = sin límite práctico)
     },
   }

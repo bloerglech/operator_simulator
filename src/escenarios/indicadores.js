@@ -126,6 +126,7 @@ export function resumen(ind, economia, incidentes = {}) {
     vapor: ind.vapor * e.vapor_GJ,
   }
   r.economia.margen = r.economia.ingresos - r.economia.madera - r.economia.alcali - r.economia.vapor
+  r.margenPorADt = r.economia.margen / adt // para las condiciones de las misiones
   r.incidentes = incidentes
   return r
 }

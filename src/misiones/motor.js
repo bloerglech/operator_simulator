@@ -57,7 +57,12 @@ function contexto(def, se, ctx) {
     sinReconocer: () => Object.values(estado.control?.alarmas.a ?? {}).filter((a) => !a.reconocida).length,
     objetivos: m.objetivos,
     guion: m.guion,
-    incidente: (tipo) => (estado.incidentes[tipo] ?? 0) - (m.incidentes0[tipo] ?? 0),
+    incidente(tipo, desde) {
+      const base = desde ? m.incidentesPaso?.[desde] : m.incidentes0
+      if (!base) return 0 // el paso aún no se ejecuta
+      return (estado.incidentes[tipo] ?? 0) - (base[tipo] ?? 0)
+    },
+    bombas: () => estado.bombas,
   }
 }
 
@@ -76,6 +81,7 @@ export function pasoMision(def, se, ctx, dt, { emitir, evento }) {
   for (const p of def.guion ?? []) {
     if (m.guion[p.id] || !evaluar(p.cuando, cx)) continue
     m.guion[p.id] = cx.t
+    m.incidentesPaso = { ...m.incidentesPaso, [p.id]: { ...ctx.estado.incidentes } } // para { incidente, desde: paso }
     for (const a of p.acciones) ejecutarAccion(a, def, se, ctx, cx, { emitir, evento })
     if (m.terminada) return
   }

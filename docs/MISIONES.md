@@ -1,7 +1,7 @@
 # Misiones
 
 Generado por `npm run documentar` desde `src/misiones/campana.js` (no editar a mano).
-Orden de la campaña: `tutorial` → `turno_noche` → `mas_toneladas` → `licor_debil` → `mallas` → `presurizacion` → `columna_colgada` → `parada_corta` → `parada_general`.
+Orden de la campaña: `tutorial` → `turno_noche` → `mas_toneladas` → `licor_debil` → `mallas` → `presurizacion` → `columna_colgada` → `parada_corta` → `parada_general` → `apagon` → `record`.
 Cada misión superada desbloquea la siguiente. Medallas según la fracción de
 puntos: oro ≥ 90 %, plata ≥ 70 %, bronce con todos los objetivos principales.
 La prueba `tests/misiones.test.js` juega cada misión con la respuesta
@@ -261,3 +261,63 @@ esperada (debe aprobar) y sin hacer nada (debe fallar).
 **Criterios de evaluación:** Planta entregada en menos de 18 horas (1 pt) · Sin aperturas de la válvula de alivio (1 pt) · Sin enclavamientos disparados (1 pt); cada objetivo secundario suma 1 pt.
 
 **Respuesta ideal:** En orden: (1) bajar el ritmo al 60 % con RC-700 y rampa, para que el fondo y el lavado se adapten; (2) cortar astillas y transferencia juntas (WIC-101 en 0 y LIC-202 en manual con salida 0), con FIC-115 fuera de cascada para que el impregnador siga lleno de licor; (3) detener el soplado (LIC-302 en manual, salida 0); (4) cortar el vapor de los tres calentadores con las bombas andando; (5) enfriar desplazando con filtrado de lavado (FIC-601 en AUTO, ≈ 600 m³/h): el licor frío entra por el fondo y sale por las extracciones; tarda muchas horas; (6) recién con el digestor bajo 100 °C (TI-303, TI-304 y TI-305), detener el filtrado (un vaso lleno de líquido no baja su presión mientras le entra líquido), bajar las consignas de PIC-301 y PIC-201 y abrir los venteos. Despresurizar caliente hace hervir el licor dentro del digestor.
+
+## Capítulo 10. Apagón
+
+**Qué enseña:** Qué queda andando sin energía (el DCS con su UPS, las válvulas), qué hacer en los primeros minutos y el orden de partida de las bombas: primero llenar y presurizar, después circular, al final alimentar.
+
+**Situación inicial:** caso base tras 8 h de operación. Corte total de energía a plena carga. Asegurar el digestor y, cuando vuelva la energía, partir en orden.
+
+**Guion:**
+
+- a los 0 min: Carmen Soto, jefa de turno (telefono): «Hola. La subestación está en mantención y trabajan con una sola línea. Debería ser un turno normal.»
+- a los 20 min:  (mural): «Las luces parpadean y se apagan. Silencio: se detuvieron todas las bombas. Las pantallas siguen encendidas con la UPS.» · evento `apagon`
+- a los 21 min: Luis Paredes, terreno (radio): «¡Sala! Se cayó todo, no hay ninguna bomba andando. Sonó la válvula de seguridad del digestor. ¿Qué cierro?»
+- a los 51 min: Carmen Soto, jefa de turno (telefono): «Volvió la energía. Parte en orden: primero el filtrado para llenar y presurizar, después las circulaciones y la transferencia, al final licores y extracciones. Rearma los enclavamientos y después parte como en una parada corta.»
+- a los 7 h: Carmen Soto, jefa de turno (telefono): «Terminó el turno. Revisemos cómo quedó la planta.» · fin de la misión
+
+**Objetivos:**
+
+- (principal, plazo 10 min) Cerrar el soplado (LIC-302 en manual, salida 0) y cortar la madera (WIC-101 en 0)
+- (secundario) Detener la transferencia (LIC-202 en manual, salida 0) y sacar FIC-115 de cascada
+- (principal) Partir las bombas de filtrado, circulaciones y transferencia
+- (principal) Llenar y presurizar el digestor (PI-301 sobre 5 bar)
+- (principal) Rearmar los enclavamientos I-03, I-04 e I-05 y devolver el vapor a automático
+- (principal, al final) Terminar el turno con la alimentación de vuelta a 200 t/h o más
+- (principal, al final) Terminar el turno con la presión del digestor entre 5 y 6 bar
+
+**Condiciones de falla:** Abrió la válvula de seguridad durante la partida. · El nivel de astillas del digestor llegó al enclavamiento. · El estanque de soplado se llenó. · El impregnador se llenó de astillas: enclavamiento I-11.
+
+**Criterios de evaluación:** A lo más 3 aperturas del alivio después de volver la energía (2 pt) · Kappa final entre 15 y 19 (1 pt) · Producción del turno de al menos 450 ADt (1 pt); cada objetivo secundario suma 1 pt.
+
+**Respuesta ideal:** Durante el corte el DCS sigue en línea y las válvulas obedecen, pero ninguna bomba anda: el soplado sigue sacando licor por la presión del digestor y la transferencia y la madera partirían solas al volver la energía. Cerrar el soplado y la transferencia, cortar la madera y sacar FIC-115 de cascada. Con la energía de vuelta: partir primero la bomba de filtrado y el lavado al fondo con la extracción final (FIC-503) en AUTO y 0, para llenar y presurizar; después las circulaciones superior e inferior y la transferencia (LIC-202 con algo de salida, para que haya caudal de retorno); luego licores y extracciones. Rearmar I-03, I-04 e I-05 cuando su circulación ande, TIC a AUTO, FIC-503 a CAS al tener presión y partir como en una parada corta: madera, soplado y lavado juntos en escalones.
+
+## Capítulo 11. Récord
+
+**Qué enseña:** Todo lo anterior junto: anticiparse con el laboratorio, mantener el balance del digestor y no confiar a ciegas en un analizador.
+
+**Situación inicial:** caso base tras 8 h de operación. Turno de 12 horas con perturbaciones encadenadas. Meta: toneladas dentro de especificación y margen.
+
+**Guion:**
+
+- a los 0 min: Carmen Soto, jefa de turno (telefono): «Hoy vamos por el récord del mes: quiero 1 250 toneladas dentro de especificación en el turno de 12 horas, y sin regalar álcali ni vapor. Te advierto que viene lluvia y que caustificación anda complicada.»
+- a los 30 min: evento `lluvia_fuerte` · Luis Paredes, terreno (radio): «Sala, se largó a llover fuerte en el patio. La pila de astillas está a la intemperie.»
+- a los 3 h: evento `licor_debil` · Felipe Mora, caustificación (telefono): «Sala, Felipe. El apagador sigue mal: el licor blanco puede venir más débil desde ahora.»
+- a los 6 h: Rodrigo Vera, evaporadores (telefono): «Sala, Rodrigo de evaporadores. Por dos horas solo puedo recibir 800 metros cúbicos por hora de licor débil.» · evento `evaporadores_limitados`
+- a los 9 h: evento `analizador_kappa`
+- a los 12 h: Carmen Soto, jefa de turno (telefono): «Terminó el turno. Veamos si hubo récord.» · fin de la misión
+
+**Objetivos:**
+
+- (principal, al final) Producir 1 250 ADt o más dentro de especificación
+- (principal, al final) Margen de al menos 230 USD por ADt
+- (secundario) Corregir la humedad de las astillas en FFC-117 con el dato del laboratorio
+- (secundario) Pedir el álcali efectivo del licor blanco
+- (secundario) Bajar el filtrado de lavado mientras evaporadores esté limitado
+- (secundario) Verificar el kappa con el laboratorio cuando el analizador falle
+
+**Condiciones de falla:** El kappa pasó de 22: la pulpa no sirve para el blanqueo. · Abrió la válvula de seguridad del digestor.
+
+**Criterios de evaluación:** Desviación estándar del kappa menor que 0,7 (2 pt) · Sin aperturas de la válvula de alivio (1 pt) · Sin enclavamientos disparados (1 pt); cada objetivo secundario suma 1 pt.
+
+**Respuesta ideal:** Cada perturbación tiene su respuesta y casi todas se anticipan: con la lluvia, humedad al laboratorio y FFC-117 corregido (y algo más de carga de álcali si el kappa del analizador sube); con el licor débil, EA al laboratorio cuando termine de bajar (una muestra temprana no ve todo el cambio) para que FFC-110 compense; con evaporadores limitado, bajar el filtrado de lavado en lo que no reciben, mirando FI-512 (con lluvia y licor débil entra más licor: unos 300 m³/h menos) y devolverlo a cascada al normalizarse; con el analizador congelado, el laboratorio manda. Las toneladas salen solas si el kappa no sale de banda.

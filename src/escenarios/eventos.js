@@ -40,6 +40,19 @@ export function leerObjetivo(ctx, o) {
   throw new Error(`Objetivo de rampa no admitido: ${JSON.stringify(o)}`)
 }
 
+/**
+ * Ejecuta un comando de un evento. Si no se puede (p. ej. partir una bomba
+ * durante un apagón) queda registrado y el evento sigue: un evento nunca
+ * detiene la simulación.
+ */
+function ejecutar(ctx, cmd, evento) {
+  try {
+    ctx.ejecutar(cmd)
+  } catch (err) {
+    ctx.evento('comando_fallido', { evento, comando: cmd.tipo, error: String(err?.message ?? err) })
+  }
+}
+
 /** Reemplaza $parametros en un comando. */
 function sustituir(cmd, p) {
   return JSON.parse(JSON.stringify(cmd), (k, v) => (typeof v === 'string' && v.startsWith('$') ? p[v.slice(1)] ?? v : v))
@@ -60,7 +73,7 @@ export function iniciarEvento(cat, se, ctx, id, parametros = {}, aviso = null) {
   }
   const inst = { n: ++se.eventos.n, id, parametros: p, t0: t, fin: def.duracion ? t + def.duracion : null, fase: 'activo', rampas: [] }
   for (const a of def.acciones) {
-    if (a.comando) ctx.ejecutar(sustituir(a.comando, p))
+    if (a.comando) ejecutar(ctx, sustituir(a.comando, p), id)
     else {
       const objetivo = sustituir(a.objetivo, p)
       // Si otro evento activo mueve la misma variable, este toma su rampa y su
@@ -106,7 +119,7 @@ function tomarRampa(ev, objetivo) {
 export function terminarEvento(cat, se, ctx, inst) {
   const def = cat.porId[inst.id]
   const t = ctx.estado.paso * ctx.modelo.dtR
-  for (const c of def.alTerminar ?? []) ctx.ejecutar(sustituir(c, inst.parametros))
+  for (const c of def.alTerminar ?? []) ejecutar(ctx, sustituir(c, inst.parametros), inst.id)
   if (def.revertir && inst.rampas.length) {
     inst.fase = 'retorno'
     inst.rampas = inst.rampas.map((r) => ({ objetivo: r.objetivo, desde: leerObjetivo(ctx, r.objetivo), hasta: r.base ?? r.desde, t0: t, duracion: r.duracion }))
@@ -121,7 +134,7 @@ function avanzarRampas(ev, ctx, t, forzar = false) {
       const f = r.duracion > 0 ? Math.min(1, (t - r.t0) / r.duracion) : 1
       if (!forzar && f < 1 && Math.round(t / ctx.modelo.dtR) % Math.round(PASO_RAMPA / ctx.modelo.dtR) !== 0) continue
       const v = r.desde + (r.hasta - r.desde) * f
-      ctx.ejecutar({ ...r.objetivo, valor: v })
+      ejecutar(ctx, { ...r.objetivo, valor: v }, inst.id)
       if (f >= 1) r.hecha = true
     }
   }

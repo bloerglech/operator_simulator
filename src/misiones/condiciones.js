@@ -12,7 +12,9 @@
 //   { alarmasSinReconocer: n }            a lo más n alarmas sin reconocer
 //   { objetivo: id } · { paso: id }       objetivo cumplido · paso del guion ejecutado
 //   { enclavamiento: id }                 enclavamiento disparado
-//   { incidente: tipo }                   ocurrió un evento del proceso (apertura_alivio, …) en la misión
+//   { incidente: tipo, desde?, op?, valor? } ocurrió un evento del proceso (apertura_alivio, …) en la misión
+//                                         (o desde que se ejecutó el paso del guion `desde`); con op, cuántas veces
+//   { bomba: id, marcha: bool }           estado de una bomba
 //   { y: [...] } · { o: [...] } · { no: c }
 // op: '<', '<=', '>', '>=', '=='; entre: [mín, máx].
 
@@ -56,7 +58,8 @@ export function evaluar(c, cx) {
   if (c.objetivo) return cx.objetivos[c.objetivo]?.estado === 'cumplido'
   if (c.paso) return !!cx.guion[c.paso]
   if (c.enclavamiento) return !!cx.control().enclavamientos[c.enclavamiento]?.disparado
-  if (c.incidente) return cx.incidente(c.incidente) > 0
+  if (c.incidente) return c.op ? comparar(cx.incidente(c.incidente, c.desde), c) : cx.incidente(c.incidente, c.desde) > 0
+  if (c.bomba) return !!cx.bombas()[c.bomba]?.marcha === c.marcha
   throw new Error(`Condición desconocida: ${JSON.stringify(c)}`)
 }
 
@@ -65,8 +68,9 @@ export function revisar(c, ruta) {
   if (!c || typeof c !== 'object') throw new Error(`${ruta}: condición inválida`)
   for (const k of ['y', 'o']) if (c[k]) return c[k].forEach((x, i) => revisar(x, `${ruta}.${k}[${i}]`))
   if (c.no) return revisar(c.no, `${ruta}.no`)
-  const claves = ['tiempo', 'tag', 'lazo', 'kpi', 'indicador', 'jugador', 'comando', 'malla', 'laboratorio', 'alarmasSinReconocer', 'objetivo', 'paso', 'enclavamiento', 'incidente']
+  const claves = ['tiempo', 'tag', 'lazo', 'kpi', 'indicador', 'jugador', 'comando', 'malla', 'laboratorio', 'alarmasSinReconocer', 'objetivo', 'paso', 'enclavamiento', 'incidente', 'bomba']
   if (!claves.some((k) => c[k] !== undefined)) throw new Error(`${ruta}: condición sin tipo conocido`)
   if (c.malla && typeof c.conmutacion !== 'boolean') throw new Error(`${ruta}: falta conmutacion (true o false)`)
+  if (c.bomba && typeof c.marcha !== 'boolean') throw new Error(`${ruta}: falta marcha (true o false)`)
   if ((c.tag || c.kpi || c.indicador || (c.lazo && !c.modo)) && !c.entre && !c.op) throw new Error(`${ruta}: falta op o entre`)
 }

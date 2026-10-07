@@ -9,7 +9,9 @@
   "presurizacion",
   "columna_colgada",
   "parada_corta",
-  "parada_general"
+  "parada_general",
+  "apagon",
+  "record"
  ],
  "especificacion": {
   "kappa": [

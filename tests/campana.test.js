@@ -4,6 +4,8 @@ import { describe, it, expect } from 'vitest'
 import { jugar } from './planes/jugar.js'
 import { planParadaCorta } from './planes/paradaCorta.js'
 import { planParadaGeneral } from './planes/paradaGeneral.js'
+import { planRecord } from './planes/record.js'
+import { planApagon } from './planes/apagon.js'
 
 describe('capítulo 4: mallas', () => {
   const MALLAS = ['mallas_circ_sup', 'mallas_circ_inf']
@@ -118,5 +120,39 @@ describe('capítulo 8: parada general', () => {
     }, 2)
     expect(r.resultado.exito).toBe(false)
     expect(r.fallida).toMatch(/110 °C/)
+  })
+})
+
+describe('capítulo 10: apagón', () => {
+  it('sin asegurar el digestor en los primeros minutos la misión falla', () => {
+    const r = jugar('apagon', {}, 2)
+    expect(r.resultado.exito).toBe(false)
+  })
+  it('asegurar, partir las bombas en orden, rearmar y partir en escalones aprueba con oro', () => {
+    const r = jugar('apagon', planApagon(), 8)
+    expect(r.resultado.exito).toBe(true)
+    expect(r.resultado.medalla).toBe('oro')
+  })
+  it('sin energía las bombas no parten', async () => {
+    const { prepararJuego } = await import('../src/escenarios/preparar.js')
+    const { config } = await import('./ayuda.js')
+    const j = prepararJuego(config(), { semilla: 3 })
+    j.enviarComando({ tipo: 'evento', accion: 'iniciar', id: 'apagon' })
+    j.avanzar(60)
+    expect(j.leerEstado().bombas.bomba_circ_sup.marcha).toBe(false)
+    expect(() => j.enviarComando({ tipo: 'bomba', id: 'bomba_circ_sup', accion: 'partir' })).toThrow(/energía/)
+    j.avanzar(1800)
+    expect(() => j.enviarComando({ tipo: 'bomba', id: 'bomba_circ_sup', accion: 'partir' })).not.toThrow()
+  })
+})
+
+describe('capítulo 11: récord', () => {
+  it('sin reaccionar el kappa sale de rango y la misión falla', () => {
+    expect(jugar('record', {}, 13).resultado.exito).toBe(false)
+  })
+  it('respondiendo cada perturbación como en los capítulos anteriores, aprueba', () => {
+    const r = jugar('record', planRecord(), 13)
+    expect(r.resultado.exito).toBe(true)
+    expect(r.resultado.resumen.incidentes.apertura_alivio).toBe(0)
   })
 })

@@ -560,6 +560,117 @@ const puestaEnMarcha = {
   respuestaIdeal: '',
 }
 
+// ---------------------------------------------------------------------------
+// 11. Récord
+
+const record = {
+  id: 'record',
+  capitulo: 'Capítulo 11',
+  titulo: 'Récord',
+  resumen: 'Turno de 12 horas con perturbaciones encadenadas. Meta: toneladas dentro de especificación y margen.',
+  ensena: 'Todo lo anterior junto: anticiparse con el laboratorio, mantener el balance del digestor y no confiar a ciegas en un analizador.',
+  inicio: { horasPrevias: 8 },
+  guion: [
+    { id: 'entrega', cuando: { tiempo: 0 }, acciones: [
+      jefa('Hoy vamos por el récord del mes: quiero 1 250 toneladas dentro de especificación en el turno de 12 horas, y sin regalar álcali ni vapor. Te advierto que viene lluvia y que caustificación anda complicada.')] },
+    { id: 'lluvia', cuando: { tiempo: 30 * MIN }, acciones: [
+      { evento: 'lluvia_fuerte' }, radio('Sala, se largó a llover fuerte en el patio. La pila de astillas está a la intemperie.')] },
+    { id: 'licor', cuando: { tiempo: 3 * H }, acciones: [
+      { evento: 'licor_debil' },
+      { mensaje: { quien: 'Felipe Mora, caustificación', canal: 'telefono', texto: 'Sala, Felipe. El apagador sigue mal: el licor blanco puede venir más débil desde ahora.' } }] },
+    { id: 'evaporadores', cuando: { tiempo: 6 * H }, acciones: [
+      evaporadores('Sala, Rodrigo de evaporadores. Por dos horas solo puedo recibir 800 metros cúbicos por hora de licor débil.'),
+      { evento: 'evaporadores_limitados' }] },
+    { id: 'analizador', cuando: { tiempo: 9 * H }, acciones: [{ evento: 'analizador_kappa' }] },
+    { id: 'relevo', cuando: { tiempo: 12 * H }, acciones: [jefa('Terminó el turno. Veamos si hubo récord.'), { terminar: true }] },
+  ],
+  objetivos: [
+    { id: 'toneladas', tipo: 'principal', final: true, texto: 'Producir 1 250 ADt o más dentro de especificación', condicion: { indicador: 'adtEnEspec', op: '>=', valor: 1250 } },
+    { id: 'margen', tipo: 'principal', final: true, texto: 'Margen de al menos 230 USD por ADt', condicion: { indicador: 'margenPorADt', op: '>=', valor: 230 } },
+    { id: 'humedad', tipo: 'secundario', texto: 'Corregir la humedad de las astillas en FFC-117 con el dato del laboratorio', desde: { paso: 'lluvia' },
+      condicion: { comando: { tipo: 'bloque', id: 'FFC-117', accion: 'parametro', campo: 'humedad' } },
+      pistas: [pista(30 * MIN, 'Con lluvia, la astilla trae más agua: pide la humedad al laboratorio y corrígela en FFC-117.', 'LW-117')] },
+    { id: 'ea', tipo: 'secundario', texto: 'Pedir el álcali efectivo del licor blanco', desde: { paso: 'licor' }, anticipable: true,
+      condicion: { comando: { tipo: 'laboratorio', analisis: 'licor_blanco_EA' } },
+      pistas: [pista(30 * MIN, 'Si el licor viene más débil, FFC-110 necesita el EA del laboratorio para mantener la carga.', 'AI-504')] },
+    { id: 'balance', tipo: 'secundario', texto: 'Bajar el filtrado de lavado mientras evaporadores esté limitado', desde: { paso: 'evaporadores' },
+      condicion: { tag: 'FI-601', op: '<=', valor: 1050 },
+      pistas: [pista(5 * MIN, 'Lo que no reciba evaporadores tiene que dejar de entrar: FIC-601 fuera de cascada, unos 130 m³/h menos.', 'FIC-601')] },
+    { id: 'kappa_lab', tipo: 'secundario', texto: 'Verificar el kappa con el laboratorio cuando el analizador falle', desde: { paso: 'analizador' },
+      condicion: { comando: { tipo: 'laboratorio', analisis: 'kappa' } },
+      pistas: [pista(45 * MIN, 'AI-701 lleva rato sin moverse. ¿Le crees? Pide un kappa al laboratorio.', 'AI-701')] },
+  ],
+  fallas: [
+    { condicion: { kpi: 'kappa', op: '>', valor: 22 }, mensaje: 'El kappa pasó de 22: la pulpa no sirve para el blanqueo.' },
+    { condicion: { incidente: 'apertura_seguridad' }, mensaje: 'Abrió la válvula de seguridad del digestor.' },
+  ],
+  fin: { paso: 'relevo' },
+  evaluacion: [
+    { texto: 'Desviación estándar del kappa menor que 0,7', condicion: { indicador: 'kappaDesv', op: '<', valor: 0.7 }, puntos: 2 },
+    { texto: 'Sin aperturas de la válvula de alivio', condicion: { no: { incidente: 'apertura_alivio' } }, puntos: 1 },
+    { texto: 'Sin enclavamientos disparados', condicion: { no: { incidente: 'enclavamiento' } }, puntos: 1 },
+  ],
+  respuestaIdeal: 'Cada perturbación tiene su respuesta y casi todas se anticipan: con la lluvia, humedad al laboratorio y FFC-117 corregido (y algo más de carga de álcali si el kappa del analizador sube); con el licor débil, EA al laboratorio cuando termine de bajar (una muestra temprana no ve todo el cambio) para que FFC-110 compense; con evaporadores limitado, bajar el filtrado de lavado en lo que no reciben, mirando FI-512 (con lluvia y licor débil entra más licor: unos 300 m³/h menos) y devolverlo a cascada al normalizarse; con el analizador congelado, el laboratorio manda. Las toneladas salen solas si el kappa no sale de banda.',
+}
+
+// ---------------------------------------------------------------------------
+// 10. Apagón
+
+const CIRCULACIONES = ['bomba_circ_sup', 'bomba_circ_inf', 'bomba_transferencia', 'bomba_filtrado']
+
+const apagon = {
+  id: 'apagon',
+  capitulo: 'Capítulo 10',
+  titulo: 'Apagón',
+  resumen: 'Corte total de energía a plena carga. Asegurar el digestor y, cuando vuelva la energía, partir en orden.',
+  ensena: 'Qué queda andando sin energía (el DCS con su UPS, las válvulas), qué hacer en los primeros minutos y el orden de partida de las bombas: primero llenar y presurizar, después circular, al final alimentar.',
+  inicio: { horasPrevias: 8 },
+  guion: [
+    { id: 'entrega', cuando: { tiempo: 0 }, acciones: [jefa('Hola. La subestación está en mantención y trabajan con una sola línea. Debería ser un turno normal.')] },
+    { id: 'corte', cuando: { tiempo: 20 * MIN }, acciones: [
+      { mensaje: { quien: '', canal: 'mural', texto: 'Las luces parpadean y se apagan. Silencio: se detuvieron todas las bombas. Las pantallas siguen encendidas con la UPS.' } },
+      { evento: 'apagon' }] },
+    { id: 'terreno', cuando: { tiempo: 21 * MIN }, acciones: [
+      radio('¡Sala! Se cayó todo, no hay ninguna bomba andando. Sonó la válvula de seguridad del digestor. ¿Qué cierro?')] },
+    { id: 'energia', cuando: { tiempo: 51 * MIN }, acciones: [
+      jefa('Volvió la energía. Parte en orden: primero el filtrado para llenar y presurizar, después las circulaciones y la transferencia, al final licores y extracciones. Rearma los enclavamientos y después parte como en una parada corta.', { puntoControl: true })] },
+    { id: 'relevo', cuando: { tiempo: 7 * H }, acciones: [jefa('Terminó el turno. Revisemos cómo quedó la planta.'), { terminar: true }] },
+  ],
+  objetivos: [
+    { id: 'asegurar', tipo: 'principal', texto: 'Cerrar el soplado (LIC-302 en manual, salida 0) y cortar la madera (WIC-101 en 0)', desde: { paso: 'corte' }, plazo: 10 * MIN,
+      condicion: { y: [{ lazo: 'LIC-302', campo: 'salida', op: '<=', valor: 2 }, { lazo: 'WIC-101', campo: 'sp', op: '<=', valor: 5 }] },
+      pistas: [pista(2 * MIN, 'Sin bombas, el soplado sigue sacando licor por la presión del digestor: ciérralo. Y que la madera no parta sola cuando vuelva la energía.', 'LIC-302'),
+        pista(5 * MIN, 'LIC-302 a MAN con salida 0 (pantalla «5 Fondo y soplado») y WIC-101 en 0 (pantalla «1 Alimentación»).', 'LIC-302', 'ayuda')] },
+    { id: 'transferencia', tipo: 'secundario', texto: 'Detener la transferencia (LIC-202 en manual, salida 0) y sacar FIC-115 de cascada', desde: { paso: 'corte' },
+      condicion: { y: [{ lazo: 'LIC-202', campo: 'salida', op: '<=', valor: 2 }, { lazo: 'FIC-115', modo: 'AUTO' }] },
+      pistas: [pista(8 * MIN, 'Al volver la energía, si la transferencia parte sola con el impregnador sin licor, la presión salta. Déjala en manual en 0.', 'LIC-202', 'ayuda')] },
+    { id: 'bombas', tipo: 'principal', texto: 'Partir las bombas de filtrado, circulaciones y transferencia', desde: { paso: 'energia' },
+      condicion: { y: CIRCULACIONES.map((b) => ({ bomba: b, marcha: true })) },
+      pistas: [pista(5 * MIN, 'Las bombas se parten desde los mímicos (clic en la bomba, «Partir»). Primero la de filtrado.', null, 'ayuda')] },
+    { id: 'presion', tipo: 'principal', texto: 'Llenar y presurizar el digestor (PI-301 sobre 5 bar)', desde: { paso: 'energia' },
+      condicion: { tag: 'PI-301', op: '>=', valor: 5 },
+      pistas: [pista(10 * MIN, 'Para presurizar tiene que entrar más de lo que sale: filtrado de lavado en AUTO (unos 400 m³/h) y la extracción final (FIC-503) en AUTO con 0 hasta que la presión vuelva.', 'FIC-503', 'ayuda')] },
+    { id: 'rearme', tipo: 'principal', texto: 'Rearmar los enclavamientos I-03, I-04 e I-05 y devolver el vapor a automático', desde: { objetivo: 'bombas' },
+      condicion: { y: [{ no: { enclavamiento: 'I-03' } }, { no: { enclavamiento: 'I-04' } }, { no: { enclavamiento: 'I-05' } }, { lazo: 'TIC-402', modo: 'AUTO' }, { lazo: 'TIC-404', modo: 'AUTO' }, { lazo: 'TIC-212', modo: 'AUTO' }] },
+      pistas: [pista(10 * MIN, 'Pantalla «8 Alarmas y eventos»: rearma cada enclavamiento (con su circulación andando) y vuelve TIC-402, TIC-404 y TIC-212 a AUTO.', null, 'ayuda')] },
+    { id: 'ritmo_final', tipo: 'principal', final: true, texto: 'Terminar el turno con la alimentación de vuelta a 200 t/h o más', condicion: { tag: 'WI-101', op: '>=', valor: 200 } },
+    { id: 'presion_final', tipo: 'principal', final: true, texto: 'Terminar el turno con la presión del digestor entre 5 y 6 bar', condicion: { tag: 'PI-301', entre: [5, 6] } },
+  ],
+  fallas: [
+    { condicion: { incidente: 'apertura_seguridad', desde: 'energia' }, mensaje: 'Abrió la válvula de seguridad durante la partida.' },
+    { condicion: { enclavamiento: 'I-02' }, mensaje: 'El nivel de astillas del digestor llegó al enclavamiento.' },
+    { condicion: { enclavamiento: 'I-08' }, mensaje: 'El estanque de soplado se llenó.' },
+    { condicion: { enclavamiento: 'I-11' }, mensaje: 'El impregnador se llenó de astillas: enclavamiento I-11.' },
+  ],
+  fin: { paso: 'relevo' },
+  evaluacion: [
+    { texto: 'A lo más 3 aperturas del alivio después de volver la energía', condicion: { incidente: 'apertura_alivio', desde: 'energia', op: '<=', valor: 3 }, puntos: 2 },
+    { texto: 'Kappa final entre 15 y 19', condicion: { kpi: 'kappa', entre: [15, 19] }, puntos: 1 },
+    { texto: 'Producción del turno de al menos 450 ADt', condicion: { indicador: 'adt', op: '>=', valor: 450 }, puntos: 1 },
+  ],
+  respuestaIdeal: 'Durante el corte el DCS sigue en línea y las válvulas obedecen, pero ninguna bomba anda: el soplado sigue sacando licor por la presión del digestor y la transferencia y la madera partirían solas al volver la energía. Cerrar el soplado y la transferencia, cortar la madera y sacar FIC-115 de cascada. Con la energía de vuelta: partir primero la bomba de filtrado y el lavado al fondo con la extracción final (FIC-503) en AUTO y 0, para llenar y presurizar; después las circulaciones superior e inferior y la transferencia (LIC-202 con algo de salida, para que haya caudal de retorno); luego licores y extracciones. Rearmar I-03, I-04 e I-05 cuando su circulación ande, TIC a AUTO, FIC-503 a CAS al tener presión y partir como en una parada corta: madera, soplado y lavado juntos en escalones.',
+}
+
 export const MISIONES = {
   tutorial,
   turno_noche: turnoNoche,
@@ -570,6 +681,8 @@ export const MISIONES = {
   columna_colgada: columnaColgada,
   parada_corta: paradaCorta,
   parada_general: paradaGeneral,
+  apagon,
+  record,
 }
 
 // En preparación (no está en la campaña todavía): capítulo 9.

@@ -695,6 +695,47 @@ const apagon = {
   respuestaIdeal: 'Durante el corte el DCS sigue en línea y las válvulas obedecen, pero ninguna bomba anda: el soplado sigue sacando licor por la presión del digestor y la transferencia y la madera partirían solas al volver la energía. Cerrar el soplado y la transferencia, cortar la madera y sacar FIC-115 de cascada. Con la energía de vuelta: partir primero la bomba de filtrado y el lavado al fondo con la extracción final (FIC-503) en AUTO y 0, para llenar y presurizar; después las circulaciones superior e inferior y la transferencia (LIC-202 con algo de salida, para que haya caudal de retorno); luego licores y extracciones. Rearmar I-03, I-04 e I-05 cuando su circulación ande, TIC a AUTO, FIC-503 a CAS al tener presión y partir como en una parada corta: madera, soplado y lavado juntos en escalones.',
 }
 
+// ---------------------------------------------------------------------------
+// Turno completo (fuera de la campaña): 8 o 12 horas con eventos aleatorios
+// (el generador lo activa el menú con la dificultad elegida) y meta.
+
+function turnoCompleto(horas) {
+  const meta = Math.round((2900 / 24) * horas * 0.85 / 10) * 10 // 85 % del ritmo nominal dentro de especificación
+  return {
+    id: `turno_${horas}`,
+    capitulo: 'Turno completo',
+    titulo: `Turno de ${horas} horas`,
+    resumen: `${horas} horas con eventos aleatorios. Meta: ${meta} ADt dentro de especificación y margen sobre 230 USD/ADt.`,
+    ensena: 'Operar un turno entero con lo aprendido: anticiparse, mantener el balance y responder a lo que venga.',
+    inicio: { horasPrevias: 8 },
+    guion: [
+      { id: 'entrega', cuando: { tiempo: 0 }, acciones: [
+        jefa(`Turno de ${horas} horas. La meta es ${meta} toneladas dentro de especificación, sin regalar álcali ni vapor. Lo que pase, lo resuelves tú; avísame si necesitas algo.`)] },
+      { id: 'mitad', cuando: { tiempo: (horas / 2) * H }, acciones: [jefa('Vamos en la mitad del turno. ¿Cómo va el kappa?', { pararAceleracion: false })] },
+      { id: 'relevo', cuando: { tiempo: horas * H }, acciones: [jefa('Terminó el turno. Veamos los números.'), { terminar: true }] },
+    ],
+    objetivos: [
+      { id: 'toneladas', tipo: 'principal', final: true, texto: `Producir ${meta} ADt o más dentro de especificación`, condicion: { indicador: 'adtEnEspec', op: '>=', valor: meta } },
+      { id: 'margen', tipo: 'principal', final: true, texto: 'Margen de al menos 230 USD por ADt', condicion: { indicador: 'margenPorADt', op: '>=', valor: 230 } },
+    ],
+    fallas: [
+      { condicion: { kpi: 'kappa', op: '>', valor: 22 }, mensaje: 'El kappa pasó de 22: la pulpa no sirve para el blanqueo.' },
+      { condicion: { incidente: 'apertura_seguridad' }, mensaje: 'Abrió la válvula de seguridad del digestor.' },
+    ],
+    fin: { paso: 'relevo' },
+    evaluacion: [
+      { texto: 'Desviación estándar del kappa menor que 0,8', condicion: { indicador: 'kappaDesv', op: '<', valor: 0.8 }, puntos: 2 },
+      { texto: 'Sin aperturas de la válvula de alivio', condicion: { no: { incidente: 'apertura_alivio' } }, puntos: 1 },
+      { texto: 'Sin enclavamientos disparados', condicion: { no: { incidente: 'enclavamiento' } }, puntos: 1 },
+      { texto: 'Respuesta media a las alarmas bajo 2 minutos', condicion: { o: [{ indicador: 'respuestaMedia', op: '<', valor: 120 }, { indicador: 'alarmasPorHora', op: '==', valor: 0 }] }, puntos: 1 },
+    ],
+    respuestaIdeal: 'No hay una respuesta única: los eventos son aleatorios. Lo que funciona siempre: recibir el turno revisando tendencias y alarmas, pedir laboratorio ante cualquier cambio de madera o de licor, mirar el álcali residual como indicador adelantado, mantener el balance del digestor cuando una salida se limita y no confiar a ciegas en un analizador.',
+  }
+}
+
+/** Modos de juego fuera de la campaña. */
+export const MODOS = { turno_8: turnoCompleto(8), turno_12: turnoCompleto(12) }
+
 export const MISIONES = {
   tutorial,
   turno_noche: turnoNoche,
@@ -715,6 +756,6 @@ export const BORRADORES = {}
 
 /** Definición de una misión de la campaña o en preparación (para pruebas). */
 export function buscarMision(id) {
-  if (Object.hasOwn(MISIONES, id)) return MISIONES[id]
-  return Object.hasOwn(BORRADORES, id) ? BORRADORES[id] : null
+  for (const grupo of [MISIONES, MODOS, BORRADORES]) if (Object.hasOwn(grupo, id)) return grupo[id]
+  return null
 }

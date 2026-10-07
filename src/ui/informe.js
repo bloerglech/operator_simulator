@@ -104,7 +104,7 @@ export function mostrarInforme(mision, cliente, alTerminar = () => {}) {
     h('div', { class: 'botones' },
       !r.exito && mision.terminada ? h('button', { onclick: () => cerrar('reintentar') }, 'Volver al último punto de control') : null,
       h('button', { onclick: () => cerrar('repetir') }, 'Repetir la misión'),
-      r.exito ? h('button', { onclick: () => cerrar('siguiente') }, 'Siguiente misión') : null,
+      r.exito && !mision.id.startsWith('turno_') ? h('button', { onclick: () => cerrar('siguiente') }, 'Siguiente misión') : null,
       h('button', { onclick: () => cerrar('seguir') }, 'Seguir operando la planta'),
       h('button', { onclick: () => cerrar('menu') }, 'Menú inicial'))))
   document.body.append(velo)

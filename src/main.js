@@ -11,6 +11,7 @@ import { crearCapaMision } from './ui/mision.js'
 import { avisar } from './hmi/dom.js'
 import { aplicarAjustes } from './ui/ajustes.js'
 import { crearSonidos } from './ui/sonidos.js'
+import { autoguardar } from './ui/partidas.js'
 
 /** Prepara la planta (caso base, misión u operación libre) con la pantalla de espera. */
 async function arrancar(cliente, op) {
@@ -44,6 +45,7 @@ async function iniciar() {
   const aplicar = () => aplicarAjustes(app, dificultades).catch(() => {})
   aplicar()
   const sonidos = crearSonidos(cliente)
+  autoguardar(cliente)
   window.__sonidos = sonidos
   cliente.alError((msg) => avisar(`Error del simulador: ${msg}. La simulación quedó en pausa.`, 12000))
   // Misiones: diálogos, objetivos, pistas e informe; acciones al terminar.
@@ -57,9 +59,15 @@ async function iniciar() {
         if (accion === 'reintentar') await cliente.reintentar()
         else {
           const i = misiones.findIndex((m) => m.id === mision.id)
-          const id = accion === 'siguiente' ? misiones[i + 1]?.id : mision.id
-          if (!id) return avisar('Completaste todas las misiones disponibles.', 6000)
-          await arrancar(cliente, { mision: id, semilla: 1000 + misiones.findIndex((m) => m.id === id) })
+          if (i < 0) {
+            // Turno completo (fuera de la campaña): se repite con eventos nuevos.
+            if (accion === 'siguiente') return avisar('El turno completo no tiene una misión siguiente: elige otra en el menú inicial.', 6000)
+            await arrancar(cliente, { ...op, semilla: (op.semilla ?? 1) + 1 })
+          } else {
+            const id = accion === 'siguiente' ? misiones[i + 1]?.id : mision.id
+            if (!id) return avisar('Completaste todas las misiones disponibles.', 6000)
+            await arrancar(cliente, { mision: id, semilla: 1000 + misiones.findIndex((m) => m.id === id) })
+          }
         }
         capa.reiniciar(accion === 'reintentar')
         app.olvidarJugador()

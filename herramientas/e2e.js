@@ -32,6 +32,7 @@ try {
   await pag.goto('http://localhost:4174/')
   await pag.getByRole('button', { name: 'Solo pantallas DCS' }).click()
   await pag.locator('.menu-inicial input[type=checkbox]').uncheck() // sin eventos aleatorios en esta prueba
+  verificar(await pag.getByText('Turno de 8 horas').isVisible() && await pag.getByText('Turno de 12 horas').isVisible(), 'menú con turnos completos de 8 y 12 horas')
   await pag.getByText('Turno libre').click()
   await pag.waitForSelector('#nav', { timeout: 120000 })
   const lazoSVG = (tag) => pag.locator('svg text', { hasText: tag }).first()
@@ -140,6 +141,11 @@ try {
   await pag.getByText('Guardar en este navegador').click()
   await pag.waitForTimeout(800)
   verificar(await leer(() => (localStorage.getItem('digestor:partida') ?? '').length > 100000), 'partida guardada en el navegador')
+  // Autoguardado al ocultar la pestaña.
+  await pag.evaluate(() => { Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true }); document.dispatchEvent(new Event('visibilitychange')) })
+  await pag.waitForTimeout(1500)
+  verificar(await leer(() => (localStorage.getItem('digestor:autoguardado') ?? '').length > 100000), 'autoguardado al ocultar la pestaña')
+  await pag.evaluate(() => { Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true }) })
   verificar(errores.length === 0, `sin errores de la página (${errores.join('; ')})`)
 
   // 7. Sala de control 3D (computador): render dentro del presupuesto, consola → DCS → sala.

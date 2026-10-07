@@ -10,7 +10,7 @@
 
 import { crearMotor } from './motor.js'
 import { configuracion } from './configuracion.js'
-import { MISIONES } from '../misiones/campana.js'
+import { MISIONES, MODOS } from '../misiones/campana.js'
 
 const motor = crearMotor(configuracion())
 const TIC_MS = 50 // ciclo del worker
@@ -62,6 +62,7 @@ self.onmessage = (ev) => {
             const d = MISIONES[id]
             return { id, capitulo: d.capitulo, titulo: d.titulo, resumen: d.resumen, ensena: d.ensena }
           }),
+          modos: Object.values(MODOS).map((d) => ({ id: d.id, titulo: d.titulo, resumen: d.resumen })),
           dificultades: cfg.campana.dificultades,
         })
         break

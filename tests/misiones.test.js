@@ -4,7 +4,7 @@
 import { describe, it, expect } from 'vitest'
 import { config } from './ayuda.js'
 import { prepararJuego } from '../src/escenarios/preparar.js'
-import { MISIONES } from '../src/misiones/campana.js'
+import { MISIONES, MODOS } from '../src/misiones/campana.js'
 import { revisar } from '../src/misiones/condiciones.js'
 
 const MIN = 60
@@ -25,7 +25,7 @@ function jugar(id, plan = {}, maxHoras = 9) {
 describe('definiciones de las misiones', () => {
   it('condiciones bien formadas, objetivos y pasos con identificador único, eventos existentes', () => {
     const eventos = new Set(config().eventos.eventos.map((e) => e.id))
-    for (const def of Object.values(MISIONES)) {
+    for (const def of [...Object.values(MISIONES), ...Object.values(MODOS)]) {
       const ids = def.objetivos.map((o) => o.id)
       expect(new Set(ids).size, def.id).toBe(ids.length)
       for (const o of def.objetivos) {
@@ -49,7 +49,7 @@ describe('definiciones de las misiones', () => {
         if (tipo === 'paso') expect(pasos.has(id), `${def.id}: paso desconocido ${id}`).toBe(true)
         else expect(ids.includes(id), `${def.id}: objetivo desconocido ${id}`).toBe(true)
       }
-      expect(config().campana.orden).toContain(def.id)
+      if (MISIONES[def.id]) expect(config().campana.orden).toContain(def.id)
     }
   })
 })
@@ -160,5 +160,13 @@ describe('búsqueda de misiones', () => {
     expect(buscarMision('tutorial')?.id).toBe('tutorial')
     expect(buscarMision('constructor')).toBe(null)
     expect(buscarMision('toString')).toBe(null)
+  })
+})
+
+describe('turno completo', () => {
+  it('sin perturbaciones, operar el caso base cumple la meta del turno de 8 horas', () => {
+    const r = jugar('turno_8', {}, 9)
+    expect(r.terminada).toBe(true)
+    expect(r.resultado.exito).toBe(true)
   })
 })

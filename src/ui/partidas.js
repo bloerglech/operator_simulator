@@ -20,6 +20,32 @@ export function leerLocal() {
   }
 }
 
+// Autoguardado: un espacio aparte, que se escribe solo (cada 5 minutos y al
+// salir de la pestaña) y no pisa la partida guardada a mano.
+const CLAVE_AUTO = 'digestor:autoguardado'
+
+export function guardarAuto(datos) {
+  try { localStorage.setItem(CLAVE_AUTO, JSON.stringify({ fecha: new Date().toISOString(), datos })) } catch { /* sin espacio: se omite */ }
+}
+
+export function leerAuto() {
+  try {
+    const x = localStorage.getItem(CLAVE_AUTO)
+    return x ? JSON.parse(x) : null
+  } catch {
+    return null
+  }
+}
+
+/** Activa el autoguardado de la partida en curso; devuelve la función para detenerlo. */
+export function autoguardar(cliente, cadaMs = 5 * 60 * 1000) {
+  const guardar = () => cliente.guardar().then(guardarAuto).catch(() => {})
+  const reloj = setInterval(guardar, cadaMs)
+  const alOcultar = () => { if (document.visibilityState === 'hidden') guardar() }
+  document.addEventListener('visibilitychange', alOcultar)
+  return () => { clearInterval(reloj); document.removeEventListener('visibilitychange', alOcultar) }
+}
+
 export function exportarArchivo(datos) {
   const blob = new Blob([JSON.stringify(datos)], { type: 'application/json' })
   const a = document.createElement('a')

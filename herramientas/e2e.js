@@ -129,6 +129,11 @@ try {
   await pag.getByRole('button', { name: 'Partir' }).click()
   await pag.waitForTimeout(1000)
   verificar(await leer(() => window.__app.estado().bombas.bomba_circ_sup.marcha), 'bomba de circulación superior partida desde el mímico')
+  // Sonidos sintetizados (Web Audio): todos se generan sin errores.
+  const nErrores = errores.length
+  await pag.evaluate(() => { for (const t of ['alarma1', 'alarma2', 'alarma3', 'telefono', 'radio', 'mural', 'alivio', 'seguridad', 'paraBomba', 'parteBomba', 'golpe', 'corte']) window.__sonidos.sonar(t) })
+  await pag.waitForTimeout(500)
+  verificar(errores.length === nErrores, 'sonidos sintetizados sin errores')
 
   // 6. Guardar en el navegador.
   await pag.getByRole('button', { name: 'Partida' }).click()

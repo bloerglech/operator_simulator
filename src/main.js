@@ -10,6 +10,7 @@ import { crearHUD } from './ui/hud.js'
 import { crearCapaMision } from './ui/mision.js'
 import { avisar } from './hmi/dom.js'
 import { aplicarAjustes } from './ui/ajustes.js'
+import { crearSonidos } from './ui/sonidos.js'
 
 /** Prepara la planta (caso base, misión u operación libre) con la pantalla de espera. */
 async function arrancar(cliente, op) {
@@ -42,6 +43,8 @@ async function iniciar() {
   // La dificultad (ruido, pistas, perfiles) se aplica a cada partida que parte.
   const aplicar = () => aplicarAjustes(app, dificultades).catch(() => {})
   aplicar()
+  const sonidos = crearSonidos(cliente)
+  window.__sonidos = sonidos
   cliente.alError((msg) => avisar(`Error del simulador: ${msg}. La simulación quedó en pausa.`, 12000))
   // Misiones: diálogos, objetivos, pistas e informe; acciones al terminar.
   const misiones = catalogo?.misiones ?? []
@@ -60,6 +63,7 @@ async function iniciar() {
         }
         capa.reiniciar(accion === 'reintentar')
         app.olvidarJugador()
+        sonidos.reiniciar()
         aplicar()
       } catch (e) {
         avisar(e.message, 8000)

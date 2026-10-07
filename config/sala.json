@@ -1153,6 +1153,11 @@
    "condicion": "evento_reciente:caida_columna",
    "duracion": 1.5,
    "amplitud": 0.02
+  },
+  {
+   "tipo": "luces_emergencia",
+   "condicion": "sin_energia",
+   "duracion": 3
   }
  ]
 }

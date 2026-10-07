@@ -69,3 +69,19 @@ describe('jugador', () => {
     expect(j.interaccionCercana(anclajes)).toBe(null)
   })
 })
+
+describe('efectos de la sala', () => {
+  it('sin energía las luces parpadean y quedan en iluminación de emergencia', async () => {
+    const { crearEfectos } = await import('../src/mundo3d/efectos.js')
+    const luz = { base: 2, luz: { intensity: 2 } }
+    const ef = crearEfectos([{ tipo: 'luces_emergencia', condicion: 'sin_energia', duracion: 3 }], { luces: [luz], balizas: {}, vapores: {} })
+    const estado = (energia) => ({ eventos: [], servicios: { energia }, control: { alarmas: { lista: [] } }, vasos: {} })
+    ef.actualizar(estado(1), 0)
+    expect(luz.luz.intensity).toBe(2)
+    ef.actualizar(estado(0), 10)
+    ef.actualizar(estado(0), 14)
+    expect(luz.luz.intensity).toBeCloseTo(0.3, 6)
+    ef.actualizar(estado(1), 20)
+    expect(luz.luz.intensity).toBe(2)
+  })
+})

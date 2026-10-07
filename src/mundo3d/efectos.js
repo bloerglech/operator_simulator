@@ -4,12 +4,17 @@
 //   alarma_prioridad_1          hay una alarma de prioridad 1 activa o sin reconocer
 //   alivio:<vaso>               la válvula de alivio (o seguridad) del vaso está abierta
 //   evento_reciente:<tipo>      ocurrió ese evento hace menos de `duracion` s reales
+//   sin_energia                 apagón (servicio de energía en 0)
+// Efecto luces_emergencia: con la condición, las luces parpadean `duracion` s
+// y luego quedan al 15 % (iluminación de emergencia).
 
 export function crearEfectos(definiciones, escena) {
   const eventosVistos = { n: null }
   const recientes = {} // tipo de evento → tiempo real en que se vio
+  let inicioEmergencia = null // tiempo real en que empezó la iluminación de emergencia
 
   function evaluar(cond, estado, ahora, duracion) {
+    if (cond === 'sin_energia') return (estado.servicios?.energia ?? 1) <= 0
     if (cond === 'alarma_prioridad_1') return estado.control.alarmas.lista.some((a) => a.prioridad === 1 && (a.activa || !a.reconocida))
     const [clase, arg] = cond.split(':')
     if (clase === 'alivio') {
@@ -34,6 +39,7 @@ export function crearEfectos(definiciones, escena) {
 
       let sacudida = 0
       let parpadeo = false
+      let emergencia = false
       for (const d of definiciones) {
         const activo = evaluar(d.condicion, estado, ahora, d.duracion)
         if (d.tipo === 'baliza') {
@@ -50,10 +56,17 @@ export function crearEfectos(definiciones, escena) {
           sacudida = Math.max(sacudida, d.amplitud ?? 0.02)
         } else if (d.tipo === 'parpadeo_luces' && activo) {
           parpadeo = true
+        } else if (d.tipo === 'luces_emergencia') {
+          if (!activo) inicioEmergencia = null
+          else {
+            inicioEmergencia ??= ahora
+            if (ahora - inicioEmergencia < (d.duracion ?? 3)) parpadeo = true
+            else emergencia = true
+          }
         }
       }
       for (const l of escena.luces) {
-        const f = parpadeo ? (Math.sin(ahora * 37) > 0.3 ? 0.25 : 1) : 1
+        const f = parpadeo ? (Math.sin(ahora * 37) > 0.3 ? 0.25 : 1) : emergencia ? 0.15 : 1
         l.luz.intensity = l.base * f
       }
       return { sacudida }

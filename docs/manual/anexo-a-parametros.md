@@ -9,7 +9,7 @@ Orígenes (ver capítulo 1.5): `literatura` (publicación citada), `especificaci
 
 | Origen | Cantidad de parámetros |
 |--------|------------------------|
-| supuesto | 345 |
+| supuesto | 347 |
 | especificacion | 19 |
 | literatura | 3 |
 | calibrado | 14 |
@@ -291,6 +291,8 @@ Orígenes (ver capítulo 1.5): `literatura` (publicación citada), `especificaci
 | `compactacion.k_arrastre` | 200000 | - | supuesto | Pa/m por m/s de velocidad superficial del licor (+ hacia abajo) |
 | `compactacion.tau` | 10 | min | supuesto | la columna se compacta o expande con esta constante de tiempo; también filtra el caudal de licor usado para el arrastre |
 | `colgamiento.hueco_maximo` | 600 | m3 | supuesto | al superarlo, la columna colgada cae (≈ 7,6 m en el fondo del digestor) |
+| `colgamiento.fraccion_liberacion` | 0.6 | - | supuesto | si las extracciones bajo la columna (corrientes_liberacion) bajan de esta fracción de su caudal al colgarse, la columna deja de estar apretada contra las mallas |
+| `colgamiento.tiempo_liberacion` | 300 | s | supuesto | tiempo con las extracciones bajas para que la columna se suelte sin caer de golpe |
 | `raspadores.imp.torque_vacio` | 15 | - | supuesto | kN·m |
 | `raspadores.imp.k_torque` | 4 | - | supuesto | kN·m por kPa |
 | `raspadores.imp.corriente_vacio` | 40 | - | supuesto | A |

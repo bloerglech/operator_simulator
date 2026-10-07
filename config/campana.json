@@ -4,7 +4,11 @@
   "tutorial",
   "turno_noche",
   "mas_toneladas",
-  "licor_debil"
+  "licor_debil",
+  "mallas",
+  "presurizacion",
+  "columna_colgada",
+  "parada_corta"
  ],
  "especificacion": {
   "kappa": [
@@ -39,7 +43,6 @@
  },
  "medallas": {
   "oro": 0.9,
-  "plata": 0.7,
-  "bronce": 0.5
+  "plata": 0.7
  }
 }

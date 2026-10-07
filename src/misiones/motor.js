@@ -5,7 +5,7 @@
 //     inicio: { horasPrevias, preparacion: { comandos, horas } },   (lo usa el puente)
 //     guion: [{ id, cuando, acciones }],                              eventos guionados
 //     objetivos: [{ id, texto, tipo: 'principal'|'secundario', condicion,
-//                   desde?, durante?, plazo?, final?, pistas?: [{ tras, quien, canal, texto, resaltar }] }],
+//                   desde?, evitable?, anticipable?, durante?, plazo?, final?, pistas?: [{ tras, quien, canal, texto, resaltar }] }],
 //     fallas: [{ condicion, mensaje }], fin: condicion,
 //     evaluacion: [{ texto, condicion, puntos }], respuestaIdeal }
 // Acciones del guion: { mensaje: { quien, canal, texto } } · { evento: id, parametros } ·
@@ -49,7 +49,10 @@ function contexto(def, se, ctx) {
     },
     indicador: (n) => (res ??= resumen(m.ind, ctx.modelo.config.campana.economia))[n],
     jugador: se.jugador,
-    comandos: () => estado.registro.filter((r) => r.paso >= m.paso0),
+    // Comandos desde que empezó la misión, o desde que se mostró el objetivo que se evalúa (desde, en s de misión).
+    desde: 0,
+    comandos() { const p0 = m.paso0 + Math.round(this.desde / ctx.modelo.dtR); return estado.registro.filter((r) => r.paso >= p0) },
+    mallas: () => estado.mallas,
     laboratorio: () => (estado.control?.laboratorio.resultados ?? []).filter((r) => r.t >= m.t0),
     sinReconocer: () => Object.values(estado.control?.alarmas.a ?? {}).filter((a) => !a.reconocida).length,
     objetivos: m.objetivos,
@@ -86,7 +89,9 @@ export function pasoMision(def, se, ctx, dt, { emitir, evento }) {
       else continue
     }
     if (o.final) continue // se evalúa al terminar
+    cx.desde = o.anticipable ? 0 : so.tVisible ?? 0 // un comando enviado antes de mostrar el objetivo no lo cumple (salvo anticipable)
     const ok = evaluar(o.condicion, cx)
+    cx.desde = 0
     if (o.durante) {
       if (!ok) so.tDesde = null
       else if (so.tDesde === null) so.tDesde = cx.t
@@ -97,7 +102,8 @@ export function pasoMision(def, se, ctx, dt, { emitir, evento }) {
       emitir({ tipo: 'objetivo', texto: `Objetivo cumplido: ${o.texto}`, objetivo: o.id, puntoControl: o.tipo === 'principal' })
       continue
     }
-    if (o.plazo && cx.t - so.tVisible > o.plazo) {
+    // El plazo es para empezar a cumplirlo: si ya se cumple y corre «durante», se le deja terminar.
+    if (o.plazo && so.tDesde === null && cx.t - so.tVisible > o.plazo) {
       so.estado = 'fallido'
       emitir({ tipo: 'objetivo', texto: `Objetivo no cumplido a tiempo: ${o.texto}`, objetivo: o.id })
       if (o.tipo === 'principal') return fallar(def, se, ctx, `No se cumplió a tiempo: ${o.texto}`, emitir)
@@ -150,8 +156,11 @@ function terminar(def, se, ctx, cx, emitir) {
   // Objetivos que se evalúan al final.
   for (const o of def.objetivos) {
     const so = m.objetivos[o.id]
-    if (o.final && so.estado === 'pendiente') so.estado = evaluar(o.condicion, cx) ? 'cumplido' : 'fallido'
-    else if (so.estado === 'pendiente') so.estado = 'fallido'
+    if (so.estado !== 'pendiente') continue
+    // Evitable: si su «desde» nunca se dio, el jugador se anticipó al problema.
+    if (o.evitable && !so.visible) so.estado = 'cumplido'
+    else if (o.final) so.estado = evaluar(o.condicion, cx) ? 'cumplido' : 'fallido'
+    else so.estado = 'fallido'
   }
   const principales = def.objetivos.filter((o) => o.tipo === 'principal')
   const exito = principales.every((o) => m.objetivos[o.id].estado === 'cumplido')
@@ -161,7 +170,7 @@ function terminar(def, se, ctx, cx, emitir) {
   const puntos = criterios.reduce((s, c) => s + (c.cumple ? c.puntos : 0), 0)
   const f = maximo > 0 ? puntos / maximo : 1
   const umbral = ctx.modelo.config.campana.medallas
-  const medalla = !exito ? null : f >= umbral.oro ? 'oro' : f >= umbral.plata ? 'plata' : f >= umbral.bronce ? 'bronce' : 'bronce'
+  const medalla = !exito ? null : f >= umbral.oro ? 'oro' : f >= umbral.plata ? 'plata' : 'bronce' // bronce: todos los objetivos principales
   const incidentes = {}
   for (const tipo of ['apertura_alivio', 'apertura_seguridad', 'enclavamiento', 'vaporizacion_subita', 'caida_columna']) incidentes[tipo] = cx.incidente(tipo)
   m.terminada = true

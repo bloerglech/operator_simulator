@@ -122,9 +122,17 @@ En dificultad 3 no hay aviso previo por radio o teléfono.
 
 - **Causa:** Problema en la planta de evaporadores.
 - **Síntomas:** Los ciclones flash se llenan (LI-510/511 altos), la extracción principal queda limitada y la presión del digestor sube en segundos.
-- **Respuesta correcta:** Bajar la extracción y el ritmo antes de que suba la presión; vigilar PI-301 y la válvula de alivio.
+- **Respuesta correcta:** Bajar el filtrado de lavado al fondo (FIC-601, fuera de cascada) en lo que falta en evaporadores: la extracción final lo sigue (FFC-503) y el balance del digestor se mantiene. Vigilar PI-301, LI-510/511 y la válvula de alivio; devolver FIC-601 a cascada cuando se normalice.
 - **Mecanismo en el simulador:** servicio limiteEvaporadores hasta 800 m3/h en 5 min. Duración: 2 h, luego vuelve a la normalidad.
 - Dificultad mínima 2, peso 1 en el generador.
+
+### Evaporadores restringen fuerte la recepción de licor (`evaporadores_restringidos`)
+
+- **Causa:** Falla en un efecto de los evaporadores: reciben un tercio menos de licor negro débil.
+- **Síntomas:** FI-512 cae a 600 m³/h, los ciclones flash se llenan en minutos, la válvula de PIC-301 abre hasta el 100 % y la presión del digestor sube hasta la válvula de alivio (7,5 bar).
+- **Respuesta correcta:** En los primeros minutos: FIC-601 a automático (fuera de cascada) y bajar su consigna unos 300 m³/h; FFC-503 baja la extracción final en lo mismo. Bajar el ritmo no alcanza: su efecto es lento. Volver FIC-601 a cascada al normalizarse.
+- **Mecanismo en el simulador:** servicio limiteEvaporadores hasta 600 m3/h en 1 min. Duración: 1 h, luego vuelve a la normalidad.
+- Dificultad mínima 3, peso 1 en el generador.
 
 ## Equipos
 
@@ -189,8 +197,8 @@ En dificultad 3 no hay aviso previo por radio o teléfono.
 ### Columna colgada en el digestor (`colgamiento`)
 
 - **Causa:** La columna de astillas se apoya en la pared y deja de bajar.
-- **Síntomas:** Baja la corriente del raspador, el nivel de astillas medido no baja aunque se sople, la consistencia de soplado cae y luego la columna cae de golpe.
-- **Respuesta correcta:** Bajar el soplado, aumentar la dilución del fondo y la circulación para mover la columna; no forzar el raspador.
+- **Síntomas:** El nivel de astillas (LI-302) sube aunque LIC-302 sople al máximo, la consistencia de soplado (CI-605) cae, la presión del digestor baja (se saca licor del hueco) y, si el hueco llega a 600 m³, la columna cae de golpe.
+- **Respuesta correcta:** Bajar la alimentación, pasar LIC-302 a manual con menos soplado y bajar las extracciones bajo la columna (FIC-601 fuera de cascada; la extracción final lo sigue): con ellas bajo el 60 % durante 5 min la columna se suelta. Volver de a poco, con el soplado en proporción a la madera.
 - **Mecanismo en el simulador:** `{"tipo":"perturbar","id":"colgamiento","vaso":"dig","valor":30}`. Duración: hasta que el operador lo resuelva.
 - Dificultad mínima 3, peso 1 en el generador.
 
@@ -217,8 +225,16 @@ En dificultad 3 no hay aviso previo por radio o teléfono.
 - **Causa:** El lavado se detiene por una falla.
 - **Síntomas:** El estanque de soplado se llena rápidamente: alarma LI-606 alta y luego el enclavamiento I-08 corta el soplado.
 - **Respuesta correcta:** Bajar el soplado y la alimentación de inmediato (parada corta) y mantener el digestor caliente.
-- **Mecanismo en el simulador:** `{"tipo":"servicio","id":"lavado","valor":0}`. Duración: 1 h, luego vuelve a la normalidad.
+- **Mecanismo en el simulador:** servicio lavado hasta 0 en 0 min. Duración: 1 h, luego vuelve a la normalidad.
 - Dificultad mínima 2, peso 1 en el generador.
+
+### Parada larga del lavado (`parada_lavado_larga`)
+
+- **Causa:** Falla mayor en el lavado (rotura de un filtro o de su accionamiento): no recibe pulpa durante unas 2,5 horas.
+- **Síntomas:** El estanque de soplado se llena (LI-606 sube ≈ 0,6 % por minuto); a 95 % el enclavamiento I-08 corta el soplado, el nivel de astillas del digestor sube y I-02 corta la alimentación.
+- **Respuesta correcta:** Parada corta en caliente: cortar la alimentación y el soplado antes de los enclavamientos, bajar las temperaturas de cocción unos 10 °C para no sobrecocer las astillas detenidas y mantener las circulaciones. Al volver el lavado, partir el soplado y la madera en escalones y subir las temperaturas.
+- **Mecanismo en el simulador:** servicio lavado hasta 0 en 0 min. Duración: 2,5 h, luego vuelve a la normalidad.
+- Dificultad mínima 3, peso 1 en el generador.
 
 ## Instrumentos
 

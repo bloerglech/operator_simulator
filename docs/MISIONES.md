@@ -1,7 +1,7 @@
 # Misiones
 
 Generado por `npm run documentar` desde `src/misiones/campana.js` (no editar a mano).
-Orden de la campaña: `tutorial` → `turno_noche` → `mas_toneladas` → `licor_debil`.
+Orden de la campaña: `tutorial` → `turno_noche` → `mas_toneladas` → `licor_debil` → `mallas` → `presurizacion` → `columna_colgada` → `parada_corta`.
 Cada misión superada desbloquea la siguiente. Medallas según la fracción de
 puntos: oro ≥ 90 %, plata ≥ 70 %, bronce con todos los objetivos principales.
 La prueba `tests/misiones.test.js` juega cada misión con la respuesta
@@ -119,3 +119,116 @@ esperada (debe aprobar) y sin hacer nada (debe fallar).
 **Criterios de evaluación:** Desviación estándar del kappa menor que 0,8 (2 pt) · Rechazos bajo 0,5 % en promedio (1 pt) · Sin aperturas de la válvula de alivio (1 pt) · Sin enclavamientos disparados (1 pt); cada objetivo secundario suma 1 pt.
 
 **Respuesta ideal:** Un licor más débil no cambia ningún caudal: lo delata el álcali residual de las extracciones (AI-504, AI-505) que baja sin otra causa. Pedir el EA del licor blanco al laboratorio: FFC-110 usa ese valor y sube el caudal para mantener la carga. Cuando caustificación avisa que faltará licor, calcular cuánta madera alcanza a cocerse con el licor disponible (carga = caudal × EA / madera) y bajar el ritmo antes de que empiece la falta, para no entregar pulpa cruda; volver al ritmo cuando se normalice.
+
+## Capítulo 4. Mallas
+
+**Qué enseña:** Las mallas se tapan de a poco: la ΔP (PDI-52x) avisa horas antes. Conmutación, retrolavado y la causa (finos) se atienden antes de que la bomba se proteja.
+
+**Situación inicial:** caso base tras 8 h de operación. Astillas con muchos finos y la conmutación de mallas detenida tras una mantención. Que no se tapen.
+
+**Guion:**
+
+- a los 0 min: `{"tipo":"mallas","id":"mallas_circ_sup","accion":"conmutacion_off"}` · `{"tipo":"mallas","id":"mallas_circ_inf","accion":"conmutacion_off"}` · `{"tipo":"perturbar","id":"finos","valor":4.5}` · Carmen Soto, jefa de turno (telefono): «Buen día. Instrumentación estuvo trabajando en el PLC de las mallas durante la noche; quedaron de avisar cuando terminen. El patio está recuperando astillas del acopio viejo.»
+- a los 45 min: Luis Paredes, terreno (radio): «Sala, pasé por la correa: las astillas vienen con harto aserrín y astilla rota. Ojo con las mallas.»
+- (`{"tag":"PDI-524","op":">=","valor":0.8}` o `{"tag":"PDI-526","op":">=","valor":0.8}`): Luis Paredes, terreno (radio): «Sala, en terreno se escucha raro la bomba de circulación. ¿Cómo ves la presión diferencial de las mallas?»
+- a los 5 h: Carmen Soto, jefa de turno (telefono): «Fin del turno. Veamos cómo quedaron las mallas.» · fin de la misión
+
+**Objetivos:**
+
+- (principal) Dejar la conmutación activa en las mallas de circulación superior e inferior
+- (principal) Retrolavar las mallas de circulación cuando su ΔP suba
+- (secundario) Pedir el contenido de finos de las astillas al laboratorio
+- (principal, al final) Terminar el turno con la ΔP de ambas mallas de circulación bajo 0,7 bar
+- (principal, al final) Terminar el turno con kappa entre 16 y 18
+
+**Condiciones de falla:** La ΔP de las mallas llegó al límite: la bomba de circulación se detuvo y se cortó el vapor de cocción. · El kappa pasó de 22: la pulpa no sirve para el blanqueo. · Abrió la válvula de seguridad del digestor.
+
+**Criterios de evaluación:** Conmutación activa antes de que la ΔP llegara a la alarma (2 pt) · Conmutación activa al entregar el turno (1 pt) · Desviación estándar del kappa menor que 0,6 (1 pt) · Sin aperturas de la válvula de alivio (1 pt) · Sin enclavamientos disparados (1 pt); cada objetivo secundario suma 1 pt.
+
+**Respuesta ideal:** Al recibir la planta, revisar el estado de los equipos que tocó mantención: la conmutación de mallas detenida hace que siempre extraigan las mismas ranuras y se tapen. Activarla apenas se nota. Cuando el patio avisa finos, pedir el análisis y vigilar la ΔP de todas las mallas (PDI-524 a PDI-527): sube de a poco durante horas. Retrolavar antes de 0,8 bar; si aun así sube, bajar el caudal de circulación o el ritmo. La bomba se protege a 0,95 bar y corta el vapor de cocción: eso cuesta horas de pulpa cruda.
+
+## Capítulo 5. Primera presurización
+
+**Qué enseña:** El digestor está lleno de líquido: lo que entra tiene que salir. Si una salida se cierra, la presión sube rápido; la respuesta es bajar en la misma cantidad lo que entra, no esperar al control.
+
+**Situación inicial:** caso base tras 8 h de operación. Evaporadores restringe de golpe la recepción de licor. La presión del digestor sube en minutos.
+
+**Guion:**
+
+- a los 0 min: Carmen Soto, jefa de turno (telefono): «Hola. Planta normal, ritmo completo. Evaporadores anda con un efecto sucio; si llaman, atiéndelos rápido.»
+- a los 10 min: Rodrigo Vera, evaporadores (telefono): «¡Sala! Rodrigo, de evaporadores. Se nos tapó el efecto 3: desde ya solo puedo recibir unos 600 metros cúbicos por hora de licor débil. Te aviso cuando se arregle.» · evento `evaporadores_restringidos`
+- (`{"tag":"LI-511","op":">=","valor":90}` o `{"tag":"LI-510","op":">=","valor":90}`): Luis Paredes, terreno (radio): «Sala, los ciclones flash están llenos, y la extracción se escucha estrangulada. ¿Qué hacemos?»
+- `{"tag":"PI-301","op":">","valor":6.5}`: Luis Paredes, terreno (radio): «¡Sala, la presión del digestor está subiendo fuerte! Pasó de 6,5.»
+- a los 1,25 h: Rodrigo Vera, evaporadores (telefono): «Sala, ya lavamos el efecto 3. Puedes mandar todo el licor de nuevo. Gracias por la paciencia.»
+- a los 2,5 h: Carmen Soto, jefa de turno (telefono): «Buen trabajo. Revisemos cómo quedó la presión.» · fin de la misión
+
+**Objetivos:**
+
+- (principal) Bajar el filtrado de lavado al fondo (FIC-601) a 950 m³/h o menos mientras dure la restricción
+- (secundario) Devolver FIC-601 a cascada cuando evaporadores se normalice
+- (principal, al final) Terminar con la presión del digestor entre 5 y 6 bar
+- (principal, al final) Terminar con kappa entre 16 y 18
+
+**Condiciones de falla:** Abrió la válvula de alivio: el digestor descargó licor caliente al estanque de alivio. · Abrió la válvula de seguridad del digestor. · La presión del digestor llegó al enclavamiento: se cortó la alimentación.
+
+**Criterios de evaluación:** Presión del digestor siempre bajo 6,5 bar (2 pt) · Sin enclavamientos disparados (1 pt) · Desviación estándar del kappa menor que 0,6 (1 pt); cada objetivo secundario suma 1 pt.
+
+**Respuesta ideal:** El digestor trabaja lleno de líquido: casi no hay volumen que absorba un desbalance, por eso la presión sube en minutos. Cuando evaporadores restringe, los ciclones flash se llenan y la extracción queda estrangulada; PIC-301 abre su válvula al 100 % y ya no puede hacer nada. La respuesta es reducir en la misma cantidad lo que entra: sacar FIC-601 de cascada y bajar su consigna en lo que falta en evaporadores (≈ 300 m³/h); la extracción final la sigue por FFC-503. Bajar el ritmo también ayuda, pero es lento. Al normalizarse, devolver FIC-601 a cascada.
+
+## Capítulo 6. Columna colgada
+
+**Qué enseña:** Los síntomas de un colgamiento (nivel que no baja aunque se sople, soplado aguado, presión que cae) y cómo soltar la columna: menos alimentación, menos soplado y menos extracción bajo la zona colgada; después, volver de a poco.
+
+**Situación inicial:** caso base tras 8 h de operación. La columna de astillas deja de bajar en el digestor. Reconocerlo y soltarla antes de que caiga sola.
+
+**Guion:**
+
+- a los 0 min: Carmen Soto, jefa de turno (telefono): «Hola. Anoche hubo varias paradas cortas y la astilla viene compactada. Vigila el fondo del digestor.»
+- a los 5 min: evento `colgamiento`
+- a los 9 min: Luis Paredes, terreno (radio): «Sala, estoy en el soplado: la lechada sale aguada, casi pura agua. Y el raspador del digestor anda liviano. Algo raro hay en el fondo.»
+- `{"incidente":"liberacion_columna"}`: Luis Paredes, terreno (radio): «¡Sala, se sintió un golpe en el digestor y el raspador volvió a tomar carga! La columna bajó.» · Carmen Soto, jefa de turno (telefono): «Bien. Ahora vuelve a la normalidad de a poco: primero el lavado y el soplado, después la madera.»
+- a los 5 h: Carmen Soto, jefa de turno (telefono): «Terminó el turno. Revisemos cómo quedó.» · fin de la misión
+
+**Objetivos:**
+
+- (principal) Bajar la alimentación de astillas (WIC-101) a 120 t/h o menos para que el nivel no llegue al enclavamiento
+- (principal) Soltar la columna antes de que caiga sola
+- (principal, al final) Terminar el turno con la alimentación de vuelta a 200 t/h o más
+- (principal, al final) Terminar el turno con la presión del digestor entre 5 y 6 bar
+- (secundario) Devolver FIC-601 y LIC-302 a su modo normal
+
+**Condiciones de falla:** La columna cayó de golpe sobre el hueco: golpe de ariete en el digestor y astillas crudas al soplado. · El nivel de astillas del digestor llegó al enclavamiento: se cortó la alimentación. · Abrió la válvula de seguridad del digestor.
+
+**Criterios de evaluación:** Sin aperturas de la válvula de alivio (2 pt) · Kappa final entre 15 y 19 (1 pt) · Producción del turno de al menos 400 ADt (1 pt) · Sin enclavamientos disparados (1 pt); cada objetivo secundario suma 1 pt.
+
+**Respuesta ideal:** Un colgamiento se reconoce por síntomas que no calzan entre sí: el nivel de astillas (LI-302) no baja aunque LIC-302 sople al máximo, la consistencia del soplado (CI-605) cae, el raspador anda liviano y la presión baja porque se está sacando licor del hueco. Soplar más solo agranda el hueco: si llega al límite, la columna cae de golpe. La respuesta: bajar la alimentación (para que el nivel no llegue al enclavamiento), pasar LIC-302 a manual con menos soplado y reducir la extracción bajo la columna bajando el filtrado de lavado (FIC-601 fuera de cascada; la extracción final lo sigue). Con la columna suelta, volver de a poco: dejar el soplado manual en proporción a la madera (la mitad de madera, la mitad de soplado) y subir en escalones la madera, el filtrado de lavado y el soplado juntos, vigilando la presión; recién con el ritmo completo, LIC-302 a AUTO con la consigna en el nivel actual y FIC-601 a CAS (a bajo ritmo FDC-607 cortaría el lavado). Las astillas que quedaron colgadas se cocieron de más: el kappa bajará unas horas.
+
+## Capítulo 7. Parada corta
+
+**Qué enseña:** Una parada corta ordenada: cortar madera y soplado antes de que lo hagan los enclavamientos, mantener lleno el impregnador y caliente (no tanto) el digestor, y partir en escalones con el lavado primero.
+
+**Situación inicial:** caso base tras 8 h de operación. El lavado se detiene por dos horas y media. Parar el digestor en caliente, sin enclavamientos, y volver a partir.
+
+**Guion:**
+
+- a los 0 min: Carmen Soto, jefa de turno (telefono): «Hola. Turno normal por ahora. El lavado tuvo problemas con un filtro en la noche.»
+- a los 10 min: Marta Díaz, lavado (telefono): «Sala, habla Marta, de lavado. Se cortó la tela del filtro 2: vamos a estar detenidos unas dos horas y media. No podemos recibir pulpa, lo siento.» · evento `parada_lavado_larga`
+- `{"tag":"LI-606","op":">=","valor":70}`: Luis Paredes, terreno (radio): «Sala, el estanque de soplado va en 70 % y subiendo. A 95 se corta el soplado solo.»
+- a los 2,667 h: Marta Díaz, lavado (telefono): «Sala, ya cambiamos la tela. Pueden mandar pulpa de nuevo, de a poco por favor.» · Carmen Soto, jefa de turno (telefono): «Parte de a poco: primero el lavado al fondo y el soplado, después la madera en escalones. Quiero el ritmo completo antes de una hora y media.»
+- a los 7 h: Carmen Soto, jefa de turno (telefono): «Terminó el turno. Revisemos la parada.» · fin de la misión
+
+**Objetivos:**
+
+- (principal) Cortar la alimentación de astillas (WIC-101)
+- (principal) Detener el soplado (LIC-302 en manual con salida 0)
+- (secundario) Mantener lleno el impregnador (FIC-115 en automático con caudal)
+- (secundario) Bajar unos 10 °C las temperaturas de cocción mientras dure la parada
+- (principal, al final) Terminar el turno con la alimentación de vuelta a 200 t/h o más
+- (principal, al final) Terminar el turno con la presión del digestor entre 5 y 6 bar
+- (secundario) Dejar LIC-302, FIC-115 y FIC-601 en su modo normal
+
+**Condiciones de falla:** El estanque de soplado se llenó: el enclavamiento cortó el soplado con el digestor alimentando. · El nivel de astillas del digestor llegó al enclavamiento: se cortó la alimentación. · La temperatura de soplado llegó al enclavamiento: el fondo estaba caliente al partir el soplado (faltó el filtrado de lavado frío). · La presión del digestor llegó al enclavamiento. · Abrió la válvula de seguridad del digestor.
+
+**Criterios de evaluación:** Sin aperturas de la válvula de alivio (2 pt) · Menos de 4 horas de pulpa fuera de especificación (1 pt) · Sin enclavamientos disparados (1 pt); cada objetivo secundario suma 1 pt.
+
+**Respuesta ideal:** Al saber que el lavado no recibirá pulpa, parar antes que los enclavamientos: WIC-101 a 0 y LIC-302 en manual con salida 0 (el estanque deja de subir). Durante la parada: FIC-115 fuera de cascada para que el impregnador siga lleno (si no, la transferencia lo vacía y al partir falta presión), las temperaturas de cocción unos 10 °C abajo y las circulaciones andando; FDC-607 queda retenido sin soplado. Para partir: primero el filtrado de lavado al fondo (FIC-601 en AUTO, unos 400 m³/h) para enfriar el fondo; después madera y soplado juntos en escalones de unas 25 t/h cada 10 minutos, con las temperaturas de vuelta a su valor. Con el ritmo completo, LIC-302 a AUTO con la consigna en el nivel actual y FIC-115 y FIC-601 a CAS. La pulpa que estuvo detenida sale sobrecocida (kappa bajo) unas horas: es el costo de la parada.

@@ -5,7 +5,9 @@
 //   { kpi, op, valor }                    valor verdadero: kappa, rechazos, viscosidad, rendimiento, produccion
 //   { indicador, op, valor }              indicador acumulado de la misión (ver indicadores.js → resumen)
 //   { jugador, valor? }                   acción del jugador informada por la interfaz (pantalla, caratula, tendencia, radio, cerca, velocidad…)
-//   { comando: { tipo, accion?, id?, … } } el operador envió un comando que coincide
+//   { comando: { tipo, accion?, id?, … } } el operador envió un comando que coincide (en un objetivo:
+//                                         después de que se mostró)
+//   { malla: id, conmutacion: bool }       estado de la conmutación de un juego de mallas
 //   { laboratorio: análisis }             llegó un resultado de laboratorio de ese análisis
 //   { alarmasSinReconocer: n }            a lo más n alarmas sin reconocer
 //   { objetivo: id } · { paso: id }       objetivo cumplido · paso del guion ejecutado
@@ -48,6 +50,7 @@ export function evaluar(c, cx) {
   if (c.jugador) return cx.jugador.includes(c.valor !== undefined ? `${c.jugador}:${c.valor}` : c.jugador) ||
     (c.valor === undefined && cx.jugador.some((x) => x.startsWith(`${c.jugador}:`)))
   if (c.comando) return cx.comandos().some((r) => coincide(r, c.comando))
+  if (c.malla) return cx.mallas()[c.malla]?.conmutacion === c.conmutacion
   if (c.laboratorio) return cx.laboratorio().some((r) => r.analisis === c.laboratorio)
   if (c.alarmasSinReconocer !== undefined) return cx.sinReconocer() <= c.alarmasSinReconocer
   if (c.objetivo) return cx.objetivos[c.objetivo]?.estado === 'cumplido'
@@ -62,7 +65,8 @@ export function revisar(c, ruta) {
   if (!c || typeof c !== 'object') throw new Error(`${ruta}: condición inválida`)
   for (const k of ['y', 'o']) if (c[k]) return c[k].forEach((x, i) => revisar(x, `${ruta}.${k}[${i}]`))
   if (c.no) return revisar(c.no, `${ruta}.no`)
-  const claves = ['tiempo', 'tag', 'lazo', 'kpi', 'indicador', 'jugador', 'comando', 'laboratorio', 'alarmasSinReconocer', 'objetivo', 'paso', 'enclavamiento', 'incidente']
+  const claves = ['tiempo', 'tag', 'lazo', 'kpi', 'indicador', 'jugador', 'comando', 'malla', 'laboratorio', 'alarmasSinReconocer', 'objetivo', 'paso', 'enclavamiento', 'incidente']
   if (!claves.some((k) => c[k] !== undefined)) throw new Error(`${ruta}: condición sin tipo conocido`)
+  if (c.malla && typeof c.conmutacion !== 'boolean') throw new Error(`${ruta}: falta conmutacion (true o false)`)
   if ((c.tag || c.kpi || c.indicador || (c.lazo && !c.modo)) && !c.entre && !c.op) throw new Error(`${ruta}: falta op o entre`)
 }

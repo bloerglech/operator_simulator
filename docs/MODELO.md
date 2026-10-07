@@ -882,6 +882,7 @@ mínimas).
 | S-43 | Canalización: el licor que pasa por caminos preferentes no intercambia con las astillas; se representa reduciendo el intercambio libre ↔ retenido del vaso. |
 | S-44 | Indicadores del turno con valores verdaderos del proceso; la pulpa fuera de especificación se valoriza con 40 % de descuento; precios en `config/campana.json` (supuestos). |
 | S-45 | Consignas de LIC-202 (22,1 m) y PIC-201 (6,1 bar) iguales al estado estacionario sin control, para que el control no desplace el punto calibrado; las circulaciones de cocción no se escalan con el ritmo. |
+| S-46 | Colgamiento: la columna se suelta sin caer de golpe si las extracciones bajo ella (principal y final) se mantienen bajo el 60 % de su caudal al colgarse durante 5 min (supuesto que representa aflojar la compactación contra las mallas); si el hueco supera 600 m³ cae de golpe. |
 | S-23 | Una tubería entre vasos entrega en cada paso el volumen que se le ingresó en el paso anterior (desfase de un paso lento, 5 s), lo que evita lazos algebraicos. |
 
 ## 16. Limitaciones conocidas
@@ -899,7 +900,7 @@ mínimas).
 | L-09 | Dispersión numérica de primer orden en el licor libre (no en las astillas). |
 | L-11 | No se modela el nivel de licor del tubo de astillas: el lazo "nivel del tubo de astillas" de la especificación queda pendiente (el tubo solo acumula astillas, WI-104). |
 | L-12 | Los enclavamientos y alarmas son un conjunto mínimo representativo, no una lista de una planta real. |
-| L-13 | El kappa es muy sensible al factor H (≈ −0,045 kappa por unidad de H cerca del caso base, unas dos veces lo habitual en eucalipto, por verificar con datos de planta): los cambios de ritmo o de temperatura mueven el kappa más que en la práctica. Consecuencia del calibrado a un solo punto (L-03, L-04). |
+| L-13 | El kappa es muy sensible al factor H (≈ −0,045 kappa por unidad de H cerca del caso base, unas dos veces lo habitual en eucalipto, por verificar con datos de planta): los cambios de ritmo o de temperatura mueven el kappa más que en la práctica. Consecuencia del calibrado a un solo punto (L-03, L-04). Por lo mismo, en una parada de 2,5 h las astillas detenidas en la zona de cocción salen con kappa 8–12 aunque se bajen 10–20 °C las temperaturas (en la práctica la caída es menor). |
 | L-14 | El control de factor H predice el H con las temperaturas de zona, que responden en 1–2 h: su ganancia es baja a propósito para no oscilar. |
 | L-10 | Resolución de la columna: una parcela ≈ 1/3 de celda (≈ 1,5 min de residencia en el impregnador, ≈ 2,5 min en el digestor). |
 

@@ -139,6 +139,7 @@ export function abrirCaratula(app, tag) {
     const avisos = []
     if (l.forzado) avisos.push(`Forzado por el enclavamiento ${l.forzado}: rearme el enclavamiento para recuperar el lazo.`)
     if (l.siguiendo) avisos.push('El esclavo no está en cascada: este lazo sigue su consigna sin controlar.')
+    if (l.retenido) avisos.push('Retenido: no se cumple su condición de habilitación (sin soplado); la salida queda fija.')
     reemplazar(aviso, avisos.map((a) => h('div', { class: 'aviso' }, a)))
     if (estado.t - ultimaTendencia > 5) {
       ultimaTendencia = estado.t

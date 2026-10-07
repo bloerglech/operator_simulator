@@ -58,6 +58,7 @@ export function construirLazos(config, inst) {
       if (!lazos[m] && !config.lazos.bloques.some((b) => b.tag === m)) throw new Error(`Lazo ${l.tag}: maestro desconocido "${m}"`)
     }
     if (l.salida.tipo === 'lazo' && !lazos[l.salida.id]) throw new Error(`Lazo ${l.tag}: esclavo desconocido "${l.salida.id}"`)
+    if (l.habilitacion && !inst.transmisores[l.habilitacion.tag]) throw new Error(`Lazo ${l.tag}: transmisor de habilitación desconocido "${l.habilitacion.tag}"`)
   }
   const bloques = {}
   const TIPOS_BLOQUE = ['carga_alcali', 'licor_madera', 'seguimiento', 'ritmo', 'factor_h', 'kappa']
@@ -194,6 +195,20 @@ export function pasoLazos(lz, inst, ctx, ce, dt, forzados) {
       }
       s.siguiendo = false
     }
+    // Habilitación: si la condición no se cumple (p. ej. sin soplado no hay
+    // factor de dilución que medir), el lazo retiene su salida sin integrar.
+    if (l.habilitacion && s.modo !== 'MAN' && !habilitado(l.habilitacion, lectura(inst, ce, l.habilitacion.tag))) {
+      if (!s.retenido) ctx.evento('lazo_retenido', { lazo: l.tag })
+      s.retenido = true
+      s.integral = s.salida
+      s.inicializar = true
+      s.pvAnt = null
+      const y = l.act ? moverActuador(l.act, s.act, s.salida, dt) : s.salida
+      escribirActuador(l, y, ctx, lz, ce)
+      s.escrito = y
+      continue
+    }
+    s.retenido = false
     const cfg = l.cfg
     cfg.Kc = s.Kc
     cfg.Ti = s.Ti
@@ -213,6 +228,10 @@ export function pasoLazos(lz, inst, ctx, ce, dt, forzados) {
     escribirActuador(l, y, ctx, lz, ce)
     s.escrito = y
   }
+}
+
+function habilitado(c, v) {
+  return c.op === '>' ? v > c.valor : v < c.valor
 }
 
 /** Interpreta la salida de un bloque como consigna de un lazo en cascada. */

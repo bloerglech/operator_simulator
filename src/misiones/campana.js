@@ -168,7 +168,7 @@ const masToneladas = {
         pista(60 * MIN, 'RC-700 sube la madera en rampa y escala los caudales marcados. La rampa normal es de 150 ADt/d por hora.', null, 'ayuda')] },
     { id: 'kappa_final', tipo: 'principal', final: true, texto: 'Terminar el turno con kappa entre 16 y 18', condicion: { kpi: 'kappa', entre: [16, 18] } },
     { id: 'en_banda', tipo: 'principal', final: true, texto: 'No más de 3 horas de pulpa fuera de especificación', condicion: { indicador: 'tiempoFueraEspec', op: '<=', valor: 3 * H } },
-    { id: 'factor_h', tipo: 'secundario', texto: 'Compensar el menor tiempo de cocción (control de factor H o temperaturas)', desde: { tag: 'QI-702', op: '>=', valor: 2700 },
+    { id: 'factor_h', tipo: 'secundario', texto: 'Compensar el menor tiempo de cocción (control de factor H o temperaturas)', desde: { tag: 'QI-702', op: '>=', valor: 2700 }, anticipable: true,
       condicion: { o: [{ comando: { tipo: 'bloque', id: 'HIC-703', accion: 'activar' } }, { lazo: 'TIC-404', campo: 'sp', op: '>=', valor: 156 }] },
       pistas: [pista(30 * MIN, 'A más ritmo las astillas pasan menos tiempo en la zona de cocción: baja el factor H. Mira HI-703.', 'HI-703'),
         pista(60 * MIN, 'Puedes activar HIC-703 (control de factor H) en la pantalla de calidad, o subir 1 a 2 °C las consignas de TIC-402 y TIC-404.', null, 'ayuda')] },
@@ -213,7 +213,7 @@ const licorDebil = {
   objetivos: [
     { id: 'kappa_final', tipo: 'principal', final: true, texto: 'Terminar el turno con kappa entre 16 y 18', condicion: { kpi: 'kappa', entre: [16, 18] } },
     { id: 'en_banda', tipo: 'principal', final: true, texto: 'No más de 1,5 horas de pulpa fuera de especificación', condicion: { indicador: 'tiempoFueraEspec', op: '<=', valor: 1.5 * H } },
-    { id: 'ea', tipo: 'secundario', texto: 'Pedir el álcali efectivo del licor blanco al laboratorio', desde: { paso: 'caustificacion' },
+    { id: 'ea', tipo: 'secundario', texto: 'Pedir el álcali efectivo del licor blanco al laboratorio', desde: { paso: 'caustificacion' }, anticipable: true,
       condicion: { comando: { tipo: 'laboratorio', analisis: 'licor_blanco_EA' } },
       pistas: [pista(30 * MIN, 'El bloque FFC-110 calcula el licor con el EA del último análisis. Si el licor se debilitó y nadie lo midió, la carga real bajó.', 'AI-504'),
         pista(60 * MIN, 'Pantalla «6 Calidad y laboratorio», botón «Álcali efectivo del licor blanco».', null, 'ayuda')] },
@@ -236,9 +236,231 @@ const licorDebil = {
   respuestaIdeal: 'Un licor más débil no cambia ningún caudal: lo delata el álcali residual de las extracciones (AI-504, AI-505) que baja sin otra causa. Pedir el EA del licor blanco al laboratorio: FFC-110 usa ese valor y sube el caudal para mantener la carga. Cuando caustificación avisa que faltará licor, calcular cuánta madera alcanza a cocerse con el licor disponible (carga = caudal × EA / madera) y bajar el ritmo antes de que empiece la falta, para no entregar pulpa cruda; volver al ritmo cuando se normalice.',
 }
 
+// ---------------------------------------------------------------------------
+// 4. Mallas
+
+const mallas = {
+  id: 'mallas',
+  capitulo: 'Capítulo 4',
+  titulo: 'Mallas',
+  resumen: 'Astillas con muchos finos y la conmutación de mallas detenida tras una mantención. Que no se tapen.',
+  ensena: 'Las mallas se tapan de a poco: la ΔP (PDI-52x) avisa horas antes. Conmutación, retrolavado y la causa (finos) se atienden antes de que la bomba se proteja.',
+  inicio: { horasPrevias: 8 },
+  guion: [
+    { id: 'entrega', cuando: { tiempo: 0 }, acciones: [
+      // Mantención dejó la conmutación de las mallas de circulación detenida y llegan astillas con muchos finos.
+      { comando: { tipo: 'mallas', id: 'mallas_circ_sup', accion: 'conmutacion_off' } },
+      { comando: { tipo: 'mallas', id: 'mallas_circ_inf', accion: 'conmutacion_off' } },
+      { comando: { tipo: 'perturbar', id: 'finos', valor: 4.5 } },
+      jefa('Buen día. Instrumentación estuvo trabajando en el PLC de las mallas durante la noche; quedaron de avisar cuando terminen. El patio está recuperando astillas del acopio viejo.')] },
+    { id: 'patio', cuando: { tiempo: 45 * MIN }, acciones: [
+      radio('Sala, pasé por la correa: las astillas vienen con harto aserrín y astilla rota. Ojo con las mallas.')] },
+    { id: 'alarma', cuando: { o: [{ tag: 'PDI-524', op: '>=', valor: 0.8 }, { tag: 'PDI-526', op: '>=', valor: 0.8 }] }, acciones: [
+      radio('Sala, en terreno se escucha raro la bomba de circulación. ¿Cómo ves la presión diferencial de las mallas?')] },
+    { id: 'relevo', cuando: { tiempo: 5 * H }, acciones: [jefa('Fin del turno. Veamos cómo quedaron las mallas.'), { terminar: true }] },
+  ],
+  objetivos: [
+    { id: 'conmutacion', tipo: 'principal', texto: 'Dejar la conmutación activa en las mallas de circulación superior e inferior',
+      condicion: { y: [{ malla: 'mallas_circ_sup', conmutacion: true }, { malla: 'mallas_circ_inf', conmutacion: true }] },
+      pistas: [pista(90 * MIN, 'Sala, ¿instrumentación te devolvió las mallas? Revisa en la pantalla de circulaciones si la conmutación está activa.'),
+        pista(120 * MIN, 'En «3 Circulaciones», haz clic en las mallas de circulación superior e inferior: «Activar conmutación».', 'PDI-524', 'ayuda')] },
+    { id: 'retrolavar', tipo: 'principal', texto: 'Retrolavar las mallas de circulación cuando su ΔP suba', evitable: true, desde: { o: [{ tag: 'PDI-524', op: '>=', valor: 0.7 }, { tag: 'PDI-526', op: '>=', valor: 0.7 }] },
+      condicion: { o: [{ comando: { tipo: 'mallas', id: 'mallas_circ_sup', accion: 'retrolavar' } }, { comando: { tipo: 'mallas', id: 'mallas_circ_inf', accion: 'retrolavar' } }] },
+      pistas: [pista(15 * MIN, 'La ΔP de las mallas sube: si llega a 0,95 bar la bomba se protege y se corta el vapor. Hay que retrolavar.', 'PDI-524'),
+        pista(30 * MIN, 'En «3 Circulaciones», clic en las mallas: «Retrolavar».', 'PDI-526', 'ayuda')] },
+    { id: 'finos', tipo: 'secundario', texto: 'Pedir el contenido de finos de las astillas al laboratorio', desde: { paso: 'patio' }, anticipable: true,
+      condicion: { comando: { tipo: 'laboratorio', analisis: 'finos_astillas' } },
+      pistas: [pista(45 * MIN, 'Si sospechas de la astilla, el laboratorio mide los finos. Pantalla «6 Calidad y laboratorio».', null, 'ayuda')] },
+    { id: 'dp_final', tipo: 'principal', final: true, texto: 'Terminar el turno con la ΔP de ambas mallas de circulación bajo 0,7 bar',
+      condicion: { y: [{ tag: 'PDI-524', op: '<', valor: 0.7 }, { tag: 'PDI-526', op: '<', valor: 0.7 }] } },
+    { id: 'kappa_final', tipo: 'principal', final: true, texto: 'Terminar el turno con kappa entre 16 y 18', condicion: { kpi: 'kappa', entre: [16, 18] } },
+  ],
+  fallas: [
+    { condicion: { o: [{ enclavamiento: 'I-09' }, { enclavamiento: 'I-10' }] }, mensaje: 'La ΔP de las mallas llegó al límite: la bomba de circulación se detuvo y se cortó el vapor de cocción.' },
+    { condicion: { kpi: 'kappa', op: '>', valor: 22 }, mensaje: 'El kappa pasó de 22: la pulpa no sirve para el blanqueo.' },
+    { condicion: { incidente: 'apertura_seguridad' }, mensaje: 'Abrió la válvula de seguridad del digestor.' },
+  ],
+  fin: { paso: 'relevo' },
+  evaluacion: [
+    { texto: 'Conmutación activa antes de que la ΔP llegara a la alarma', condicion: { y: [{ objetivo: 'conmutacion' }, { no: { paso: 'alarma' } }] }, puntos: 2 },
+    { texto: 'Conmutación activa al entregar el turno', condicion: { y: [{ malla: 'mallas_circ_sup', conmutacion: true }, { malla: 'mallas_circ_inf', conmutacion: true }] }, puntos: 1 },
+    { texto: 'Desviación estándar del kappa menor que 0,6', condicion: { indicador: 'kappaDesv', op: '<', valor: 0.6 }, puntos: 1 },
+    { texto: 'Sin aperturas de la válvula de alivio', condicion: { no: { incidente: 'apertura_alivio' } }, puntos: 1 },
+    { texto: 'Sin enclavamientos disparados', condicion: { no: { incidente: 'enclavamiento' } }, puntos: 1 },
+  ],
+  respuestaIdeal: 'Al recibir la planta, revisar el estado de los equipos que tocó mantención: la conmutación de mallas detenida hace que siempre extraigan las mismas ranuras y se tapen. Activarla apenas se nota. Cuando el patio avisa finos, pedir el análisis y vigilar la ΔP de todas las mallas (PDI-524 a PDI-527): sube de a poco durante horas. Retrolavar antes de 0,8 bar; si aun así sube, bajar el caudal de circulación o el ritmo. La bomba se protege a 0,95 bar y corta el vapor de cocción: eso cuesta horas de pulpa cruda.',
+}
+
+// ---------------------------------------------------------------------------
+// 5. Primera presurización
+
+const evaporadores = (texto) => ({ mensaje: { quien: 'Rodrigo Vera, evaporadores', canal: 'telefono', texto } })
+
+const presurizacion = {
+  id: 'presurizacion',
+  capitulo: 'Capítulo 5',
+  titulo: 'Primera presurización',
+  resumen: 'Evaporadores restringe de golpe la recepción de licor. La presión del digestor sube en minutos.',
+  ensena: 'El digestor está lleno de líquido: lo que entra tiene que salir. Si una salida se cierra, la presión sube rápido; la respuesta es bajar en la misma cantidad lo que entra, no esperar al control.',
+  inicio: { horasPrevias: 8 },
+  guion: [
+    { id: 'entrega', cuando: { tiempo: 0 }, acciones: [
+      jefa('Hola. Planta normal, ritmo completo. Evaporadores anda con un efecto sucio; si llaman, atiéndelos rápido.')] },
+    { id: 'aviso', cuando: { tiempo: 10 * MIN }, acciones: [
+      evaporadores('¡Sala! Rodrigo, de evaporadores. Se nos tapó el efecto 3: desde ya solo puedo recibir unos 600 metros cúbicos por hora de licor débil. Te aviso cuando se arregle.'),
+      { evento: 'evaporadores_restringidos' }] },
+    { id: 'flash', cuando: { o: [{ tag: 'LI-511', op: '>=', valor: 90 }, { tag: 'LI-510', op: '>=', valor: 90 }] }, acciones: [
+      radio('Sala, los ciclones flash están llenos, y la extracción se escucha estrangulada. ¿Qué hacemos?')] },
+    { id: 'sobrepresion', cuando: { tag: 'PI-301', op: '>', valor: 6.5 }, acciones: [
+      radio('¡Sala, la presión del digestor está subiendo fuerte! Pasó de 6,5.')] },
+    { id: 'normal', cuando: { tiempo: 75 * MIN }, acciones: [
+      evaporadores('Sala, ya lavamos el efecto 3. Puedes mandar todo el licor de nuevo. Gracias por la paciencia.')] },
+    { id: 'relevo', cuando: { tiempo: 150 * MIN }, acciones: [jefa('Buen trabajo. Revisemos cómo quedó la presión.'), { terminar: true }] },
+  ],
+  objetivos: [
+    { id: 'lavado', tipo: 'principal', texto: 'Bajar el filtrado de lavado al fondo (FIC-601) a 950 m³/h o menos mientras dure la restricción', desde: { paso: 'aviso' },
+      condicion: { tag: 'FI-601', op: '<=', valor: 950 },
+      pistas: [pista(3 * MIN, 'Lo que entra al digestor tiene que salir. Si evaporadores recibe 330 m³/h menos, algo tiene que entrar 330 menos. El filtrado de lavado (FIC-601) es la entrada más grande.', 'FIC-601'),
+        pista(6 * MIN, 'Pantalla «5 Fondo y soplado»: carátula de FIC-601, pásalo a AUTO y baja la consigna a unos 850 m³/h. FFC-503 bajará la extracción final en lo mismo.', 'FIC-601', 'ayuda')] },
+    { id: 'cascada', tipo: 'secundario', texto: 'Devolver FIC-601 a cascada cuando evaporadores se normalice', desde: { paso: 'normal' },
+      condicion: { lazo: 'FIC-601', modo: 'CAS' },
+      pistas: [pista(15 * MIN, 'Evaporadores ya recibe todo. Vuelve FIC-601 a CAS para que el factor de dilución (FDC-607) lo maneje de nuevo.', 'FIC-601', 'ayuda')] },
+    { id: 'presion_final', tipo: 'principal', final: true, texto: 'Terminar con la presión del digestor entre 5 y 6 bar', condicion: { tag: 'PI-301', entre: [5, 6] } },
+    { id: 'kappa_final', tipo: 'principal', final: true, texto: 'Terminar con kappa entre 16 y 18', condicion: { kpi: 'kappa', entre: [16, 18] } },
+  ],
+  fallas: [
+    { condicion: { incidente: 'apertura_alivio' }, mensaje: 'Abrió la válvula de alivio: el digestor descargó licor caliente al estanque de alivio.' },
+    { condicion: { incidente: 'apertura_seguridad' }, mensaje: 'Abrió la válvula de seguridad del digestor.' },
+    { condicion: { enclavamiento: 'I-01' }, mensaje: 'La presión del digestor llegó al enclavamiento: se cortó la alimentación.' },
+  ],
+  fin: { paso: 'relevo' },
+  evaluacion: [
+    { texto: 'Presión del digestor siempre bajo 6,5 bar', condicion: { no: { paso: 'sobrepresion' } }, puntos: 2 },
+    { texto: 'Sin enclavamientos disparados', condicion: { no: { incidente: 'enclavamiento' } }, puntos: 1 },
+    { texto: 'Desviación estándar del kappa menor que 0,6', condicion: { indicador: 'kappaDesv', op: '<', valor: 0.6 }, puntos: 1 },
+  ],
+  respuestaIdeal: 'El digestor trabaja lleno de líquido: casi no hay volumen que absorba un desbalance, por eso la presión sube en minutos. Cuando evaporadores restringe, los ciclones flash se llenan y la extracción queda estrangulada; PIC-301 abre su válvula al 100 % y ya no puede hacer nada. La respuesta es reducir en la misma cantidad lo que entra: sacar FIC-601 de cascada y bajar su consigna en lo que falta en evaporadores (≈ 300 m³/h); la extracción final la sigue por FFC-503. Bajar el ritmo también ayuda, pero es lento. Al normalizarse, devolver FIC-601 a cascada.',
+}
+
+// ---------------------------------------------------------------------------
+// 6. Columna colgada
+
+const columnaColgada = {
+  id: 'columna_colgada',
+  capitulo: 'Capítulo 6',
+  titulo: 'Columna colgada',
+  resumen: 'La columna de astillas deja de bajar en el digestor. Reconocerlo y soltarla antes de que caiga sola.',
+  ensena: 'Los síntomas de un colgamiento (nivel que no baja aunque se sople, soplado aguado, presión que cae) y cómo soltar la columna: menos alimentación, menos soplado y menos extracción bajo la zona colgada; después, volver de a poco.',
+  inicio: { horasPrevias: 8 },
+  guion: [
+    { id: 'entrega', cuando: { tiempo: 0 }, acciones: [
+      jefa('Hola. Anoche hubo varias paradas cortas y la astilla viene compactada. Vigila el fondo del digestor.')] },
+    { id: 'colgamiento', cuando: { tiempo: 5 * MIN }, acciones: [{ evento: 'colgamiento' }] },
+    { id: 'terreno', cuando: { tiempo: 9 * MIN }, acciones: [
+      radio('Sala, estoy en el soplado: la lechada sale aguada, casi pura agua. Y el raspador del digestor anda liviano. Algo raro hay en el fondo.')] },
+    { id: 'soltada', cuando: { incidente: 'liberacion_columna' }, acciones: [
+      radio('¡Sala, se sintió un golpe en el digestor y el raspador volvió a tomar carga! La columna bajó.'),
+      jefa('Bien. Ahora vuelve a la normalidad de a poco: primero el lavado y el soplado, después la madera.', { puntoControl: true })] },
+    { id: 'relevo', cuando: { tiempo: 5 * H }, acciones: [jefa('Terminó el turno. Revisemos cómo quedó.'), { terminar: true }] },
+  ],
+  objetivos: [
+    { id: 'alimentacion', tipo: 'principal', texto: 'Bajar la alimentación de astillas (WIC-101) a 120 t/h o menos para que el nivel no llegue al enclavamiento', desde: { paso: 'terreno' },
+      condicion: { lazo: 'WIC-101', campo: 'sp', op: '<=', valor: 120 },
+      pistas: [pista(4 * MIN, 'Mira LI-302: el nivel de astillas sube aunque el soplado está al máximo. Si nada baja por el fondo y sigues alimentando, el nivel llega al enclavamiento.', 'LI-302'),
+        pista(8 * MIN, 'Pantalla «1 Alimentación»: baja la consigna de WIC-101 a unas 100 t/h.', 'WIC-101', 'ayuda')] },
+    { id: 'soltar', tipo: 'principal', texto: 'Soltar la columna antes de que caiga sola', desde: { paso: 'terreno' },
+      condicion: { incidente: 'liberacion_columna' },
+      pistas: [pista(6 * MIN, 'Con la columna colgada, soplar más solo agranda el hueco bajo ella. Pasa LIC-302 a manual y baja el soplado.', 'LIC-302'),
+        pista(10 * MIN, 'La extracción tira el licor hacia abajo y aprieta la columna contra las mallas. Baja el filtrado de lavado (FIC-601 en AUTO, unos 750 m³/h): FFC-503 bajará la extracción final y la columna se soltará en unos minutos.', 'FIC-601', 'ayuda')] },
+    { id: 'ritmo_final', tipo: 'principal', final: true, texto: 'Terminar el turno con la alimentación de vuelta a 200 t/h o más', condicion: { tag: 'WI-101', op: '>=', valor: 200 } },
+    { id: 'presion_final', tipo: 'principal', final: true, texto: 'Terminar el turno con la presión del digestor entre 5 y 6 bar', condicion: { tag: 'PI-301', entre: [5, 6] } },
+    { id: 'cascada', tipo: 'secundario', texto: 'Devolver FIC-601 y LIC-302 a su modo normal', desde: { paso: 'soltada' },
+      condicion: { y: [{ lazo: 'FIC-601', modo: 'CAS' }, { lazo: 'LIC-302', modo: 'AUTO' }] },
+      pistas: [pista(10 * MIN, 'Sube de a poco: cada 10 minutos unas 20 t/h más de madera, el filtrado de lavado y la salida de LIC-302 en la misma proporción. Mira PI-301.', 'WIC-101'),
+        pista(90 * MIN, 'Con el ritmo completo y la presión estable, fija la consigna de LIC-302 en el nivel actual, pásalo a AUTO y vuelve FIC-601 a CAS.', 'LIC-302', 'ayuda')] },
+  ],
+  fallas: [
+    { condicion: { incidente: 'caida_columna' }, mensaje: 'La columna cayó de golpe sobre el hueco: golpe de ariete en el digestor y astillas crudas al soplado.' },
+    { condicion: { enclavamiento: 'I-02' }, mensaje: 'El nivel de astillas del digestor llegó al enclavamiento: se cortó la alimentación.' },
+    { condicion: { incidente: 'apertura_seguridad' }, mensaje: 'Abrió la válvula de seguridad del digestor.' },
+  ],
+  fin: { paso: 'relevo' },
+  evaluacion: [
+    { texto: 'Sin aperturas de la válvula de alivio', condicion: { no: { incidente: 'apertura_alivio' } }, puntos: 2 },
+    { texto: 'Kappa final entre 15 y 19', condicion: { kpi: 'kappa', entre: [15, 19] }, puntos: 1 },
+    { texto: 'Producción del turno de al menos 400 ADt', condicion: { indicador: 'adt', op: '>=', valor: 400 }, puntos: 1 },
+    { texto: 'Sin enclavamientos disparados', condicion: { no: { incidente: 'enclavamiento' } }, puntos: 1 },
+  ],
+  respuestaIdeal: 'Un colgamiento se reconoce por síntomas que no calzan entre sí: el nivel de astillas (LI-302) no baja aunque LIC-302 sople al máximo, la consistencia del soplado (CI-605) cae, el raspador anda liviano y la presión baja porque se está sacando licor del hueco. Soplar más solo agranda el hueco: si llega al límite, la columna cae de golpe. La respuesta: bajar la alimentación (para que el nivel no llegue al enclavamiento), pasar LIC-302 a manual con menos soplado y reducir la extracción bajo la columna bajando el filtrado de lavado (FIC-601 fuera de cascada; la extracción final lo sigue). Con la columna suelta, volver de a poco: dejar el soplado manual en proporción a la madera (la mitad de madera, la mitad de soplado) y subir en escalones la madera, el filtrado de lavado y el soplado juntos, vigilando la presión; recién con el ritmo completo, LIC-302 a AUTO con la consigna en el nivel actual y FIC-601 a CAS (a bajo ritmo FDC-607 cortaría el lavado). Las astillas que quedaron colgadas se cocieron de más: el kappa bajará unas horas.',
+}
+
+// ---------------------------------------------------------------------------
+// 7. Parada corta
+
+const lavado = (texto) => ({ mensaje: { quien: 'Marta Díaz, lavado', canal: 'telefono', texto } })
+
+const paradaCorta = {
+  id: 'parada_corta',
+  capitulo: 'Capítulo 7',
+  titulo: 'Parada corta',
+  resumen: 'El lavado se detiene por dos horas y media. Parar el digestor en caliente, sin enclavamientos, y volver a partir.',
+  ensena: 'Una parada corta ordenada: cortar madera y soplado antes de que lo hagan los enclavamientos, mantener lleno el impregnador y caliente (no tanto) el digestor, y partir en escalones con el lavado primero.',
+  inicio: { horasPrevias: 8 },
+  guion: [
+    { id: 'entrega', cuando: { tiempo: 0 }, acciones: [jefa('Hola. Turno normal por ahora. El lavado tuvo problemas con un filtro en la noche.')] },
+    { id: 'aviso', cuando: { tiempo: 10 * MIN }, acciones: [
+      lavado('Sala, habla Marta, de lavado. Se cortó la tela del filtro 2: vamos a estar detenidos unas dos horas y media. No podemos recibir pulpa, lo siento.'),
+      { evento: 'parada_lavado_larga' }] },
+    { id: 'estanque', cuando: { tag: 'LI-606', op: '>=', valor: 70 }, acciones: [
+      radio('Sala, el estanque de soplado va en 70 % y subiendo. A 95 se corta el soplado solo.')] },
+    { id: 'vuelve', cuando: { tiempo: 160 * MIN }, acciones: [
+      lavado('Sala, ya cambiamos la tela. Pueden mandar pulpa de nuevo, de a poco por favor.', ),
+      jefa('Parte de a poco: primero el lavado al fondo y el soplado, después la madera en escalones. Quiero el ritmo completo antes de una hora y media.', { puntoControl: true })] },
+    { id: 'relevo', cuando: { tiempo: 7 * H }, acciones: [jefa('Terminó el turno. Revisemos la parada.'), { terminar: true }] },
+  ],
+  objetivos: [
+    { id: 'madera', tipo: 'principal', texto: 'Cortar la alimentación de astillas (WIC-101)', desde: { paso: 'aviso' },
+      condicion: { lazo: 'WIC-101', campo: 'sp', op: '<=', valor: 5 },
+      pistas: [pista(5 * MIN, 'Si el lavado no recibe, el estanque de soplado se llena y el soplado se corta solo; si el soplado se corta y sigues alimentando, sube el nivel del digestor. Hay que parar.'),
+        pista(10 * MIN, 'Pantalla «1 Alimentación»: consigna de WIC-101 en 0.', 'WIC-101', 'ayuda')] },
+    { id: 'soplado', tipo: 'principal', texto: 'Detener el soplado (LIC-302 en manual con salida 0)', desde: { paso: 'aviso' },
+      condicion: { lazo: 'LIC-302', campo: 'salida', op: '<=', valor: 2 },
+      pistas: [pista(10 * MIN, 'Pantalla «5 Fondo y soplado»: LIC-302 a MAN y salida 0. Así el estanque deja de subir.', 'LIC-302', 'ayuda')] },
+    { id: 'impregnador', tipo: 'secundario', texto: 'Mantener lleno el impregnador (FIC-115 en automático con caudal)', desde: { paso: 'aviso' }, anticipable: true,
+      condicion: { lazo: 'FIC-115', modo: 'AUTO' },
+      pistas: [pista(15 * MIN, 'Sin madera, FFC-117 lleva a cero el licor negro al impregnador y la transferencia lo vacía (mira PI-201). Saca FIC-115 de cascada para que siga entrando licor.', 'FIC-115', 'radio')] },
+    { id: 'temperaturas', tipo: 'secundario', texto: 'Bajar unos 10 °C las temperaturas de cocción mientras dure la parada', desde: { paso: 'aviso' }, anticipable: true,
+      condicion: { y: [{ lazo: 'TIC-402', campo: 'sp', op: '<=', valor: 147 }, { lazo: 'TIC-404', campo: 'sp', op: '<=', valor: 146 }] },
+      pistas: [pista(20 * MIN, 'Las astillas detenidas en la zona de cocción se siguen cociendo. Baja las consignas de TIC-402 y TIC-404 unos 10 °C.', 'TIC-402', 'ayuda')] },
+    { id: 'ritmo_final', tipo: 'principal', final: true, texto: 'Terminar el turno con la alimentación de vuelta a 200 t/h o más', condicion: { tag: 'WI-101', op: '>=', valor: 200 } },
+    { id: 'presion_final', tipo: 'principal', final: true, texto: 'Terminar el turno con la presión del digestor entre 5 y 6 bar', condicion: { tag: 'PI-301', entre: [5, 6] } },
+    { id: 'modos', tipo: 'secundario', texto: 'Dejar LIC-302, FIC-115 y FIC-601 en su modo normal', desde: { paso: 'vuelve' },
+      condicion: { y: [{ lazo: 'LIC-302', modo: 'AUTO' }, { lazo: 'FIC-115', modo: 'CAS' }, { lazo: 'FIC-601', modo: 'CAS' }] },
+      pistas: [pista(90 * MIN, 'Con el ritmo completo: LIC-302 a AUTO con la consigna en el nivel actual, FIC-115 y FIC-601 a CAS.', 'LIC-302', 'ayuda')] },
+  ],
+  fallas: [
+    { condicion: { enclavamiento: 'I-08' }, mensaje: 'El estanque de soplado se llenó: el enclavamiento cortó el soplado con el digestor alimentando.' },
+    { condicion: { enclavamiento: 'I-02' }, mensaje: 'El nivel de astillas del digestor llegó al enclavamiento: se cortó la alimentación.' },
+    { condicion: { enclavamiento: 'I-06' }, mensaje: 'La temperatura de soplado llegó al enclavamiento: el fondo estaba caliente al partir el soplado (faltó el filtrado de lavado frío).' },
+    { condicion: { enclavamiento: 'I-01' }, mensaje: 'La presión del digestor llegó al enclavamiento.' },
+    { condicion: { incidente: 'apertura_seguridad' }, mensaje: 'Abrió la válvula de seguridad del digestor.' },
+  ],
+  fin: { paso: 'relevo' },
+  evaluacion: [
+    { texto: 'Sin aperturas de la válvula de alivio', condicion: { no: { incidente: 'apertura_alivio' } }, puntos: 2 },
+    { texto: 'Menos de 4 horas de pulpa fuera de especificación', condicion: { indicador: 'tiempoFueraEspec', op: '<=', valor: 4 * H }, puntos: 1 },
+    { texto: 'Sin enclavamientos disparados', condicion: { no: { incidente: 'enclavamiento' } }, puntos: 1 },
+  ],
+  respuestaIdeal: 'Al saber que el lavado no recibirá pulpa, parar antes que los enclavamientos: WIC-101 a 0 y LIC-302 en manual con salida 0 (el estanque deja de subir). Durante la parada: FIC-115 fuera de cascada para que el impregnador siga lleno (si no, la transferencia lo vacía y al partir falta presión), las temperaturas de cocción unos 10 °C abajo y las circulaciones andando; FDC-607 queda retenido sin soplado. Para partir: primero el filtrado de lavado al fondo (FIC-601 en AUTO, unos 400 m³/h) para enfriar el fondo; después madera y soplado juntos en escalones de unas 25 t/h cada 10 minutos, con las temperaturas de vuelta a su valor. Con el ritmo completo, LIC-302 a AUTO con la consigna en el nivel actual y FIC-115 y FIC-601 a CAS. La pulpa que estuvo detenida sale sobrecocida (kappa bajo) unas horas: es el costo de la parada.',
+}
+
 export const MISIONES = {
   tutorial,
   turno_noche: turnoNoche,
   mas_toneladas: masToneladas,
   licor_debil: licorDebil,
+  mallas,
+  presurizacion,
+  columna_colgada: columnaColgada,
+  parada_corta: paradaCorta,
 }

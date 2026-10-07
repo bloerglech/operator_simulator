@@ -215,7 +215,7 @@ export function extensionControl(config) {
         const s = ce.lazos[l.tag]
         lazos[l.tag] = {
           descripcion: l.descripcion, pv: s.pv, sp: s.sp, salida: s.salida, modo: s.modo, unidad: l.unidadPV, rango: [l.pvMin, l.pvMax],
-          Kc: s.Kc, Ti: s.Ti, Td: s.Td, accion: l.accion, maestro: s.maestro, maestros: l.maestros, forzado: s.forzado, siguiendo: !!s.siguiendo,
+          Kc: s.Kc, Ti: s.Ti, Td: s.Td, accion: l.accion, maestro: s.maestro, maestros: l.maestros, forzado: s.forzado, siguiendo: !!s.siguiendo, retenido: !!s.retenido,
           transmisor: l.pv, actuador: l.salida, posicion: s.act ? s.act.pos : null, pegado: !!s.act?.pegado,
         }
       }

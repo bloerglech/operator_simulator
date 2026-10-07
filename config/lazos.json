@@ -660,6 +660,7 @@
   },
   {
    "tag": "CIC-605",
+   "habilitacion": { "tag": "FI-603", "op": ">", "valor": 300, "nota": "sin soplado se retiene (no hay pulpa que diluir ni que medir)" },
    "descripcion": "Consistencia de soplado (licor de la lechada de soplado; la dilución lo sigue)",
    "pv": "CI-605",
    "salida": {
@@ -686,6 +687,7 @@
   },
   {
    "tag": "TIC-604",
+   "habilitacion": { "tag": "FI-603", "op": ">", "valor": 300, "nota": "sin soplado se retiene (no hay pulpa que diluir ni que medir)" },
    "descripcion": "Temperatura de soplado (maestro alternativo del filtrado de lavado)",
    "pv": "TI-604",
    "salida": {
@@ -723,6 +725,7 @@
   },
   {
    "tag": "FDC-607",
+   "habilitacion": { "tag": "FI-603", "op": ">", "valor": 300, "nota": "sin soplado se retiene (no hay pulpa que diluir ni que medir)" },
    "descripcion": "Factor de dilución (filtrado de lavado)",
    "pv": "FD-607",
    "salida": {

@@ -93,6 +93,11 @@ export function construirModelo(config) {
       compactacion: leerCompactacion(hidraulica),
       raspador: leerRaspador(hidraulica.raspadores?.[cv.id], cv.id),
       huecoMaximo: p(hidraulica.colgamiento, 'hueco_maximo', 'hidraulica.colgamiento.hueco_maximo'),
+      liberacion: {
+        fraccion: p(hidraulica.colgamiento, 'fraccion_liberacion', 'hidraulica.colgamiento.fraccion_liberacion'),
+        tiempo: p(hidraulica.colgamiento, 'tiempo_liberacion', 'hidraulica.colgamiento.tiempo_liberacion'),
+        corrientes: (hidraulica.colgamiento.corrientes_liberacion ?? []).filter((id) => topologia.corrientes.some((c) => c.id === id && c.origen?.vaso === cv.id)),
+      },
     }
   })
   const vasoPorId = Object.fromEntries(vasos.map((v) => [v.id, v]))

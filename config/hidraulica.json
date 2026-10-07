@@ -135,7 +135,20 @@
       "unidad": "m3",
       "origen": "supuesto",
       "nota": "al superarlo, la columna colgada cae (≈ 7,6 m en el fondo del digestor)"
-    }
+    },
+    "fraccion_liberacion": {
+      "valor": 0.6,
+      "unidad": "-",
+      "origen": "supuesto",
+      "nota": "si las extracciones bajo la columna (corrientes_liberacion) bajan de esta fracción de su caudal al colgarse, la columna deja de estar apretada contra las mallas"
+    },
+    "tiempo_liberacion": {
+      "valor": 300,
+      "unidad": "s",
+      "origen": "supuesto",
+      "nota": "tiempo con las extracciones bajas para que la columna se suelte sin caer de golpe"
+    },
+    "corrientes_liberacion": ["ext_principal", "ext_final"]
   },
   "raspadores": {
     "_descripcion": "Raspadores de fondo: torque = torque_vacio + k_torque·σ_fondo; corriente = corriente_vacio + k_corriente·torque.",

@@ -67,6 +67,28 @@ describe('tutorial', () => {
   })
 })
 
+describe('objetivos con comandos', () => {
+  it('un comando enviado antes de que aparezca el objetivo no lo cumple (tutorial: reconocer)', () => {
+    const j = prepararJuego(config(), { semilla: 5, mision: 'tutorial' })
+    j.enviarComando({ tipo: 'alarma', id: '*', accion: 'reconocer' })
+    const acciones = [
+      { tipo: 'jugador', evento: 'dcs' },
+      { tipo: 'jugador', evento: 'pantalla', valor: 'digestor' },
+      { tipo: 'jugador', evento: 'caratula', valor: 'TIC-402' },
+      { tipo: 'lazo', id: 'TIC-402', accion: 'consigna', valor: 157 },
+      { tipo: 'lazo', id: 'FIC-405', accion: 'modo', valor: 'MAN' },
+      { tipo: 'lazo', id: 'FIC-405', accion: 'modo', valor: 'AUTO' },
+    ]
+    for (let m = 0; m < 15; m++) {
+      if (m < acciones.length) j.enviarComando(acciones[m])
+      j.avanzar(MIN)
+    }
+    const mi = j.leerEstado().escenario.mision
+    expect(mi.objetivos.find((o) => o.id === 'auto').estado).toBe('cumplido')
+    expect(mi.objetivos.find((o) => o.id === 'alarma').estado).toBe('pendiente')
+  })
+})
+
 describe('capítulo 1: turno de noche', () => {
   it('sin hacer nada el kappa sale de banda y la misión falla', () => {
     const r = jugar('turno_noche')

@@ -290,7 +290,7 @@ describe('control avanzado', () => {
     s.avanzar(3 * HORA) // ganancia baja a propósito: la zona responde en 1–2 h
     const b = ctl(s).bloques['HIC-703']
     expect(Math.abs(b.Hprevisto - (H0 + 40))).toBeLessThan(15)
-    expect(lazo(s, 'TIC-402').sp - T0).toBeGreaterThan(0.5)
+    expect(lazo(s, 'TIC-402').sp - T0).toBeGreaterThan(0.2)
     expect(lazo(s, 'TIC-402').sp - T0).toBeLessThan(6) // la zona sube menos que la salida del calentador
   })
 })

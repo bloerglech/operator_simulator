@@ -4,7 +4,7 @@
     "valor": 40,
     "unidad": "%",
     "origen": "supuesto",
-    "nota": "volumen de astillas (con poros) / volumen del vaso"
+    "nota": "fracción media usada para armar la columna del estado inicial; la real la calcula la compactación"
   },
   "penetracion": {
     "k_ref": {
@@ -80,5 +80,128 @@
     "unidad": "bar",
     "origen": "supuesto",
     "nota": "margen sobre la presión de saturación para declarar vaporización súbita"
+  },
+  "compactacion": {
+    "_descripcion": "Compactación de la columna (Janssen). s = s0·(1 + c_kappa·(1 − κ/κ0))·(1 + c_esfuerzo·σ/(σ + σ_ref)), con σ el esfuerzo efectivo.",
+    "s0": {
+      "valor": 36,
+      "unidad": "%",
+      "origen": "supuesto",
+      "nota": "astillas frescas sin carga"
+    },
+    "s_max": {
+      "valor": 55,
+      "unidad": "%",
+      "origen": "supuesto"
+    },
+    "c_kappa": {
+      "valor": 0.15,
+      "unidad": "-",
+      "origen": "supuesto",
+      "nota": "ablandamiento de la astilla cocida"
+    },
+    "c_esfuerzo": {
+      "valor": 0.12,
+      "unidad": "-",
+      "origen": "supuesto"
+    },
+    "esfuerzo_ref": {
+      "valor": 5,
+      "unidad": "kPa",
+      "origen": "supuesto"
+    },
+    "mu_K": {
+      "valor": 0.08,
+      "unidad": "-",
+      "origen": "supuesto",
+      "nota": "fricción con la pared × coeficiente de empuje lateral"
+    },
+    "k_arrastre": {
+      "valor": 200000.0,
+      "unidad": "-",
+      "origen": "supuesto",
+      "nota": "Pa/m por m/s de velocidad superficial del licor (+ hacia abajo)"
+    },
+    "tau": {
+      "valor": 10,
+      "unidad": "min",
+      "origen": "supuesto",
+      "nota": "la columna se compacta o expande con esta constante de tiempo; también filtra el caudal de licor usado para el arrastre"
+    }
+  },
+  "colgamiento": {
+    "hueco_maximo": {
+      "valor": 600,
+      "unidad": "m3",
+      "origen": "supuesto",
+      "nota": "al superarlo, la columna colgada cae (≈ 7,6 m en el fondo del digestor)"
+    }
+  },
+  "raspadores": {
+    "_descripcion": "Raspadores de fondo: torque = torque_vacio + k_torque·σ_fondo; corriente = corriente_vacio + k_corriente·torque.",
+    "imp": {
+      "torque_vacio": {
+        "valor": 15,
+        "unidad": "-",
+        "origen": "supuesto",
+        "nota": "kN·m"
+      },
+      "k_torque": {
+        "valor": 4,
+        "unidad": "-",
+        "origen": "supuesto",
+        "nota": "kN·m por kPa"
+      },
+      "corriente_vacio": {
+        "valor": 40,
+        "unidad": "-",
+        "origen": "supuesto",
+        "nota": "A"
+      },
+      "k_corriente": {
+        "valor": 1.5,
+        "unidad": "-",
+        "origen": "supuesto",
+        "nota": "A por kN·m"
+      },
+      "corriente_alarma": {
+        "valor": 250,
+        "unidad": "-",
+        "origen": "supuesto",
+        "nota": "A"
+      }
+    },
+    "dig": {
+      "torque_vacio": {
+        "valor": 25,
+        "unidad": "-",
+        "origen": "supuesto",
+        "nota": "kN·m"
+      },
+      "k_torque": {
+        "valor": 6,
+        "unidad": "-",
+        "origen": "supuesto",
+        "nota": "kN·m por kPa"
+      },
+      "corriente_vacio": {
+        "valor": 60,
+        "unidad": "-",
+        "origen": "supuesto",
+        "nota": "A"
+      },
+      "k_corriente": {
+        "valor": 1.2,
+        "unidad": "-",
+        "origen": "supuesto",
+        "nota": "A por kN·m"
+      },
+      "corriente_alarma": {
+        "valor": 350,
+        "unidad": "-",
+        "origen": "supuesto",
+        "nota": "A"
+      }
+    }
   }
 }

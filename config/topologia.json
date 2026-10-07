@@ -113,9 +113,14 @@
     },
     {
       "id": "licor_imp",
-      "nombre": "Licor de impregnación (licor negro caliente)",
+      "nombre": "Licor negro caliente a la alimentación (desde la extracción principal)",
       "origen": {
-        "fuente": "licor_impregnacion"
+        "vaso": "dig",
+        "z": {
+          "valor": 27,
+          "unidad": "m",
+          "origen": "supuesto"
+        }
       },
       "destino": {
         "vaso": "imp",
@@ -207,7 +212,7 @@
         }
       },
       "destino": {
-        "sumidero": "flash"
+        "equipo": "flash1"
       }
     },
     {
@@ -262,7 +267,7 @@
         }
       },
       "destino": {
-        "sumidero": "flash"
+        "equipo": "flash1"
       }
     },
     {
@@ -317,7 +322,7 @@
         }
       },
       "destino": {
-        "sumidero": "flash"
+        "equipo": "flash1"
       }
     },
     {
@@ -358,7 +363,7 @@
         "fondo": true
       },
       "destino": {
-        "sumidero": "estanque_soplado"
+        "equipo": "estanque_soplado"
       }
     }
   ],

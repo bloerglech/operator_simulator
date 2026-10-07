@@ -1,7 +1,7 @@
 # MODELO DE PROCESO — Digestor continuo Lo-Solids, eucalipto
 
-Versión: Fase 1b (transporte, hidráulica, energía y cinética de cocción
-calibrada). La sección 17 resume qué está implementado. Explicación
+Versión: Fase 1c (transporte, hidráulica, energía, cinética calibrada,
+presión y equipos). La sección 17 resume qué está implementado. Explicación
 didáctica en `docs/manual/`.
 Este documento se actualiza en cada cambio del modelo. Cada parámetro
 mencionado vive en `config/*.json` con su unidad y su origen
@@ -500,145 +500,181 @@ Sirven para puntaje y alarmas de calidad; no pretenden ser cuantitativos.
 
 ---
 
-## 7. Energía (`config/energia.json`)
+## 7. Energía y equipos auxiliares (`config/energia.json`, `config/equipos.json`)
 
 Entalpía con referencia 0 °C: licor `ρ·cp·V·T`, parcela
-`(m·cp_madera + ρ·cp·V_r)·T`. El licor libre lleva la temperatura como un
-escalar más del transporte; las parcelas, la suya (sección 5.3). Pérdidas al
-ambiente por vaso, repartidas por volumen de celda:
+`(m·cp_madera + ρ·cp·V_r)·T`, vapor `h_fg(T_s) + (ρ·cp/1000)·T_s` por kg (el
+agua condensada se cuenta como licor, 1 kg = 1 L). El licor libre lleva la
+temperatura como un escalar más del transporte; las parcelas, la suya
+(sección 5.3). Pérdidas al ambiente por vaso, repartidas por volumen de celda:
 
 ```
 dT_j/dt = −UA_j · (T_j − T_amb) / (ρ·cp·V_f,j)        (integración exacta)
 ```
 
 - cp madera 1,4 kJ/kg·K; licor ρ = 1 050 kg/m³, cp = 3,8 kJ/kg·K,
-  **constantes** en la Fase 1a (supuesto S-12; la dependencia con los
-  sólidos disueltos queda para la Fase 1c). La humedad de las astillas se
-  trata como licor con esas mismas propiedades (S-18).
-- Calor de reacción despreciado (supuesto S-04; la cocción kraft es
-  levemente exotérmica).
-- Las circulaciones extraen licor de una malla, lo calientan y lo
-  devuelven por el tubo central a la celda de retorno configurada.
+  **constantes** (S-12). La dependencia con los sólidos disueltos (≈ 3 %
+  en cp) no se implementó: no cambia la dinámica y complicaría el transporte
+  de la temperatura (decisión de la Fase 1c).
+- Propiedades del agua (`src/sim/agua.js`): presión de saturación de
+  IAPWS-IF97 región 4 (`literatura`); calor latente ajustado a las tablas de
+  vapor (error < 0,1 % entre 100 y 200 °C).
 
-**Calentadores indirectos (vapor MP).** En la Fase 1a se simplifican a
-"llevar la corriente a `T_salida` con una potencia máxima `Q_max`"
-(`config/energia.json`); la potencia entregada queda en la contabilidad de
-energía. Modelo completo (Fase 1c):
+### 7.1 Calentadores (`equipos.calentadores`)
+
+Lado del vapor isotérmico a T_s = T_sat(P_MP):
 
 ```
-Q = U·A · ΔT_ml(T_vap, T_in, T_out)
-1/U = 1/U_limpio + R_inc(t)
-dR_inc/dt = k_inc · exp(−E_inc/R·(1/T − 1/T_ref))    (CaCO₃; lavado ácido → R_inc = 0)
-ṁ_vap = Cv · x_válvula · √(ρ · (P_cabezal − P_carcasa))
-Q = ṁ_vap · h_fg(P_carcasa),   T_vap = T_sat(P_carcasa)
+T_sal,max = T_s − (T_s − T_ent) · exp(−UA/(ṁ·cp))
+T_sal = min(T_consigna, T_sal,max)       Q = ṁ·cp·(T_sal − T_ent)       ṁ_vapor = Q / h_fg(T_s)
+UA = UA_limpio / (1 + f),   df/dt = k_inc · exp(−E/R·(1/T − 1/T_ref))   (CaCO₃)
 ```
 
-Se resuelve P_carcasa por bisección en cada paso rápido. Con incrustación,
-la válvula se abre más para el mismo Q hasta saturar: es el síntoma de
-pérdida de capacidad. Calentador de respaldo conmutables.
+Cada calentador tiene una unidad de respaldo limpia (comando `conmutar`) y
+se puede lavar con ácido (f = 0). Si la consigna no se alcanza, el
+calentador queda "saturado" (en la Fase 2 la válvula de vapor del TIC
+quedará abierta al 100 %). UA_limpio se dimensionó con ≈ 30 % de margen
+sobre el caso base (P8). Una caída de presión del cabezal MP baja T_s y la
+capacidad.
 
-**Ciclones flash:**
+### 7.2 Ciclones flash y evaporadores
 
-```
-fracción vaporizada = cp_l · (T_in − T_sat(P_flash)) / h_fg(P_flash)
-```
-
-El vapor del flash 1 va al silo de astillas; nivel y presión de cada
-ciclón son estados dinámicos (balance de masa y de vapor).
-
-**Silo de astillas:** temperatura de las astillas vaporizadas, consumo de
-vapor flash + vapor fresco BP, calidad de vaporización `S_vap`.
-
-Propiedades del agua/vapor (T_sat, P_sat, h_fg): correlaciones de
-IAPWS-IF97 simplificadas (región de saturación).
-
----
-
-## 8. Presión y elementos de seguridad
-
-Cada vaso es un nodo de presión:
+El licor de las extracciones superior, principal y final entra al flash 1
+(2,5 bar(a)); su líquido pasa al flash 2 (1,1 bar(a)) y de ahí a
+evaporadores. En cada flash el licor se enfría a T_sat(P):
 
 ```
-dP/dt = (Σ Q_entra − Σ Q_sale + Q_vap,súbita) / C_eff
-C_eff = V_liq · (β_liq + β_vaso) + V_gas / (γ · P)
+m_vapor = ρ·cp·V·(T − T_sat) / h_fg(T_sat)        (los sólidos se concentran en el licor que queda)
 ```
 
-- β_liq ≈ 4,6·10⁻¹⁰ 1/Pa (agua); β_vaso por elasticidad del manto
-  (supuesto). Con ≈ 4 000 m³ llenos, un desbalance de 0,01 m³/s sube la
-  presión del orden de 0,02–0,04 bar/s: segundos a decenas de segundos,
-  como pide la especificación.
-- V_gas > 0 en los estados de llenado y en la opción "fase vapor" (donde la
-  presión del tope la fija el vapor directo). La misma ecuación cubre vaso
-  parcialmente lleno y lleno.
-- Todos los caudales dependen de la presión (válvulas
-  `Q = Cv·f(x)·√(ΔP/ρ)`, bombas con curva), por lo que la presión se
-  integra con Euler implícito (una iteración de Newton) en el paso rápido.
-- **Vaporización súbita:** si `P < P_sat(T_máx de las celdas superiores) +
-  margen`, se genera vapor `Q_vap = k_flash · (P_sat − P)`, que empuja la
-  presión hacia arriba con golpe y se registra como incidente.
-- **Válvula de alivio** (proporcional sobre su ajuste) y **válvula de
-  seguridad** (apertura total con histéresis). Cada apertura queda en el
-  registro de incidentes.
+Nivel: control proporcional ideal hacia la consigna (τ = 60 s) hasta la
+Fase 2. La salida del flash 2 está limitada por la **capacidad de recepción
+de evaporadores** (perturbable). Si un flash se llena (≥ 98 %), el anterior
+no puede descargar; si el flash 1 se llena, las extracciones del digestor
+quedan bloqueadas (las válvulas no pasan y las bombas no impulsan) y la
+presión del digestor sube: es la cadena de la misión 5.
 
----
+### 7.3 Silo de astillas y vaporización
 
-## 9. Columna de astillas
-
-- **Nivel de astillas:** altura del tope de la columna (masa de astillas
-  en el vaso / ρ_col / A). Medido por un transmisor con su ruido.
-- **Compactación:** `ρ_col = ρ_col,0 · (1 + c_σ · σ) · (1 + c_κ · (κ_0 −
-  kappa_local)/κ_0)` (más compactación cuanto más cocida la astilla).
-- **Esfuerzo efectivo** (tipo Janssen, 1D):
-  `dσ/dz = (1−ε)(ρ_s − ρ_l)·g − f_arrastre(F/A − v) − (4 μ_p K / D)·σ`
-  (arrastre del licor: hacia abajo en cocorriente, hacia arriba en
-  contracorriente; fricción con la pared).
-- **Movimiento:** si la fuerza neta disponible en una sección no supera la
-  fricción (μ_p alto por perturbación, astillas pegadas), la columna sobre
-  ese punto se detiene (**colgamiento**): sube el nivel medido, cae la
-  consistencia de soplado, baja el torque del raspador; al soltarse cae de
-  golpe.
-- **Raspadores:** torque ∝ σ en el fondo · área · μ; corriente del motor
-  proporcional; enclavamiento por alta corriente.
-- **Consistencia de soplado:** masa de pulpa / (pulpa + licor) en la salida;
-  se controla con la dilución del fondo.
-
-Esta parte es la más simplificada y sus parámetros son `supuesto`, ajustados
-para que los síntomas sean creíbles (limitación L-07).
-
----
-
-## 10. Mallas
-
-Para cada juego de mallas (filas alternadas):
+El vapor de ambos flash llega al silo en el paso siguiente. Se usa primero
+el vapor flash y luego vapor fresco de baja presión (hasta su máximo) para
+llevar las astillas a la consigna (100 °C, silo atmosférico); el vapor flash
+sobrante se ventea. Balance exacto:
 
 ```
-ΔP_m = Q_m · (R_0 + R_finos + R_inc) / A_abierta
-dR_finos/dt = k_f · c_finos · Q_m / A − k_retro · R_finos · [retrolavado]
-              − k_conm · R_finos · [conmutación]
-dR_inc/dt   = k_inc,m(T)                     (CaCO₃, solo se limpia con lavado ácido)
+C·(T − T_silo) = Σ m_v·(h_v − c·T)          C = m·cp_madera + V_agua·ρ·cp
 ```
 
-El caudal máximo de extracción queda limitado por la presión disponible
-(vaso − ciclón flash − pérdidas); con mallas tapadas la válvula satura y
-el balance del digestor cambia.
+El condensado queda como humedad de las astillas (≈ 0,19 kg/kg). La calidad
+de vaporización:
 
----
+```
+S_vap = (1 − exp(−t_residencia/τ_vap)) · min(1, (T − T_patio)/(T_consigna − T_patio))
+```
+
+con t_residencia = inventario del silo / caudal del medidor.
+
+### 7.4 Medidor, tubo de astillas y bombas
+
+Medidor volumétrico: `ṁ_seca = rpm · V_rev · η · s_pila · ρ_básica`. Con la
+velocidad fija, un lote de menor densidad baja la producción (como en la
+planta). Si las bombas de astillas no dan (detenidas o cerca de su presión de
+cierre), las astillas se acumulan en el tubo de astillas y se recuperan con
+un 20 % de sobrecapacidad al volver a partir.
+
+### 7.5 Estanque de soplado
+
+Recibe la pulpa y el licor del soplado; sale al lavado a la tasa pedida
+(perturbable: "parada de lavado"). Nivel = volumen de licor + astillas /
+volumen del estanque; si se llena, rebalsa (se registra).
+
+## 8. Presión y elementos de seguridad (`src/sim/presion.js`)
+
+Cada vaso hidráulico tiene un estado de presión con el **exceso** de líquido
+E sobre la capacidad geométrica (E > 0: lleno y comprimido; E < 0: falta
+líquido):
+
+```
+lleno y cerrado:      P = P_ref + E / C,      C = V_líquido · (β_licor + β_vaso)
+falta líquido:        P = max(P_ebullición, P_atm)     (vapor o rompedor de vacío)
+venteo abierto:       P = P_atm (el exceso rebalsa)
+P_ebullición = max_j (P_sat(T_j) − ρ·g·z_j)            (piso: el licor hierve si P cae bajo él)
+```
+
+- β_licor = 4,6·10⁻¹⁰ 1/Pa, β_vaso = 5·10⁻¹⁰ 1/Pa (supuesto). En el
+  digestor C ≈ 3,4·10⁻⁶ m³/Pa: un desbalance de 50 m³/h cambia la presión
+  ≈ 0,4 bar/min. **La presión responde en segundos**, como pide la
+  especificación.
+- Paso rápido (0,2 s): `dE/dt = Q_fijo − Q_válvulas(P) − Q_alivio(P) − Q_seguridad(P)`,
+  integrado con Euler implícito (regula falsi; la función es monótona).
+  Q_fijo suma las corrientes con bomba (con su factor de marcha y su curva)
+  y la penetración medida en el paso lento anterior.
+- Paso lento: el balance hidráulico (`hidraulica.js`) recalcula E exacto con
+  los volúmenes que realmente pasaron (los de las válvulas los acumuló el
+  paso rápido). Así la masa se conserva exactamente.
+- Válvulas (`valvulas.js`): `Q = Kv·f(x)·√(ΔP/1 bar)` con característica
+  lineal o de igual porcentaje, actuador con tiempo de carrera y constante de
+  tiempo, y la malla en serie: `ΔP = R·Q + (Q/(Kv·f))²·1 bar`. La presión
+  aguas arriba incluye la hidrostática hasta la malla.
+- Hoy las válvulas con presión son la **extracción principal** (a flash 1) y
+  el **exceso del separador del impregnador** (P5). Las demás corrientes son
+  de caudal fijo (bomba + control de flujo ideal hasta la Fase 2).
+- Bombas: factor de marcha de primer orden (partida/detención) y curva
+  simplificada: el caudal baja linealmente a 0 en los últimos `margen` bar
+  antes de la presión de cierre.
+- **Alivio:** apertura proporcional entre su ajuste y ajuste + sobrepresión.
+  **Seguridad:** abre sobre su ajuste y cierra bajo ajuste − purga. Cada
+  apertura, cada episodio de vaporización súbita y cada maniobra quedan en el
+  registro de eventos con su tiempo.
+- La apertura inicial de las válvulas se calcula para el caudal de diseño a
+  la presión de diseño; sin control (Fase 2), la presión se acomoda donde
+  entra lo mismo que sale.
+
+## 9. Columna de astillas (`src/sim/columna.js`)
+
+- **Nivel:** altura del tope de la pila de parcelas.
+- **Compactación (Janssen):** se recorre la pila desde el tope:
+
+```
+dσ/dz = γ − σ/λ,   λ = D/(4·μK),   γ = (m/V)·(1 − ρ_licor/ρ_pared)·g + k_arrastre·q_licor
+s = s0 · (1 + c_κ·(1 − κ/κ0)) · (1 + c_σ·σ/(σ + σ_ref))      (con s ≤ s_max)
+```
+
+  q_licor es la velocidad superficial del licor (+ hacia abajo): la
+  cocorriente compacta y la contracorriente afloja. s se acerca a su valor con
+  una constante de tiempo de 10 min y el arrastre usa el caudal filtrado: sin
+  eso, compactación e hidráulica se realimentan paso a paso (se probó). El
+  esfuerzo en el fondo empuja el **raspador**:
+  `torque = T0 + k_T·σ_fondo`, `corriente = I0 + k_I·torque`.
+- **Colgamiento:** las parcelas sobre la altura colgada no bajan; lo que sale
+  por el fondo deja un hueco de licor bajo ellas. Síntomas que aparecen solos:
+  el nivel no baja aunque se siga alimentando, cuando se vacía la parte baja
+  cae la consistencia de soplado y el torque del raspador, y el hueco
+  absorbe licor (baja la presión). Al superar el hueco máximo (600 m³) o con
+  el comando `soltar_columna`, la columna cae (evento con la altura de caída).
+  La fricción con la pared (μK) es perturbable.
+- **Canalización:** pendiente (Fase 5, perturbaciones).
+
+## 10. Mallas (`src/sim/mallas.js`)
+
+```
+R = R0·(1 + r_f + r_inc),   ΔP = R·Q
+dr_f/dt = (Q/Q_d)·(finos/finos_ref)/τ_tap − [conmutación]·r_f/τ_limp
+retrolavado: r_f ← r_f·(1 − η_retro)        lavado ácido: r_inc ← 0
+dr_inc/dt = k_inc·exp(−E/R·(1/T − 1/T_ref))
+```
+
+Con la conmutación de filas el taponamiento se estabiliza en ≈ 0,25 R0; sin
+ella crece ≈ 1 R0 cada 6 h. Las corrientes con bomba quedan limitadas a la
+ΔP máxima de la bomba (pierden caudal); las corrientes con válvula ven R en
+serie. Siete juegos: separadores del impregnador y del digestor, mallas de
+extracción superior, principal y final, y mallas de ambas circulaciones.
 
 ## 11. Alimentación (línea de astillas)
 
-- Silo: inventario (masa), nivel, vaporización (sección 7).
-- Medidor: caudal (sección 3).
-- Tubo de astillas: nivel de licor con balance de volumen.
-- Bombas de astillas en serie: caudal de lechada; si una se detiene, cae la
-  alimentación y la presión de entrada al impregnador.
-- Primera fracción de licor blanco y licor de retorno de la circulación de
-  tope: relación licor/madera de la alimentación.
-
-Nivel de detalle: suficiente para lazos, enclavamientos y fallas de la
-sección 10 de la especificación; no se modela la hidráulica interna de las
-bombas de astillas (limitación L-08).
-
----
+Ver 7.3 y 7.4. El licor de impregnación (licor negro caliente) sale de las
+mallas de extracción principal del digestor con su bomba (S-22 resuelto).
+La hidráulica interna de las bombas de astillas no se modela (L-08).
 
 ## 12. Instrumentación y laboratorio
 
@@ -683,10 +719,20 @@ Rutina `herramientas/calibrar.js` (Fase 1b):
 
 ## 14. Estados de operación
 
-El mismo modelo cubre: vasos vacíos (sin columna, V_gas = V), llenado con
-licor y astillas, lleno y frío, presurizado, calentamiento (circulaciones
-con vapor), operación normal, detenido en caliente (columna detenida,
-cinética activa), enfriamiento y despresurización. Requisitos numéricos:
+El mismo modelo cubre: vasos vacíos (venteo abierto, bombas detenidas, silo
+vacío), llenado con licor y astillas (con el venteo abierto, a presión
+atmosférica; rebalsa al llenarse), lleno y frío, presurizado (venteo cerrado y
+bombeo), calentamiento (circulaciones con vapor), operación normal, detenido
+en caliente (columna detenida, cinética activa), enfriamiento y
+despresurización (con vaporización súbita si se despresuriza caliente). Las
+pruebas cubren vacío, llenado, presurización, columna detenida y
+vaporización súbita; las secuencias completas de partida y parada son de la
+Fase 6.
+
+El estado inicial de operación es sintético: las parcelas se precocinan según
+su edad esperada (S-30). Tarda ≈ 10 h en llegar al estado estacionario y en
+la primera hora puede abrir el alivio del digestor (sin control de presión);
+los escenarios del juego partirán de estados estables guardados. Requisitos numéricos:
 sin divisiones por caudales o masas nulas (umbrales mínimos explícitos),
 la cinética es válida bajo 100 °C (la Arrhenius simplemente da velocidades
 mínimas).
@@ -713,18 +759,24 @@ mínimas).
 | S-14 | Álcali residual informado = 40·[OH⁻] (sin ácidos débiles). |
 | S-15 | Pérdidas de calor al ambiente con UA constante por vaso. |
 | S-16 | Valores provisionales de la tabla de preguntas P1–P19 del plan (aceptados por el usuario para avanzar). |
-| S-17 | Fase 1a: con el vaso lleno, el exceso de licor sale por la corriente de cierre (separador del impregnador, extracción principal del digestor). Se reemplaza por el balance de presión en la Fase 1c. |
+| S-17 | ~~Corriente de cierre~~ — reemplazada en la Fase 1c por el balance de presión (§8). |
 | S-18 | La humedad de la astilla entra como licor retenido con las propiedades del licor (agua pura sin especies). |
-| S-19 | Fracción de astillas en la columna constante (40 %) hasta la Fase 1c (compactación). |
-| S-20 | Calentadores como temperatura de salida con potencia máxima hasta la Fase 1c (vapor, incrustación). |
+| S-19 | Fracción de astillas 40 % solo para armar la columna inicial; desde la Fase 1c la calcula la compactación (§9). |
+| S-20 | ~~Calentadores con potencia máxima~~ — reemplazado en la Fase 1c por el modelo con vapor e incrustación (§7.1). |
 | S-21 | El caso base inicial parte con astillas ya impregnadas con el licor inicial del vaso; el estado estacionario se alcanza en ≈ 2 residencias (≈ 9 h). |
-| S-22 | El licor de impregnación (licor negro caliente a 150 °C) entra como fuente externa; en la Fase 1c se conecta a la extracción correspondiente. |
+| S-22 | ~~El licor de impregnación entra como fuente externa~~ — reemplazado en la Fase 1c por S-35. |
 | S-24 | Con ρ·cp del licor constante, el calor sensible de la madera que se disuelve (cp_madera·Δm·T) se registra como término aparte del balance de energía en vez de pasar al licor. |
 | S-25 | Las salidas de astillas (raspador, soplado) se especifican en base madera alimentada (m0): equivale a retirar un volumen fijo de columna, porque la astilla no cambia de volumen al cocinarse (hasta la compactación de la Fase 1c). Sin control de nivel (Fase 2), así el nivel no depende del rendimiento. |
 | S-26 | Filtrado de lavado con 5 g/L de álcali efectivo (antes 2), para que el álcali residual del soplado quede en 4–7 g/L. |
 | S-27 | Solo se calibran 6 factores (deslignificación, consumo de álcali por lignina, degradación de carbohidratos, formación de HexA, escisión de celulosa, impregnación); el resto de las constantes cinéticas son supuestos de orden de magnitud. |
 | S-28 | Caso base: filtrado de lavado al fondo 1 180 m³/h con extracción final 790 m³/h (ambos +70 respecto de la Fase 1a) para un factor de dilución de 2,2 m³/ADt sin que el filtrado frío suba a la zona de cocción. |
 | S-29 | Difusión libre ↔ retenido con τ ≈ 9 min a 150 °C (D_ref = 2,5·10⁻⁹ m²/s); condensación (OH_c) y reprecipitación de lignina centradas en 3 g/L de álcali dentro de la astilla. Con valores más lentos o umbrales más altos, el interior de la astilla quedaba sin álcali y la temperatura dejaba de bajar el kappa. |
+| S-30 | Estado inicial de operación sintético: parcelas precocinadas según su edad esperada en la columna, con un licor de cocción típico; tasa de penetración inicial estimada. |
+| S-31 | Presión: compresibilidad del vaso 5·10⁻¹⁰ 1/Pa; válvulas con presión solo en la extracción principal y el exceso del impregnador; el resto de las corrientes con caudal fijo hasta la Fase 2. |
+| S-32 | Ciclones flash a presión constante y nivel con control proporcional ideal; el vapor de ambos va al silo; el condensado de la vaporización queda como humedad de las astillas. |
+| S-33 | Compactación tipo Janssen con μK = 0,08 y constante de tiempo de 10 min; hueco máximo de colgamiento 600 m³. |
+| S-34 | Mallas: ΔP limpia 0,15–0,3 bar, taponamiento ≈ 1 R0 cada 6 h sin conmutación, equilibrio ≈ 0,25 R0 con conmutación. |
+| S-35 | Licor de impregnación desde la extracción principal (260 m³/h); por la válvula de extracción principal a flash pasan ≈ 100 m³/h. |
 | S-23 | Una tubería entre vasos entrega en cada paso el volumen que se le ingresó en el paso anterior (desfase de un paso lento, 5 s), lo que evita lazos algebraicos. |
 
 ## 16. Limitaciones conocidas
@@ -761,7 +813,11 @@ mínimas).
 | Cinética (lignina, carbohidratos, HexA, viscosidad, álcali, impregnación por clase) | Fase 1b ✔ |
 | Calibración (`npm run calibrar`, resultado en `docs/CALIBRACION.md`) | Fase 1b ✔ |
 | Índices de blanqueabilidad y color (§6.11) | Fase 5 (puntaje) |
-| Presión, alivio, vapor, flash, mallas, compactación, alimentación, propiedades del licor | Fase 1c |
+| Presión de los vasos, válvulas, bombas, alivio, seguridad, vaporización súbita, venteo | Fase 1c ✔ |
+| Calentadores con vapor e incrustación, ciclones flash, evaporadores, silo, medidor, tubo de astillas, estanque de soplado | Fase 1c ✔ |
+| Mallas, compactación, colgamiento, raspadores | Fase 1c ✔ |
+| Propiedades del licor variables con los sólidos | Descartado (ver §7) |
+| Canalización | Fase 5 |
 
 ## 18. Referencias (a verificar al implementar)
 

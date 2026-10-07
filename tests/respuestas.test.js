@@ -18,6 +18,7 @@ function escenario(cambios, horas = 6) {
   planta.cargar(base)
   const est = planta.estadoInterno()
   for (const c of cambios) {
+    if (c.tipo === 'valvula') { planta.enviarComando(c); continue }
     const actual = c.tipo === 'ajustar' ? est.ajustes[c.id][c.campo] : est.fuentes[c.id][c.campo]
     planta.enviarComando({ tipo: c.tipo, id: c.id, campo: c.campo, valor: c.factor !== undefined ? actual * c.factor : actual + c.suma })
   }
@@ -59,7 +60,8 @@ describe('respuestas cualitativas', () => {
   })
 
   it('más dilución y extracción bajan los sólidos disueltos y suben la viscosidad', () => {
-    const { k, s } = escenario(escalar(['fil_sup', 'fil_inf'], 'caudal', 2))
+    // Con más filtrado hay que extraer más (si no, presuriza y el filtrado sube por la columna).
+    const { k, s } = escenario([...escalar(['fil_sup', 'fil_inf'], 'caudal', 2), { tipo: 'valvula', id: 'ext_principal', valor: 0.96 }])
     const ds = (st) => st.vasos.dig.zonas.coccion_inferior
     const dsOrg = (z) => z.LD + z.XD + z.CD + z.OD
     const planta = crearPlanta(config())

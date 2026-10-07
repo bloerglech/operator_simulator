@@ -46,7 +46,7 @@
   "reacciones": {
     "lignina_rapida": {
       "A": {
-        "valor": 0.009112,
+        "valor": 0.008832,
         "unidad": "1/s",
         "origen": "calibrado",
         "nota": "calibrado 2026-10-07 (objetivo: kappa)"
@@ -64,7 +64,7 @@
     },
     "lignina_principal_OH": {
       "A": {
-        "valor": 0.0009112,
+        "valor": 0.0008832,
         "unidad": "1/s",
         "origen": "calibrado",
         "nota": "calibrado 2026-10-07 (objetivo: kappa)"
@@ -82,7 +82,7 @@
     },
     "lignina_principal_HS": {
       "A": {
-        "valor": 0.001215,
+        "valor": 0.001178,
         "unidad": "1/s",
         "origen": "calibrado",
         "nota": "calibrado 2026-10-07 (objetivo: kappa)"
@@ -105,7 +105,7 @@
     },
     "lignina_residual": {
       "A": {
-        "valor": 0.0004252,
+        "valor": 0.0004122,
         "unidad": "1/s",
         "origen": "calibrado",
         "nota": "calibrado 2026-10-07 (objetivo: kappa)"
@@ -159,7 +159,7 @@
     },
     "celulosa_peeling": {
       "A": {
-        "valor": 0.0004134,
+        "valor": 0.0003975,
         "unidad": "1/s",
         "origen": "calibrado",
         "nota": "calibrado 2026-10-07 (objetivo: rendimiento)"
@@ -172,7 +172,7 @@
     },
     "celulosa_hidrolisis": {
       "A": {
-        "valor": 0.00003675,
+        "valor": 0.00003533,
         "unidad": "1/s",
         "origen": "calibrado",
         "nota": "calibrado 2026-10-07 (objetivo: rendimiento)"
@@ -185,7 +185,7 @@
     },
     "xilano_disolucion": {
       "A": {
-        "valor": 0.0006473,
+        "valor": 0.0006223,
         "unidad": "1/s",
         "origen": "calibrado",
         "nota": "calibrado 2026-10-07 (objetivo: rendimiento)"
@@ -203,7 +203,7 @@
     },
     "xilano_hidrolisis": {
       "A": {
-        "valor": 0.00004593,
+        "valor": 0.00004416,
         "unidad": "1/s",
         "origen": "calibrado",
         "nota": "calibrado 2026-10-07 (objetivo: rendimiento)"
@@ -216,7 +216,7 @@
     },
     "otros_peeling": {
       "A": {
-        "valor": 0.0006887,
+        "valor": 0.0006621,
         "unidad": "1/s",
         "origen": "calibrado",
         "nota": "calibrado 2026-10-07 (objetivo: rendimiento)"
@@ -229,7 +229,7 @@
     },
     "otros_hidrolisis": {
       "A": {
-        "valor": 0.00004593,
+        "valor": 0.00004416,
         "unidad": "1/s",
         "origen": "calibrado",
         "nota": "calibrado 2026-10-07 (objetivo: rendimiento)"
@@ -267,7 +267,7 @@
     },
     "hexa_formacion": {
       "A": {
-        "valor": 0.0003761,
+        "valor": 0.0003594,
         "unidad": "1/s",
         "origen": "calibrado",
         "nota": "calibrado 2026-10-07 (objetivo: kappaHexA)"
@@ -303,7 +303,7 @@
     },
     "viscosidad": {
       "A": {
-        "valor": 6.766e-8,
+        "valor": 6.269e-8,
         "unidad": "1/s",
         "origen": "calibrado",
         "nota": "calibrado 2026-10-07 (objetivo: viscosidad)"
@@ -351,7 +351,7 @@
   },
   "consumo_alcali": {
     "alfa_lignina": {
-      "valor": 5.401,
+      "valor": 3.83,
       "unidad": "mol/kg",
       "origen": "calibrado",
       "nota": "calibrado 2026-10-07 (objetivo: alcaliExtraccion)"
@@ -387,7 +387,7 @@
   },
   "impregnacion": {
     "A": {
-      "valor": 0.006442,
+      "valor": 0.007791,
       "unidad": "1/s",
       "origen": "calibrado",
       "nota": "calibrado 2026-10-07 (objetivo: rechazos)"

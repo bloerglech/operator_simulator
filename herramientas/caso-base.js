@@ -46,6 +46,15 @@ for (const [id, v] of Object.entries(s.vasos)) {
 }
 for (const [id, v] of Object.entries(s.valvulas)) console.log(`  Válvula ${id.padEnd(18)} apertura ${f(v.apertura * 100, 1)} %   ${f(v.caudal * 3600, 0)} m³/h`)
 console.log(`  Incidentes: ${Object.keys(s.incidentes).length ? JSON.stringify(s.incidentes) : 'ninguno'}`)
+linea()
+const e = s.equipos
+console.log('EQUIPOS')
+console.log(`  Silo: nivel ${f(e.silo.nivel * 100, 0)} %, astillas a ${f(e.silo.Tsalida, 1)} °C, vaporización ${f(e.silo.vaporizacion * 100, 0)} %, vapor flash ${f(e.silo.vaporFlash * 3.6, 1)} t/h, vapor BP ${f(e.silo.vaporBP * 3.6, 1)} t/h, venteado ${f(e.silo.vaporVenteado * 3.6, 1)} t/h`)
+console.log(`  Medidor: ${f(e.medidor.velocidad, 2)} rpm, ${f(e.medidor.caudal * 3.6, 1)} t/h secas`)
+for (const [id, fl] of Object.entries(e.flash)) console.log(`  ${id}: nivel ${f(fl.nivel * 100, 0)} %, ${f(fl.T, 1)} °C, vapor ${f(fl.vapor * 3.6, 1)} t/h, salida ${f(fl.salida * 3600, 0)} m³/h`)
+console.log(`  Estanque de soplado: nivel ${f(e.estanqueSoplado.nivel * 100, 0)} %`)
+for (const [id, c] of Object.entries(e.calentadores)) console.log(`  Calentador ${id.padEnd(15)} ${f(c.calor / 1000, 1)} MW, vapor ${f(c.vapor * 3.6, 1)} t/h, T máx ${f(c.Tmax, 1)} °C${c.saturado ? '  SATURADO' : ''}`)
+console.log(`  Vapor específico (calentadores): ${f(k.vaporEspecifico, 2)} GJ/ADt`)
 
 linea()
 console.log('ZONAS (licor libre)')

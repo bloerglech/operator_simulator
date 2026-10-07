@@ -3,6 +3,7 @@
 // madera) y de energía en cualquier momento.
 
 import { capacidadParcela } from './materia.js'
+import { inventarioEquipos } from './equipos.js'
 
 /** Cantidades vacías: licor (m³), esp (Σ c·v por especie), madera (kg), energia (kJ). */
 export function cantidadesVacias(nEsp) {
@@ -45,6 +46,7 @@ export function inventario(modelo, estado) {
   for (const tubo of Object.values(estado.tubos)) {
     for (const paq of tubo.paquetes) sumarPaqueteA(acc, paq, fis)
   }
+  inventarioEquipos(estado, acc, fis)
   return acc
 }
 

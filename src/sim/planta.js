@@ -19,6 +19,8 @@ import { incrementoH } from './factorH.js'
 import { reaccionarParcela, calidadPulpa } from './cinetica.js'
 import { instantanea } from './instantanea.js'
 import { pasoRapidoEquipos, factorCorriente, cerrarPresion, registrarEvento } from './pasoRapido.js'
+import { pasoSilo, calentar, entregarAEquipo, pasoFlashYEstanque, kgPorRevolucion } from './equipos.js'
+import { pasoMalla } from './mallas.js'
 
 const copiar = (x) => JSON.parse(JSON.stringify(x))
 
@@ -76,7 +78,7 @@ export function crearPlanta(config, opciones = {}) {
 // ---------------------------------------------------------------------------
 // Comandos
 
-const CAMPOS_CORRIENTE = ['caudal', 'caudalMadera', 'T_salida']
+const CAMPOS_CORRIENTE = ['caudal', 'caudalMadera', 'T_salida', 'velocidad']
 
 /**
  * Comandos:
@@ -85,6 +87,14 @@ const CAMPOS_CORRIENTE = ['caudal', 'caudalMadera', 'T_salida']
  *   { tipo: 'valvula', id, valor }                       (comando de apertura 0–1)
  *   { tipo: 'bomba', id, accion: 'partir' | 'detener' }
  *   { tipo: 'venteo', id: vaso, accion: 'abrir' | 'cerrar' }
+ *   { tipo: 'calentador', id, accion: 'conmutar' | 'lavado_acido' }  (unidad de respaldo; limpieza)
+ *   { tipo: 'servicio', id, valor }  (presionVaporMP, presionVaporBP, vaporBPMax, limiteEvaporadores,
+ *                                     transportadorSilo, lavado, Tpatio, vaporFlashSilo — también perturbaciones)
+ *   { tipo: 'mallas', id, accion: 'retrolavar' | 'conmutacion_on' | 'conmutacion_off' | 'lavado_acido' }
+ *   { tipo: 'perturbar', id: 'colgamiento', vaso, valor: altura (m) } · { id: 'soltar_columna', vaso }
+ *   { tipo: 'perturbar', id: 'friccion', vaso, valor } · { id: 'finos', valor }  (multiplicadores)
+ *   { tipo: 'perturbar', id: 'incrustacion', equipo: calentador, valor }  (factor f de la unidad activa)
+ * En las astillas, 'caudalMadera' fija la velocidad del medidor para ese caudal con la densidad actual.
  */
 function validarComando(modelo, estado, cmd) {
   const numero = () => {
@@ -113,13 +123,55 @@ function validarComando(modelo, estado, cmd) {
   } else if (cmd.tipo === 'venteo') {
     if (!modelo.vasoPorId[cmd.id]) throw new Error(`Vaso desconocido: ${cmd.id}`)
     if (!['abrir', 'cerrar'].includes(cmd.accion)) throw new Error('Acción de venteo: abrir o cerrar')
+  } else if (cmd.tipo === 'calentador') {
+    if (!modelo.equipos.calentadores[cmd.id]) throw new Error(`Calentador desconocido: ${cmd.id}`)
+    if (!['conmutar', 'lavado_acido'].includes(cmd.accion)) throw new Error('Acción de calentador: conmutar o lavado_acido')
+  } else if (cmd.tipo === 'servicio') {
+    if (!(cmd.id in estado.servicios)) throw new Error(`Servicio desconocido: ${cmd.id}`)
+    numero()
+  } else if (cmd.tipo === 'mallas') {
+    if (!modelo.mallas[cmd.id]) throw new Error(`Mallas desconocidas: ${cmd.id}`)
+    if (!['retrolavar', 'conmutacion_on', 'conmutacion_off', 'lavado_acido'].includes(cmd.accion)) throw new Error('Acción de mallas inválida')
+  } else if (cmd.tipo === 'perturbar') {
+    if (['colgamiento', 'soltar_columna', 'friccion'].includes(cmd.id)) {
+      if (!modelo.vasoPorId[cmd.vaso]) throw new Error(`Vaso desconocido: ${cmd.vaso}`)
+    } else if (cmd.id === 'incrustacion') {
+      if (!modelo.equipos.calentadores[cmd.equipo]) throw new Error(`Calentador desconocido: ${cmd.equipo}`)
+    } else if (cmd.id !== 'finos') throw new Error(`Perturbación desconocida: ${cmd.id}`)
+    if (cmd.id !== 'soltar_columna') numero()
   } else throw new Error(`Comando desconocido: ${cmd.tipo}`)
 }
 
 function aplicarComando(modelo, estado, cmd) {
   if (cmd.tipo === 'ajustar') {
     const v = cmd.campo === 'T_salida' ? cmd.valor : Math.max(0, cmd.valor)
+    if (cmd.campo === 'caudalMadera' && estado.ajustes[cmd.id].velocidad !== undefined) {
+      estado.ajustes[cmd.id].velocidad = v / kgPorRevolucion(modelo.equipos, estado.fuentes.astillas.densidad)
+    }
     estado.ajustes[cmd.id][cmd.campo] = v
+  } else if (cmd.tipo === 'calentador') {
+    const c = estado.equipos.calentadores[cmd.id]
+    if (cmd.accion === 'conmutar') c.activo = 1 - c.activo
+    else c.incrustacion[c.activo] = 0
+    registrarEvento(modelo, estado, cmd.accion === 'conmutar' ? 'conmutacion_calentador' : 'lavado_acido', { equipo: cmd.id })
+  } else if (cmd.tipo === 'servicio') {
+    estado.servicios[cmd.id] = cmd.valor
+  } else if (cmd.tipo === 'mallas') {
+    const m = estado.mallas[cmd.id]
+    if (cmd.accion === 'retrolavar') m.rf *= 1 - modelo.mallas[cmd.id].retro
+    else if (cmd.accion === 'lavado_acido') m.rinc = 0
+    else m.conmutacion = cmd.accion === 'conmutacion_on'
+    registrarEvento(modelo, estado, 'mallas_' + cmd.accion, { equipo: cmd.id })
+  } else if (cmd.tipo === 'perturbar') {
+    const v = modelo.vasoPorId[cmd.vaso]
+    if (cmd.id === 'colgamiento') colgarColumna(modelo, estado, v, cmd.valor)
+    else if (cmd.id === 'soltar_columna') soltarColumna(modelo, estado, v)
+    else if (cmd.id === 'friccion') estado.vasos[v.id].friccion = Math.max(0.01, cmd.valor)
+    else if (cmd.id === 'incrustacion') {
+      const c = estado.equipos.calentadores[cmd.equipo]
+      c.incrustacion[c.activo] = Math.max(0, cmd.valor)
+    }
+    else estado.perturbaciones.finos = Math.max(0, cmd.valor)
   } else if (cmd.tipo === 'fuente') {
     const f = estado.fuentes[cmd.id]
     if (modelo.idx[cmd.campo] !== undefined && f.c) f.c[modelo.idx[cmd.campo]] = Math.max(0, cmd.valor)
@@ -152,10 +204,9 @@ function pasoLento(modelo, estado) {
     const a = estado.ajustes[c.id]
     const fc = factorCorriente(modelo, estado, c)
     if (c.tipo === 'astillas') {
-      const paq = paqueteVacio(nEsp)
-      const m = a.caudalMadera * dt * fc
-      if (m > 0) paq.parcelas.push(parcelaFresca(modelo, estado.fuentes.astillas, m))
-      sumarPaqueteA(cont.entra, paq, fis)
+      // Silo, vaporización, medidor y tubo de astillas (la entrada al sistema
+      // se contabiliza en el silo).
+      const paq = pasoSilo(modelo, estado, dt, fc, (props, m) => parcelaFresca(modelo, props, m))
       registrarCaudal(estado, c.id, volumenPaquete(paq) / dt, estado.fuentes.astillas.T)
       paquetes[c.id] = paq
     } else if (c.tipo === 'fuente') {
@@ -175,14 +226,10 @@ function pasoLento(modelo, estado) {
     sumarPaquete(paquetes[c.destino.unir], paquetes[c.id])
     delete paquetes[c.id]
   }
-  // 3. Calentadores.
+  // 3. Calentadores (vapor de media presión).
   for (const c of modelo.corrientes) {
     if (!c.calentador || !paquetes[c.id]) continue
-    const li = paquetes[c.id].licor
-    const C = li.v * fis.rcpLicor
-    if (C <= 0) continue
-    const q = Math.min(c.calentador.Qmax * dt, Math.max(0, C * (estado.ajustes[c.id].T_salida - li.T)))
-    li.T += q / C
+    const q = calentar(modelo, estado, c.id, paquetes[c.id].licor, estado.ajustes[c.id].T_salida, dt)
     cont.entra.energia += q
     cont.calentadores += q
     estado.corrientes[c.id].calor = q / dt
@@ -250,6 +297,22 @@ function pasoLento(modelo, estado) {
     }
   }
 
+  // 6b. Ciclones flash, evaporadores y estanque de soplado.
+  pasoFlashYEstanque(modelo, estado, dt)
+
+  // 6c. Mallas (taponamiento e incrustación) y colgamientos.
+  const finos = (modelo.cin.clases.find((k) => k.id === 'finos')?.w ?? 0.06) / 0.06 * (estado.perturbaciones.finos ?? 1)
+  for (const [id, m] of Object.entries(modelo.mallas)) {
+    const q = m.corrientes.reduce((s, cid) => s + (estado.corrientes[cid].caudalReal ?? 0), 0)
+    const c0 = modelo.corrientePorId[m.corrientes[0]]
+    const T = estado.vasos[c0.origen.vaso].T[c0.origen.j]
+    pasoMalla(m, estado.mallas[id], q, T, finos, dt)
+  }
+  for (const v of modelo.vasos) {
+    const ev = estado.vasos[v.id]
+    if (ev.hueco > v.huecoMaximo) soltarColumna(modelo, estado, v)
+  }
+
   // 7. Reacciones de cocción, envejecimiento y factor H de todas las parcelas
   //    (en los vasos y en las tuberías).
   const pr = cont.produccion
@@ -267,6 +330,27 @@ function pasoLento(modelo, estado) {
   for (const tubo of Object.values(estado.tubos)) for (const q of tubo.paquetes) q.parcelas.forEach(procesar)
 }
 
+/** La parte colgada de la columna se suelta y cae sobre el hueco. */
+function soltarColumna(modelo, estado, v) {
+  const ev = estado.vasos[v.id]
+  const caida = ev.hueco / v.geom.A[v.geom.n - 1]
+  for (const par of ev.parcelas) delete par.colgada
+  registrarEvento(modelo, estado, 'caida_columna', { vaso: v.id, caida })
+  ev.hueco = 0
+}
+
+/** Cuelga la columna de un vaso desde una altura (m sobre el fondo). */
+function colgarColumna(modelo, estado, v, altura) {
+  const ev = estado.vasos[v.id]
+  let base = 0
+  for (const par of ev.parcelas) {
+    const h = base / v.geom.A[v.geom.n - 1]
+    if (h >= altura) par.colgada = true
+    base += par.vol / (par.sc ?? v.sCol)
+  }
+  registrarEvento(modelo, estado, 'colgamiento', { vaso: v.id, altura })
+}
+
 /** Lo que sale de un vaso por una corriente va a su tubería o a su sumidero. */
 function salidaCorriente(modelo, estado, id, paq) {
   const c = modelo.corrientePorId[id]
@@ -275,6 +359,8 @@ function salidaCorriente(modelo, estado, id, paq) {
   if (c.volumenTubo > 0) {
     empujar(estado.tubos[id], paq)
     estado.corrientes[id].vUltimo = vol
+  } else if (c.destino.equipo) {
+    entregarAEquipo(estado, c.destino.equipo, paq)
   } else {
     aSumidero(modelo, estado, c.destino.sumidero, paq)
   }

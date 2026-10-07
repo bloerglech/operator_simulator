@@ -15,6 +15,9 @@ import { incrementoH } from './factorH.js'
 import { P_ATM, G } from './agua.js'
 import { caracteristica, aperturaPara } from './valvulas.js'
 import { pisoEbullicion } from './presion.js'
+import { estadoEquiposInicial, kgPorRevolucion } from './equipos.js'
+import { estadoMallasInicial } from './mallas.js'
+import { clonarParcela } from './materia.js'
 
 /** Caudal de madera seca (kg/s) para una producción (ADt/d) y un rendimiento. */
 export function maderaDesdeProduccion(produccion, rendimiento) {
@@ -38,6 +41,7 @@ export function ajustesCasoBase(modelo, fuentes) {
     if (cb.alcali.reparto[c.id]) a.caudal = qLB * p(cb.alcali.reparto, c.id, `caso_base.alcali.reparto.${c.id}`)
     else if (cb.caudales[c.id]) a.caudal = p(cb.caudales, c.id, `caso_base.caudales.${c.id}`)
     if (c.tipo === 'astillas' || c.tipo === 'fondo') a.caudalMadera = madera
+    if (c.tipo === 'astillas') a.velocidad = madera / kgPorRevolucion(modelo.equipos, fuentes.astillas.densidad) // rev/s
     if (c.calentador) {
       a.T_salida = p(cb.temperaturas_calentadores, c.id, `caso_base.temperaturas_calentadores.${c.id}`)
     }
@@ -57,11 +61,11 @@ export function fuentesIniciales(modelo) {
     }
   }
   fuentes.astillas = {
-    T: p(cb.astillas, 'T', 'caso_base.astillas.T'),
+    T: modelo.equipos.TvapConsigna, // la calcula el silo en cada paso
     humedad: p(cb.astillas, 'humedad', 'caso_base.astillas.humedad'),
     densidad: modelo.densidadBasica,
     reactividad: modelo.cin.reactividad,
-    vaporizacion: p(cb.astillas, 'vaporizacion', 'caso_base.astillas.vaporizacion'),
+    vaporizacion: 0.95, // la calcula el silo en cada paso
     marca: 0,
   }
   return fuentes
@@ -176,6 +180,38 @@ export function crearEstadoInicial(modelo, { modo = 'operacion', semilla } = {})
         estado.corrientes[c.id].vUltimo = v
       }
     }
+  }
+
+  if (modo === 'vacio' && ajustes.astillas) ajustes.astillas.velocidad = 0
+  const eqIni = estadoEquiposInicial(modelo, {
+    modo,
+    fuentes,
+    ajustes,
+    licorTipico: licorInicial[modelo.vasos[modelo.vasos.length - 1].id] ?? { c: fuentes.filtrado.c },
+  })
+  estado.equipos = eqIni.estado
+  estado.servicios = eqIni.servicios
+  // Estanque de soplado: pulpa cocida (copia de la del fondo del digestor) al
+  // 10 % de consistencia en el licor inicial del estanque.
+  const fondo = estado.vasos[modelo.vasos[modelo.vasos.length - 1].id].parcelas[0]
+  const est = estado.equipos.estanque
+  if (modo === 'operacion' && fondo && est.licor.v > 0) {
+    const pulpa = est.licor.v * modelo.fis.densidadLicor * 0.1
+    const par = clonarParcela(fondo)
+    const k = pulpa / par.m
+    for (const c of ['m', 'vol', 'vp', 'vr', 'm0', 'M', 'HexA', 'Rp']) par[c] *= k
+    par.s = par.s.map((x) => x * k)
+    par.T = est.licor.T
+    par.cr = est.licor.c.slice()
+    delete par.colgada
+    est.parcelas.push(par)
+  }
+  estado.mallas = estadoMallasInicial(modelo.mallas)
+  // Perturbaciones activas (las activa el instructor o el generador de eventos).
+  estado.perturbaciones = { finos: 1 }
+  for (const v of modelo.vasos) {
+    estado.vasos[v.id].friccion = 1
+    estado.vasos[v.id].hueco = 0
   }
 
   const inv0 = inventario(modelo, estado)

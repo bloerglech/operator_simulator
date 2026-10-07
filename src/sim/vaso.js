@@ -10,7 +10,7 @@
 //  7. Intercambio licor libre ↔ astilla (difusión de especies y calor).
 //  8. Pérdidas de calor al ambiente.
 
-import { ubicarColumna, agregarTope, retirarFondo } from './columna.js'
+import { ubicarColumna, agregarTope, retirarFondo, compactar } from './columna.js'
 import { balanceHidraulico } from './hidraulica.js'
 import { transportarLicor } from './transporte.js'
 import { capacidadParcela } from './materia.js'
@@ -58,12 +58,25 @@ export function pasoVaso(v, est, ent, dt) {
   const nEsp = est.c.length
   const iOH = v.iOH
 
-  // 1. Astillas: salida por el fondo, entrada por el tope.
+  // 1. Astillas: salida por el fondo, entrada por el tope. Con la columna
+  //    colgada, lo que sale del fondo deja un hueco bajo la parte colgada.
   const parcelasFondo = retirarFondo(est.parcelas, Math.max(0, ent.fondo.masa))
+  if (est.parcelas.some((q) => q.colgada)) {
+    est.hueco = (est.hueco ?? 0) + parcelasFondo.reduce((s, q) => s + q.vol / (q.sc ?? v.sCol), 0)
+  }
   agregarTope(est.parcelas, ent.parcelasTope, v.masaObjetivo, fis)
 
-  // 2. Ubicación de la columna.
-  const col = ubicarColumna(est.parcelas, geom, v.sCol)
+  // 2. Compactación y ubicación de la columna; esfuerzo sobre el raspador.
+  const cmp = { ...v.compactacion, friccion: est.friccion ?? 1, hueco: est.hueco ?? 0, dt, sIni: v.sCol }
+  const sigmaFondo = compactar(est.parcelas, geom, cmp, est.flujoFiltrado, v.cinLigPorKappa, fis.densidadLicor, v.densidadPared)
+  const col = ubicarColumna(est.parcelas, geom, v.sCol, est.hueco ?? 0)
+  const r = v.raspador
+  const fondoConAstillas = est.parcelas.length > 0 && !est.parcelas[0].colgada
+  est.raspador = {
+    esfuerzo: fondoConAstillas ? sigmaFondo : 0,
+    torque: r.T0 + r.kT * (fondoConAstillas ? sigmaFondo / 1000 : 0),
+  }
+  est.raspador.corriente = r.I0 + r.kI * est.raspador.torque
   const cap = geom.V.map((V, j) => Math.max(0, V - col.volAstilla[j]))
 
   // 3. Penetración: el licor libre llena los poros con aire de las astillas.
@@ -160,6 +173,9 @@ export function pasoVaso(v, est, ent, dt) {
   est.vf = hid.vNueva
   est.T = T
   est.c = c
+  est.flujo = hid.flujo
+  const af = 1 - Math.exp(-dt / v.compactacion.tau)
+  est.flujoFiltrado = est.flujoFiltrado ? est.flujoFiltrado.map((x, i) => x + (hid.flujo[i] - x) * af) : hid.flujo.slice()
 
   return {
     extraidos,

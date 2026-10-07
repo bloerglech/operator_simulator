@@ -145,6 +145,7 @@ describe('estabilidad en condiciones extremas', () => {
     planta.avanzar(HORA)
     const v1 = planta.leerEstado({ perfiles: true }).vasos.dig.perfil.licorLibre.reduce((a, b) => a + b, 0)
     expect(v1).toBeCloseTo(0.3 * HORA, -1) // la bomba tarda unos segundos en partir
+    planta.enviarComando({ tipo: 'servicio', id: 'transportadorSilo', valor: 20 })
     planta.enviarComando({ tipo: 'ajustar', id: 'astillas', campo: 'caudalMadera', valor: 20 })
     planta.avanzar(2 * HORA)
     const s = planta.leerEstado({ perfiles: true, balances: true })

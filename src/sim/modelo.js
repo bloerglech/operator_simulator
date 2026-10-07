@@ -6,6 +6,8 @@ import { p, validarParametros } from './parametros.js'
 import { crearGeometria, celdaDeAltura } from './geometria.js'
 import { indicesEspecies } from './licor.js'
 import { construirCinetica } from './cinetica.js'
+import { construirEquipos } from './equipos.js'
+import { construirMallas } from './mallas.js'
 
 /**
  * La configuración es un objeto con una entrada por archivo de config/:
@@ -88,6 +90,9 @@ export function construirModelo(config) {
       iOH: idx.OH,
       zonas,
       presion: leerPresion(equipos.presion?.[cv.id], cv.id, hidraulica),
+      compactacion: leerCompactacion(hidraulica),
+      raspador: leerRaspador(hidraulica.raspadores?.[cv.id], cv.id),
+      huecoMaximo: p(hidraulica.colgamiento, 'hueco_maximo', 'hidraulica.colgamiento.hueco_maximo'),
     }
   })
   const vasoPorId = Object.fromEntries(vasos.map((v) => [v.id, v]))
@@ -124,6 +129,8 @@ export function construirModelo(config) {
       c.destino.j = cc.destino.tope ? 0 : celdaDeAltura(v.geom, p(cc.destino, 'z', `topologia.corrientes.${cc.id}.destino.z`))
     } else if (cc.destino.sumidero) {
       c.destino.sumidero = cc.destino.sumidero
+    } else if (cc.destino.equipo) {
+      c.destino.equipo = cc.destino.equipo
     } else if (cc.destino.unir) {
       if (c.tipo !== 'fuente') throw new Error(`Corriente "${cc.id}": solo una fuente puede unirse a otra corriente`)
       c.destino.unir = cc.destino.unir
@@ -138,8 +145,7 @@ export function construirModelo(config) {
     if (c.tipo !== 'fuente' && c.tipo !== 'astillas' && c.destino.vaso && c.volumenTubo <= 0) {
       throw new Error(`Corriente "${cc.id}": entre vasos se requiere el volumen de tubería en equipos.tubos`)
     }
-    const cal = energia.calentadores?.[cc.id]
-    if (cal) c.calentador = { Qmax: p(cal, 'Q_max', `energia.calentadores.${cc.id}.Q_max`) }
+    if (equipos.calentadores?.[cc.id]) c.calentador = true
     return c
   })
   const corrientePorId = Object.fromEntries(corrientes.map((c) => [c.id, c]))
@@ -156,13 +162,15 @@ export function construirModelo(config) {
     const c = corrientePorId[id]
     if (!c || c.tipo !== 'extraccion') throw new Error(`equipos.valvulas.${id}: debe ser una extracción de un vaso`)
     const ruta = `equipos.valvulas.${id}`
+    const destinoFlash = c.destino.equipo && equipos.flash?.[c.destino.equipo]
     valvulas[id] = {
       Kv: p(cv, 'Kv', `${ruta}.Kv`),
       tipo: cv.caracteristica ?? 'lineal',
       R: cv.rangeabilidad ?? 50,
       tau: p(cv, 'tau', `${ruta}.tau`),
       carrera: p(cv, 'carrera', `${ruta}.carrera`),
-      Pdest: p(cv, 'P_destino', `${ruta}.P_destino`),
+      // Presión aguas abajo: la del ciclón flash de destino o la configurada.
+      Pdest: destinoFlash ? p(destinoFlash, 'P', `equipos.flash.${c.destino.equipo}.P`) : p(cv, 'P_destino', `${ruta}.P_destino`),
     }
     c.valvula = valvulas[id]
   }
@@ -186,8 +194,29 @@ export function construirModelo(config) {
   for (const c of corrientes) c.bombas ??= []
 
   const cin = construirCinetica(config)
+  for (const v of vasos) {
+    v.compactacion.kappa0 = cin.comp.lignina / cin.ligPorKappa
+    v.cinLigPorKappa = cin.ligPorKappa
+    v.densidadPared = densidadPared
+  }
+  const eq = construirEquipos(config)
+  const mallas = construirMallas(config)
+  for (const [id, m] of Object.entries(mallas)) {
+    for (const cid of m.corrientes) {
+      const c = corrientePorId[cid]
+      if (!c || c.tipo !== 'extraccion') throw new Error(`equipos.mallas.${id}: "${cid}" debe ser una extracción`)
+      c.malla = id
+    }
+  }
+  for (const c of corrientes) {
+    if (c.destino.equipo && c.destino.equipo !== 'estanque_soplado' && !eq.flash[c.destino.equipo]) {
+      throw new Error(`Corriente "${c.id}": equipo de destino desconocido "${c.destino.equipo}"`)
+    }
+  }
 
   return {
+    equipos: eq,
+    mallas,
     cin,
     dtR,
     dtL,
@@ -229,5 +258,32 @@ function leerPresion(cp, id, hidraulica) {
       Kv: p(cp.seguridad, 'Kv', `${r}.seguridad.Kv`),
       Pdest: p(cp.seguridad, 'P_destino', `${r}.seguridad.P_destino`),
     },
+  }
+}
+
+function leerCompactacion(h) {
+  const c = h.compactacion
+  const r = 'hidraulica.compactacion'
+  return {
+    s0: p(c, 's0', `${r}.s0`),
+    sMax: p(c, 's_max', `${r}.s_max`),
+    cKappa: p(c, 'c_kappa', `${r}.c_kappa`),
+    cSigma: p(c, 'c_esfuerzo', `${r}.c_esfuerzo`),
+    sigmaRef: p(c, 'esfuerzo_ref', `${r}.esfuerzo_ref`),
+    muK: p(c, 'mu_K', `${r}.mu_K`),
+    kArrastre: p(c, 'k_arrastre', `${r}.k_arrastre`),
+    tau: p(c, 'tau', `${r}.tau`),
+  }
+}
+
+function leerRaspador(c, id) {
+  if (!c) throw new Error(`Faltan los datos del raspador del vaso "${id}" en hidraulica.raspadores`)
+  const r = `hidraulica.raspadores.${id}`
+  return {
+    T0: p(c, 'torque_vacio', `${r}.torque_vacio`),
+    kT: p(c, 'k_torque', `${r}.k_torque`),
+    I0: p(c, 'corriente_vacio', `${r}.corriente_vacio`),
+    kI: p(c, 'k_corriente', `${r}.k_corriente`),
+    Ialarma: p(c, 'corriente_alarma', `${r}.corriente_alarma`),
   }
 }

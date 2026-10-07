@@ -161,6 +161,12 @@ $$Q_{LB} = \frac{262{,}9}{2\,940} = 0{,}0895\ \mathrm{m^3/s} = 322\ \mathrm{m^3/
 Repartido: alimentación 161 m³/h, transferencia 32 m³/h, circulación
 superior 64 m³/h, inferior 64 m³/h.
 
+> Nota (Fase 1c): las astillas salen del silo a 100 °C con ≈ 0,19 kg de
+> condensado por kg de madera (capítulo 5.5), y el licor negro caliente de
+> la impregnación sale de la extracción principal del digestor. Los números
+> de este capítulo usan los valores de diseño de la Fase 1a; el simulador
+> da valores levemente distintos.
+
 ### Paso 3 — Relación licor/madera en la impregnación
 
 La relación licor/madera (L/W) cuenta todo el líquido que acompaña a la

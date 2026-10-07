@@ -58,6 +58,16 @@ marcado en `config/` (ver Anexo A): las constantes cinéticas de eucalipto son
   *Transactions of the Faraday Society* 51. *(por verificar)* — Aproximación
   de fuerza impulsora lineal.
 
+## Agua y vapor; mecánica de la columna
+
+- IAPWS (2007). *Revised Release on the IAPWS Industrial Formulation 1997 for
+  the Thermodynamic Properties of Water and Steam* (IAPWS-IF97). — Ecuación de
+  saturación (región 4) usada en `agua.js`; validada en las pruebas contra
+  valores de tabla.
+- Janssen, H. A. (1895). Versuche über Getreidedruck in Silozellen.
+  *Zeitschrift des Vereines Deutscher Ingenieure* 39. *(por verificar)* —
+  Esfuerzo en columnas de material granular con fricción en la pared.
+
 ## Métodos numéricos
 
 - Patankar, S. V. (1980). *Numerical Heat Transfer and Fluid Flow*.

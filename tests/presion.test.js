@@ -20,7 +20,7 @@ describe('presión del digestor', () => {
 
   it('si se restringe la extracción, la presión sube en segundos y el alivio la contiene', () => {
     const planta = plantaBase()
-    planta.avanzar(1800)
+    planta.avanzar(3 * 3600) // después del transitorio del arranque sintético
     const p0 = presion(planta, 'dig')
     planta.enviarComando({ tipo: 'valvula', id: 'ext_principal', valor: 0 })
     planta.avanzar(20)
@@ -40,11 +40,11 @@ describe('presión del digestor', () => {
 
   it('con el alivio insuficiente, abre la válvula de seguridad y la presión cicla bajo el ajuste', () => {
     const cfg = config()
-    cfg.equipos.presion.dig.alivio.Kv.valor = 50 // alivio subdimensionado
+    cfg.equipos.presion.dig.alivio.Kv.valor = 10 // alivio subdimensionado
     // Bombas más fuertes: si no, su curva limita la presión antes de 9 bar(g).
     for (const b of Object.values(cfg.equipos.bombas)) if (b.P_cierre) b.P_cierre.valor = 20
     const planta = crearPlanta(cfg)
-    planta.avanzar(1800)
+    planta.avanzar(3 * 3600) // después del transitorio del arranque sintético
     planta.enviarComando({ tipo: 'valvula', id: 'ext_principal', valor: 0 })
     planta.avanzar(300)
     const ev = planta.estadoInterno().eventos.map((e) => e.tipo)
@@ -54,7 +54,7 @@ describe('presión del digestor', () => {
 
   it('si se abre de más la extracción, la presión cae hasta la de saturación y hay vaporización súbita', () => {
     const planta = plantaBase()
-    planta.avanzar(1800)
+    planta.avanzar(3 * 3600) // después del transitorio del arranque sintético
     planta.enviarComando({ tipo: 'valvula', id: 'ext_principal', valor: 1 })
     planta.avanzar(300)
     const ev = planta.estadoInterno().eventos.map((e) => e.tipo)
@@ -66,7 +66,7 @@ describe('presión del digestor', () => {
 
   it('al detenerse la bomba de lavado, el digestor pierde presión', () => {
     const planta = plantaBase()
-    planta.avanzar(1800)
+    planta.avanzar(3 * 3600) // después del transitorio del arranque sintético
     const p0 = presion(planta, 'dig')
     planta.enviarComando({ tipo: 'bomba', id: 'bomba_lavado', accion: 'detener' })
     planta.avanzar(60)

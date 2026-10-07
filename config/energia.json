@@ -1,13 +1,46 @@
 {
-  "_descripcion": "Energía: ambiente, pérdidas y calentadores (simplificados en la Fase 1a: temperatura de salida con potencia máxima; vapor e incrustación en la Fase 1c).",
-  "T_ambiente": { "valor": 20, "unidad": "°C", "origen": "supuesto" },
-  "UA_perdidas": {
-    "imp": { "valor": 5, "unidad": "kW/K", "origen": "supuesto" },
-    "dig": { "valor": 15, "unidad": "kW/K", "origen": "supuesto" }
+  "_descripcion": "Energía: ambiente, pérdidas y servicios de vapor.",
+  "T_ambiente": {
+    "valor": 20,
+    "unidad": "°C",
+    "origen": "supuesto"
   },
-  "calentadores": {
-    "retorno_transf": { "Q_max": { "valor": 30, "unidad": "MW", "origen": "supuesto" } },
-    "circ_sup": { "Q_max": { "valor": 45, "unidad": "MW", "origen": "supuesto" } },
-    "circ_inf": { "Q_max": { "valor": 45, "unidad": "MW", "origen": "supuesto" } }
+  "UA_perdidas": {
+    "imp": {
+      "valor": 5,
+      "unidad": "kW/K",
+      "origen": "supuesto"
+    },
+    "dig": {
+      "valor": 15,
+      "unidad": "kW/K",
+      "origen": "supuesto"
+    }
+  },
+  "vapor": {
+    "P_MP": {
+      "valor": 12,
+      "unidad": "bar(g)",
+      "origen": "supuesto",
+      "nota": "cabezal de vapor de media presión a los calentadores (P8)"
+    },
+    "P_BP": {
+      "valor": 3.5,
+      "unidad": "bar(g)",
+      "origen": "supuesto",
+      "nota": "vapor fresco de baja presión al silo"
+    },
+    "vapor_bp_max": {
+      "valor": 15,
+      "unidad": "kg/s",
+      "origen": "supuesto",
+      "nota": "capacidad de vapor fresco al silo"
+    }
+  },
+  "T_astillas_patio": {
+    "valor": 15,
+    "unidad": "°C",
+    "origen": "supuesto",
+    "nota": "temperatura de las astillas en el patio"
   }
 }

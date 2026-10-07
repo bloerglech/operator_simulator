@@ -32,6 +32,9 @@ export function instantanea(modelo, estado, op = {}) {
         seguridad: ev.presion.seguridadAbierta,
         ebullicion: ev.presion.ebullicion,
       },
+      raspador: ev.raspador ? { ...ev.raspador } : null,
+      colgada: ev.parcelas.some((q) => q.colgada),
+      hueco: ev.hueco ?? 0,
     }
     if (op.perfiles) salida.vasos[v.id].perfil = perfil(modelo, v, ev, d)
   }
@@ -51,6 +54,16 @@ export function instantanea(modelo, estado, op = {}) {
     caudal: estado.corrientes[id].caudalReal,
   }]))
   salida.bombas = Object.fromEntries(Object.keys(modelo.bombas).map((id) => [id, { ...estado.bombas[id] }]))
+  salida.equipos = equipos(modelo, estado)
+  salida.servicios = { ...estado.servicios }
+  salida.mallas = Object.fromEntries(Object.entries(estado.mallas).map(([id, m]) => [id, {
+    dP: m.dP, // Pa
+    dPmax: modelo.mallas[id].dPmax,
+    caudal: m.Q,
+    taponamiento: m.rf,
+    incrustacion: m.rinc,
+    conmutacion: m.conmutacion,
+  }]))
   salida.eventos = estado.eventos.slice(-50)
   salida.incidentes = { ...estado.incidentes }
   if (op.balances) salida.balances = cierreBalances(modelo, estado)
@@ -165,6 +178,11 @@ function indicadores(modelo, estado) {
     k.TSoplado = sopl.T
   }
   // Calidad de la pulpa en el soplado y álcali residual.
+  // Consumo específico de vapor (vapor MP a calentadores + vapor fresco BP al silo).
+  if (estado.equipos && k.produccion > 0) {
+    const vapor = Object.values(estado.equipos.calentadores).reduce((s, c) => s + c.Q, 0) // kW
+    k.vaporEspecifico = (vapor * 86400) / 1e6 / k.produccion // GJ/ADt
+  }
   const q = dSop?.calidadSalida
   if (q) {
     k.kappa = q.kappa
@@ -178,10 +196,15 @@ function indicadores(modelo, estado) {
     k.xilano = q.xilano
   }
   const { OH, LD, XD, CD, OD, SI } = modelo.idx
-  if (dSop?.licorSalida) k.alcaliResidualSoplado = dSop.licorSalida.c[OH] // mol/L (EA)
+  if (dSop?.licorSalida) {
+    k.alcaliResidualSoplado = dSop.licorSalida.c[OH] // mol/L (EA)
+    const licorKg = dSop.licorSalida.v * modelo.fis.densidadLicor
+    const pulpa = dSop.maderaSalida * modelo.dtL
+    k.consistenciaSoplado = pulpa + licorKg > 0 ? pulpa / (pulpa + licorKg) : 0
+  }
   k.extracciones = {}
   for (const c of modelo.corrientes) {
-    if (c.tipo !== 'extraccion' || !c.destino.sumidero) continue
+    if (c.tipo !== 'extraccion' || !(c.destino.sumidero || c.destino.equipo)) continue
     const ec = estado.corrientes[c.id]
     if (!ec.c) continue
     k.extracciones[c.id] = {
@@ -192,4 +215,44 @@ function indicadores(modelo, estado) {
     }
   }
   return k
+}
+
+/** Estado de los equipos auxiliares para las pantallas. */
+function equipos(modelo, estado) {
+  const e = estado.equipos
+  const eq = modelo.equipos
+  const as = estado.fuentes.astillas
+  const kgRev = eq.medidor.Vrev * eq.medidor.eta * eq.medidor.sPila * as.densidad
+  const volEstanque = e.estanque.licor.v + e.estanque.parcelas.reduce((s, q) => s + q.vol, 0)
+  const vaporMP = Object.values(e.calentadores).reduce((s, c) => s + c.vapor, 0)
+  return {
+    silo: {
+      nivel: (e.silo.masa / (eq.medidor.sPila * as.densidad)) / eq.silo.V, // fracción
+      Tsalida: e.silo.Tsalida,
+      vaporizacion: e.silo.vaporizacion,
+      vaporFlash: e.silo.vaporFlashUsado, // kg/s
+      vaporBP: e.silo.vaporBP,
+      vaporVenteado: e.silo.vaporVenteado,
+    },
+    medidor: { velocidad: estado.ajustes.astillas?.velocidad * 60, caudal: (estado.ajustes.astillas?.velocidad ?? 0) * kgRev }, // rpm, kg/s
+    tuboAstillas: { acumulado: e.tubo.parcelas.reduce((s, q) => s + q.m0, 0) }, // kg
+    flash: Object.fromEntries(Object.entries(e.flash).map(([id, f]) => [id, {
+      nivel: f.licor.v / eq.flash[id].V,
+      T: f.licor.T,
+      P: eq.flash[id].P,
+      vapor: f.vapor,
+      salida: f.salida,
+      lleno: f.lleno,
+    }])),
+    estanqueSoplado: { nivel: volEstanque / eq.estanque.V, pulpa: e.estanque.parcelas[0]?.m ?? 0 },
+    calentadores: Object.fromEntries(Object.entries(e.calentadores).map(([id, c]) => [id, {
+      calor: c.Q, // kW
+      vapor: c.vapor, // kg/s
+      unidadActiva: c.activo,
+      incrustacion: c.incrustacion[c.activo],
+      Tmax: c.Tmax,
+      saturado: c.saturado,
+    }])),
+    vaporMP, // kg/s total a los calentadores
+  }
 }

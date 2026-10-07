@@ -22,6 +22,8 @@ const UNIDADES = {
   'h': { f: 3600 },
   '1/s': { f: 1 },
   '1/h': { f: 1 / 3600 },
+  '1/d': { f: 1 / 86400 },
+  'rpm': { f: 1 / 60 }, // revoluciones por segundo
   // longitud, área, volumen
   'm': { f: 1 },
   'mm': { f: 1e-3 },
@@ -32,7 +34,10 @@ const UNIDADES = {
   'm3/min': { f: 1 / 60 },
   'm3/h': { f: 1 / 3600 },
   'L/s': { f: 1e-3 },
+  'kg': { f: 1 },
+  't': { f: 1000 },
   'kg/s': { f: 1 },
+  'kg/h': { f: 1 / 3600 },
   't/h': { f: 1000 / 3600 },
   't/d': { f: 1000 / 86400 },
   'ADt/d': { f: 1 }, // la producción se maneja internamente en ADt/d

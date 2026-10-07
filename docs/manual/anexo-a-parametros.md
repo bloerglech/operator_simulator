@@ -9,10 +9,10 @@ Orígenes (ver capítulo 1.5): `literatura` (publicación citada), `especificaci
 
 | Origen | Cantidad de parámetros |
 |--------|------------------------|
-| supuesto | 184 |
+| supuesto | 342 |
 | especificacion | 19 |
+| literatura | 3 |
 | calibrado | 14 |
-| literatura | 2 |
 
 ## config/simulacion.json
 
@@ -35,6 +35,7 @@ Orígenes (ver capítulo 1.5): `literatura` (publicación citada), `especificaci
 | `vasos[dig].zonas[coccion_inferior].hasta` | 47 | m | supuesto |  |
 | `vasos[dig].zonas[lavado].desde` | 47 | m | supuesto |  |
 | `vasos[dig].zonas[lavado].hasta` | 57 | m | supuesto |  |
+| `corrientes[licor_imp].origen.z` | 27 | m | supuesto |  |
 | `corrientes[circ_tope_imp].origen.z` | 1 | m | supuesto |  |
 | `corrientes[imp_exceso].origen.z` | 1 | m | supuesto |  |
 | `corrientes[retorno_transf].origen.z` | 1 | m | supuesto |  |
@@ -64,6 +65,140 @@ Orígenes (ver capítulo 1.5): `literatura` (publicación citada), `especificaci
 | `tubos.retorno_transf` | 15 | m3 | supuesto |  |
 | `tubos.circ_sup` | 15 | m3 | supuesto |  |
 | `tubos.circ_inf` | 15 | m3 | supuesto |  |
+| `tubos.licor_imp` | 20 | m3 | supuesto |  |
+| `presion.imp.P_diseno` | 6 | bar(g) | supuesto |  |
+| `presion.imp.alivio.P_ajuste` | 7.5 | bar(g) | supuesto |  |
+| `presion.imp.alivio.sobrepresion` | 0.5 | bar | supuesto | aumento sobre el ajuste para apertura total |
+| `presion.imp.alivio.Kv` | 800 | m3/h/bar^0.5 | supuesto |  |
+| `presion.imp.alivio.P_destino` | 0 | bar(g) | supuesto |  |
+| `presion.imp.seguridad.P_ajuste` | 9 | bar(g) | supuesto |  |
+| `presion.imp.seguridad.purga` | 0.7 | bar | supuesto | cierra bajo P_ajuste − purga |
+| `presion.imp.seguridad.Kv` | 3000 | m3/h/bar^0.5 | supuesto |  |
+| `presion.imp.seguridad.P_destino` | 0 | bar(g) | supuesto |  |
+| `presion.dig.P_diseno` | 5.5 | bar(g) | supuesto |  |
+| `presion.dig.alivio.P_ajuste` | 7.5 | bar(g) | supuesto |  |
+| `presion.dig.alivio.sobrepresion` | 0.5 | bar | supuesto |  |
+| `presion.dig.alivio.Kv` | 800 | m3/h/bar^0.5 | supuesto |  |
+| `presion.dig.alivio.P_destino` | 0 | bar(g) | supuesto |  |
+| `presion.dig.seguridad.P_ajuste` | 9 | bar(g) | supuesto |  |
+| `presion.dig.seguridad.purga` | 0.7 | bar | supuesto |  |
+| `presion.dig.seguridad.Kv` | 3000 | m3/h/bar^0.5 | supuesto |  |
+| `presion.dig.seguridad.P_destino` | 0 | bar(g) | supuesto |  |
+| `valvulas.imp_exceso.Kv` | 400 | m3/h/bar^0.5 | supuesto |  |
+| `valvulas.imp_exceso.tau` | 2 | s | supuesto |  |
+| `valvulas.imp_exceso.carrera` | 20 | s | supuesto |  |
+| `valvulas.imp_exceso.P_destino` | 0 | bar(g) | supuesto | estanque de licor de nivel |
+| `valvulas.ext_principal.Kv` | 200 | m3/h/bar^0.5 | supuesto |  |
+| `valvulas.ext_principal.tau` | 2 | s | supuesto |  |
+| `valvulas.ext_principal.carrera` | 20 | s | supuesto |  |
+| `bombas.bombas_astillas.P_cierre` | 12 | bar(g) | supuesto |  |
+| `bombas.bombas_astillas.margen` | 3 | bar | supuesto |  |
+| `bombas.bombas_astillas.tau` | 3 | s | supuesto |  |
+| `bombas.bomba_transferencia.P_cierre` | 11 | bar(g) | supuesto |  |
+| `bombas.bomba_transferencia.margen` | 3 | bar | supuesto |  |
+| `bombas.bomba_transferencia.tau` | 3 | s | supuesto |  |
+| `bombas.bomba_circ_sup.tau` | 3 | s | supuesto |  |
+| `bombas.bomba_circ_inf.tau` | 3 | s | supuesto |  |
+| `bombas.bomba_licor_blanco.P_cierre` | 13 | bar(g) | supuesto |  |
+| `bombas.bomba_licor_blanco.margen` | 3 | bar | supuesto |  |
+| `bombas.bomba_licor_blanco.tau` | 2 | s | supuesto |  |
+| `bombas.bomba_filtrado.P_cierre` | 12 | bar(g) | supuesto |  |
+| `bombas.bomba_filtrado.margen` | 3 | bar | supuesto |  |
+| `bombas.bomba_filtrado.tau` | 2 | s | supuesto |  |
+| `bombas.bomba_lavado.P_cierre` | 12 | bar(g) | supuesto |  |
+| `bombas.bomba_lavado.margen` | 3 | bar | supuesto |  |
+| `bombas.bomba_lavado.tau` | 2 | s | supuesto |  |
+| `bombas.bomba_extraccion_superior.tau` | 2 | s | supuesto |  |
+| `bombas.bomba_extraccion_final.tau` | 2 | s | supuesto |  |
+| `bombas.bomba_licor_imp.P_cierre` | 11 | bar(g) | supuesto |  |
+| `bombas.bomba_licor_imp.margen` | 3 | bar | supuesto |  |
+| `bombas.bomba_licor_imp.tau` | 3 | s | supuesto |  |
+| `calentadores.retorno_transf.UA_limpio` | 300 | kW/K | supuesto |  |
+| `calentadores.retorno_transf.incrustacion` | 0.02 | 1/d | supuesto | aumento de f por día a 150 °C |
+| `calentadores.retorno_transf.E_incrustacion` | 40 | kJ/mol | supuesto |  |
+| `calentadores.circ_sup.UA_limpio` | 800 | kW/K | supuesto |  |
+| `calentadores.circ_sup.incrustacion` | 0.02 | 1/d | supuesto |  |
+| `calentadores.circ_sup.E_incrustacion` | 40 | kJ/mol | supuesto |  |
+| `calentadores.circ_inf.UA_limpio` | 700 | kW/K | supuesto |  |
+| `calentadores.circ_inf.incrustacion` | 0.02 | 1/d | supuesto |  |
+| `calentadores.circ_inf.E_incrustacion` | 40 | kJ/mol | supuesto |  |
+| `flash.flash1.P` | 2.5 | bar(a) | supuesto |  |
+| `flash.flash1.volumen` | 60 | m3 | supuesto |  |
+| `flash.flash1.nivel_consigna` | 50 | % | supuesto |  |
+| `flash.flash1.tau_nivel` | 60 | s | supuesto |  |
+| `flash.flash2.P` | 1.1 | bar(a) | supuesto |  |
+| `flash.flash2.volumen` | 80 | m3 | supuesto |  |
+| `flash.flash2.nivel_consigna` | 50 | % | supuesto |  |
+| `flash.flash2.tau_nivel` | 60 | s | supuesto |  |
+| `evaporadores.limite_recepcion` | 2500 | m3/h | supuesto | capacidad de recepción de licor negro débil; perturbable |
+| `silo.volumen` | 1200 | m3 | supuesto | volumen útil de astillas a granel |
+| `silo.nivel_inicial` | 70 | % | supuesto |  |
+| `silo.tau_vaporizacion` | 10 | min | supuesto | tiempo característico de remoción de aire |
+| `silo.T_maxima` | 100 | °C | supuesto | silo atmosférico |
+| `medidor.volumen_por_revolucion` | 1.6 | m3 | supuesto |  |
+| `medidor.eficiencia_llenado` | 90 | % | supuesto |  |
+| `medidor.fraccion_astillas_pila` | 36 | % | supuesto | volumen de astillas / volumen a granel |
+| `medidor.velocidad_maxima` | 25 | rpm | supuesto |  |
+| `tubo_astillas.capacidad` | 20000 | kg | supuesto |  |
+| `tubo_astillas.sobrecapacidad_bombas` | 20 | % | supuesto | caudal extra para vaciar lo acumulado |
+| `estanque_soplado.volumen` | 3000 | m3 | supuesto |  |
+| `estanque_soplado.nivel_inicial` | 50 | % | supuesto |  |
+| `mallas.separador_imp.dP_limpia` | 0.15 | bar | supuesto | a caudal de diseño, limpia |
+| `mallas.separador_imp.Q_diseno` | 600 | m3/h | supuesto |  |
+| `mallas.separador_imp.dP_maxima` | 0.8 | bar | supuesto | límite de succión de la bomba |
+| `mallas.separador_imp.tiempo_taponamiento` | 6 | h | supuesto | tiempo en que r_f crece 1 (una R0) sin conmutación, a caudal de diseño y finos normales |
+| `mallas.separador_imp.tiempo_limpieza_conmutacion` | 1.5 | h | supuesto | la conmutación de filas mantiene r_f ≈ 0,25 |
+| `mallas.separador_imp.eficiencia_retrolavado` | 70 | % | supuesto |  |
+| `mallas.separador_imp.incrustacion` | 0.01 | 1/d | supuesto | CaCO3, típica en eucalipto |
+| `mallas.separador_imp.E_incrustacion` | 40 | kJ/mol | supuesto |  |
+| `mallas.separador_dig.dP_limpia` | 0.15 | bar | supuesto | a caudal de diseño, limpia |
+| `mallas.separador_dig.Q_diseno` | 1200 | m3/h | supuesto |  |
+| `mallas.separador_dig.dP_maxima` | 0.8 | bar | supuesto | límite de succión de la bomba |
+| `mallas.separador_dig.tiempo_taponamiento` | 6 | h | supuesto | tiempo en que r_f crece 1 (una R0) sin conmutación, a caudal de diseño y finos normales |
+| `mallas.separador_dig.tiempo_limpieza_conmutacion` | 1.5 | h | supuesto | la conmutación de filas mantiene r_f ≈ 0,25 |
+| `mallas.separador_dig.eficiencia_retrolavado` | 70 | % | supuesto |  |
+| `mallas.separador_dig.incrustacion` | 0.01 | 1/d | supuesto | CaCO3, típica en eucalipto |
+| `mallas.separador_dig.E_incrustacion` | 40 | kJ/mol | supuesto |  |
+| `mallas.mallas_superior.dP_limpia` | 0.2 | bar | supuesto | a caudal de diseño, limpia |
+| `mallas.mallas_superior.Q_diseno` | 150 | m3/h | supuesto |  |
+| `mallas.mallas_superior.dP_maxima` | 0.8 | bar | supuesto | límite de succión de la bomba |
+| `mallas.mallas_superior.tiempo_taponamiento` | 6 | h | supuesto | tiempo en que r_f crece 1 (una R0) sin conmutación, a caudal de diseño y finos normales |
+| `mallas.mallas_superior.tiempo_limpieza_conmutacion` | 1.5 | h | supuesto | la conmutación de filas mantiene r_f ≈ 0,25 |
+| `mallas.mallas_superior.eficiencia_retrolavado` | 70 | % | supuesto |  |
+| `mallas.mallas_superior.incrustacion` | 0.01 | 1/d | supuesto | CaCO3, típica en eucalipto |
+| `mallas.mallas_superior.E_incrustacion` | 40 | kJ/mol | supuesto |  |
+| `mallas.mallas_circ_sup.dP_limpia` | 0.3 | bar | supuesto | a caudal de diseño, limpia |
+| `mallas.mallas_circ_sup.Q_diseno` | 1100 | m3/h | supuesto |  |
+| `mallas.mallas_circ_sup.dP_maxima` | 1 | bar | supuesto | límite de succión de la bomba |
+| `mallas.mallas_circ_sup.tiempo_taponamiento` | 6 | h | supuesto | tiempo en que r_f crece 1 (una R0) sin conmutación, a caudal de diseño y finos normales |
+| `mallas.mallas_circ_sup.tiempo_limpieza_conmutacion` | 1.5 | h | supuesto | la conmutación de filas mantiene r_f ≈ 0,25 |
+| `mallas.mallas_circ_sup.eficiencia_retrolavado` | 70 | % | supuesto |  |
+| `mallas.mallas_circ_sup.incrustacion` | 0.01 | 1/d | supuesto | CaCO3, típica en eucalipto |
+| `mallas.mallas_circ_sup.E_incrustacion` | 40 | kJ/mol | supuesto |  |
+| `mallas.mallas_principal.dP_limpia` | 0.3 | bar | supuesto | a caudal de diseño, limpia |
+| `mallas.mallas_principal.Q_diseno` | 450 | m3/h | supuesto |  |
+| `mallas.mallas_principal.dP_maxima` | 1 | bar | supuesto | límite de succión de la bomba |
+| `mallas.mallas_principal.tiempo_taponamiento` | 6 | h | supuesto | tiempo en que r_f crece 1 (una R0) sin conmutación, a caudal de diseño y finos normales |
+| `mallas.mallas_principal.tiempo_limpieza_conmutacion` | 1.5 | h | supuesto | la conmutación de filas mantiene r_f ≈ 0,25 |
+| `mallas.mallas_principal.eficiencia_retrolavado` | 70 | % | supuesto |  |
+| `mallas.mallas_principal.incrustacion` | 0.01 | 1/d | supuesto | CaCO3, típica en eucalipto |
+| `mallas.mallas_principal.E_incrustacion` | 40 | kJ/mol | supuesto |  |
+| `mallas.mallas_circ_inf.dP_limpia` | 0.3 | bar | supuesto | a caudal de diseño, limpia |
+| `mallas.mallas_circ_inf.Q_diseno` | 1100 | m3/h | supuesto |  |
+| `mallas.mallas_circ_inf.dP_maxima` | 1 | bar | supuesto | límite de succión de la bomba |
+| `mallas.mallas_circ_inf.tiempo_taponamiento` | 6 | h | supuesto | tiempo en que r_f crece 1 (una R0) sin conmutación, a caudal de diseño y finos normales |
+| `mallas.mallas_circ_inf.tiempo_limpieza_conmutacion` | 1.5 | h | supuesto | la conmutación de filas mantiene r_f ≈ 0,25 |
+| `mallas.mallas_circ_inf.eficiencia_retrolavado` | 70 | % | supuesto |  |
+| `mallas.mallas_circ_inf.incrustacion` | 0.01 | 1/d | supuesto | CaCO3, típica en eucalipto |
+| `mallas.mallas_circ_inf.E_incrustacion` | 40 | kJ/mol | supuesto |  |
+| `mallas.mallas_final.dP_limpia` | 0.3 | bar | supuesto | a caudal de diseño, limpia |
+| `mallas.mallas_final.Q_diseno` | 900 | m3/h | supuesto |  |
+| `mallas.mallas_final.dP_maxima` | 1 | bar | supuesto | límite de succión de la bomba |
+| `mallas.mallas_final.tiempo_taponamiento` | 6 | h | supuesto | tiempo en que r_f crece 1 (una R0) sin conmutación, a caudal de diseño y finos normales |
+| `mallas.mallas_final.tiempo_limpieza_conmutacion` | 1.5 | h | supuesto | la conmutación de filas mantiene r_f ≈ 0,25 |
+| `mallas.mallas_final.eficiencia_retrolavado` | 70 | % | supuesto |  |
+| `mallas.mallas_final.incrustacion` | 0.01 | 1/d | supuesto | CaCO3, típica en eucalipto |
+| `mallas.mallas_final.E_incrustacion` | 40 | kJ/mol | supuesto |  |
 
 ## config/madera.json
 
@@ -130,7 +265,7 @@ Orígenes (ver capítulo 1.5): `literatura` (publicación citada), `especificaci
 
 | Parámetro | Valor | Unidad | Origen | Fuente / nota |
 |-----------|-------|--------|--------|---------------|
-| `fraccion_astillas_columna` | 40 | % | supuesto | volumen de astillas (con poros) / volumen del vaso |
+| `fraccion_astillas_columna` | 40 | % | supuesto | fracción media usada para armar la columna del estado inicial; la real la calcula la compactación |
 | `penetracion.k_ref` | 0.2 | 1/s | supuesto | ≈ 5 s de constante de tiempo a T_ref |
 | `penetracion.T_ref` | 100 | °C | supuesto |  |
 | `penetracion.E` | 15 | kJ/mol | supuesto |  |
@@ -141,6 +276,28 @@ Orígenes (ver capítulo 1.5): `literatura` (publicación citada), `especificaci
 | `difusion.eccsa_max` | 1 | - | supuesto |  |
 | `difusion.K_e` | 0.1 | mol/L | supuesto |  |
 | `k_calor` | 0.09 | 1/s | supuesto | calentamiento de astillas de 4 mm, ≈ 11 s |
+| `compresibilidad_licor` | 4.6e-10 | 1/Pa | literatura | agua a 25-150 °C, orden de magnitud |
+| `compresibilidad_vaso` | 5e-10 | 1/Pa | supuesto | elasticidad del manto; ajusta la rapidez de las presurizaciones |
+| `margen_ebullicion` | 0 | bar | supuesto | margen sobre la presión de saturación para declarar vaporización súbita |
+| `compactacion.s0` | 36 | % | supuesto | astillas frescas sin carga |
+| `compactacion.s_max` | 55 | % | supuesto |  |
+| `compactacion.c_kappa` | 0.15 | - | supuesto | ablandamiento de la astilla cocida |
+| `compactacion.c_esfuerzo` | 0.12 | - | supuesto |  |
+| `compactacion.esfuerzo_ref` | 5 | kPa | supuesto |  |
+| `compactacion.mu_K` | 0.08 | - | supuesto | fricción con la pared × coeficiente de empuje lateral |
+| `compactacion.k_arrastre` | 200000 | - | supuesto | Pa/m por m/s de velocidad superficial del licor (+ hacia abajo) |
+| `compactacion.tau` | 10 | min | supuesto | la columna se compacta o expande con esta constante de tiempo; también filtra el caudal de licor usado para el arrastre |
+| `colgamiento.hueco_maximo` | 600 | m3 | supuesto | al superarlo, la columna colgada cae (≈ 7,6 m en el fondo del digestor) |
+| `raspadores.imp.torque_vacio` | 15 | - | supuesto | kN·m |
+| `raspadores.imp.k_torque` | 4 | - | supuesto | kN·m por kPa |
+| `raspadores.imp.corriente_vacio` | 40 | - | supuesto | A |
+| `raspadores.imp.k_corriente` | 1.5 | - | supuesto | A por kN·m |
+| `raspadores.imp.corriente_alarma` | 250 | - | supuesto | A |
+| `raspadores.dig.torque_vacio` | 25 | - | supuesto | kN·m |
+| `raspadores.dig.k_torque` | 6 | - | supuesto | kN·m por kPa |
+| `raspadores.dig.corriente_vacio` | 60 | - | supuesto | A |
+| `raspadores.dig.k_corriente` | 1.2 | - | supuesto | A por kN·m |
+| `raspadores.dig.corriente_alarma` | 350 | - | supuesto | A |
 
 ## config/energia.json
 
@@ -149,9 +306,10 @@ Orígenes (ver capítulo 1.5): `literatura` (publicación citada), `especificaci
 | `T_ambiente` | 20 | °C | supuesto |  |
 | `UA_perdidas.imp` | 5 | kW/K | supuesto |  |
 | `UA_perdidas.dig` | 15 | kW/K | supuesto |  |
-| `calentadores.retorno_transf.Q_max` | 30 | MW | supuesto |  |
-| `calentadores.circ_sup.Q_max` | 45 | MW | supuesto |  |
-| `calentadores.circ_inf.Q_max` | 45 | MW | supuesto |  |
+| `vapor.P_MP` | 12 | bar(g) | supuesto | cabezal de vapor de media presión a los calentadores (P8) |
+| `vapor.P_BP` | 3.5 | bar(g) | supuesto | vapor fresco de baja presión al silo |
+| `vapor.vapor_bp_max` | 15 | kg/s | supuesto | capacidad de vapor fresco al silo |
+| `T_astillas_patio` | 15 | °C | supuesto | temperatura de las astillas en el patio |
 
 ## config/cinetica.json
 
@@ -164,17 +322,17 @@ Orígenes (ver capítulo 1.5): `literatura` (publicación citada), `especificaci
 | `fraccion_reactiva.celulosa` | 5 | % | supuesto | accesible al peeling |
 | `fraccion_reactiva.xilano` | 50 | % | supuesto | disoluble |
 | `fraccion_reactiva.otros_carbohidratos` | 70 | % | supuesto | accesible al peeling |
-| `reacciones.lignina_rapida.A` | 0.009112 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: kappa) |
+| `reacciones.lignina_rapida.A` | 0.008832 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: kappa) |
 | `reacciones.lignina_rapida.E` | 50 | kJ/mol | supuesto |  |
 | `reacciones.lignina_rapida.a_OH` | 0 | - | supuesto |  |
-| `reacciones.lignina_principal_OH.A` | 0.0009112 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: kappa) |
+| `reacciones.lignina_principal_OH.A` | 0.0008832 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: kappa) |
 | `reacciones.lignina_principal_OH.E` | 130 | kJ/mol | supuesto |  |
 | `reacciones.lignina_principal_OH.a_OH` | 1 | - | supuesto |  |
-| `reacciones.lignina_principal_HS.A` | 0.001215 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: kappa) |
+| `reacciones.lignina_principal_HS.A` | 0.001178 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: kappa) |
 | `reacciones.lignina_principal_HS.E` | 120 | kJ/mol | supuesto |  |
 | `reacciones.lignina_principal_HS.a_OH` | 0.5 | - | supuesto |  |
 | `reacciones.lignina_principal_HS.b_HS` | 0.4 | - | supuesto |  |
-| `reacciones.lignina_residual.A` | 0.0004252 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: kappa) |
+| `reacciones.lignina_residual.A` | 0.0004122 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: kappa) |
 | `reacciones.lignina_residual.E` | 117 | kJ/mol | supuesto |  |
 | `reacciones.lignina_residual.a_OH` | 0.7 | - | supuesto |  |
 | `reacciones.condensacion.A` | 0.00005 | 1/s | supuesto | lignina principal → residual con álcali bajo |
@@ -183,43 +341,43 @@ Orígenes (ver capítulo 1.5): `literatura` (publicación citada), `especificaci
 | `reacciones.condensacion.n` | 4 | - | supuesto |  |
 | `reacciones.reprecipitacion.k` | 0.0005 | 1/s | supuesto | por mol/L bajo el umbral |
 | `reacciones.reprecipitacion.OH_umbral` | 3 | g/L NaOH | supuesto |  |
-| `reacciones.celulosa_peeling.A` | 0.0004134 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: rendimiento) |
+| `reacciones.celulosa_peeling.A` | 0.0003975 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: rendimiento) |
 | `reacciones.celulosa_peeling.E` | 100 | kJ/mol | supuesto |  |
-| `reacciones.celulosa_hidrolisis.A` | 0.00003675 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: rendimiento) |
+| `reacciones.celulosa_hidrolisis.A` | 0.00003533 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: rendimiento) |
 | `reacciones.celulosa_hidrolisis.E` | 150 | kJ/mol | supuesto |  |
-| `reacciones.xilano_disolucion.A` | 0.0006473 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: rendimiento) |
+| `reacciones.xilano_disolucion.A` | 0.0006223 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: rendimiento) |
 | `reacciones.xilano_disolucion.E` | 80 | kJ/mol | supuesto |  |
 | `reacciones.xilano_disolucion.a_OH` | 1 | - | supuesto |  |
-| `reacciones.xilano_hidrolisis.A` | 0.00004593 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: rendimiento) |
+| `reacciones.xilano_hidrolisis.A` | 0.00004416 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: rendimiento) |
 | `reacciones.xilano_hidrolisis.E` | 120 | kJ/mol | supuesto |  |
-| `reacciones.otros_peeling.A` | 0.0006887 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: rendimiento) |
+| `reacciones.otros_peeling.A` | 0.0006621 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: rendimiento) |
 | `reacciones.otros_peeling.E` | 90 | kJ/mol | supuesto |  |
-| `reacciones.otros_hidrolisis.A` | 0.00004593 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: rendimiento) |
+| `reacciones.otros_hidrolisis.A` | 0.00004416 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: rendimiento) |
 | `reacciones.otros_hidrolisis.E` | 120 | kJ/mol | supuesto |  |
 | `reacciones.extraibles.A` | 0.001 | 1/s | supuesto |  |
 | `reacciones.extraibles.E` | 40 | kJ/mol | supuesto |  |
 | `reacciones.acetilos.A` | 0.005 | 1/s | supuesto | desacetilación rápida |
 | `reacciones.acetilos.E` | 40 | kJ/mol | supuesto |  |
-| `reacciones.hexa_formacion.A` | 0.0003761 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: kappaHexA) |
+| `reacciones.hexa_formacion.A` | 0.0003594 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: kappaHexA) |
 | `reacciones.hexa_formacion.E` | 110 | kJ/mol | supuesto |  |
 | `reacciones.hexa_formacion.a_OH` | 1 | - | supuesto |  |
 | `reacciones.hexa_degradacion.A` | 0.00003 | 1/s | supuesto |  |
 | `reacciones.hexa_degradacion.E` | 120 | kJ/mol | supuesto |  |
 | `reacciones.hexa_degradacion.a_OH` | 0 | - | supuesto | sobre todo térmica |
-| `reacciones.viscosidad.A` | 6.766e-8 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: viscosidad) |
+| `reacciones.viscosidad.A` | 6.269e-8 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: viscosidad) |
 | `reacciones.viscosidad.E` | 179 | kJ/mol | especificacion | Kubes et al. (1983), factor G; verificar |
 | `reacciones.viscosidad.a_OH` | 1 | - | supuesto |  |
 | `reacciones.viscosidad.beta_DS` | 0.005 | L/g | supuesto | daño extra por sólidos orgánicos disueltos (efecto Lo-Solids) |
 | `reacciones.redeposito_xilano.k` | 0.0001 | 1/s | supuesto | por mol/L bajo el umbral |
 | `reacciones.redeposito_xilano.OH_umbral` | 10 | g/L NaOH | supuesto |  |
 | `solidos_disueltos.kappa_DS` | 0.002 | L/g | supuesto | freno de la deslignificación: f = 1/(1 + kappa_DS·DS_org) |
-| `consumo_alcali.alfa_lignina` | 5.401 | mol/kg | calibrado | calibrado 2026-10-07 (objetivo: alcaliExtraccion) |
+| `consumo_alcali.alfa_lignina` | 3.83 | mol/kg | calibrado | calibrado 2026-10-07 (objetivo: alcaliExtraccion) |
 | `consumo_alcali.alfa_carbohidratos` | 6 | mol/kg | supuesto | OH⁻ por kg de carbohidrato degradado (ácidos) |
 | `consumo_alcali.alfa_extraibles` | 3 | mol/kg | supuesto |  |
 | `consumo_alcali.A_DS` | 0.00009 | 1/s | supuesto | mol OH⁻ por kg de sólido orgánico disuelto, por s y por mol/L de OH⁻ |
 | `consumo_alcali.E_DS` | 100 | kJ/mol | supuesto |  |
 | `consumo_alcali.beta_HS_lignina` | 0.5 | mol/kg | supuesto | HS⁻ por kg de lignina disuelta |
-| `impregnacion.A` | 0.006442 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: rechazos) |
+| `impregnacion.A` | 0.007791 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: rechazos) |
 | `impregnacion.E` | 30 | kJ/mol | supuesto |  |
 | `impregnacion.K_OH` | 2 | g/L NaOH | supuesto |  |
 | `impregnacion.espesor_ref` | 4 | mm | supuesto |  |
@@ -238,8 +396,7 @@ Orígenes (ver capítulo 1.5): `literatura` (publicación citada), `especificaci
 | `produccion` | 3000 | ADt/d | especificacion |  |
 | `rendimiento_nominal` | 53.5 | % | especificacion | solo para convertir producción en madera hasta la Fase 1b |
 | `astillas.humedad` | 47.5 | % | especificacion | base húmeda |
-| `astillas.T` | 95 | °C | supuesto | después de la vaporización |
-| `astillas.vaporizacion` | 95 | % | supuesto | calidad de vaporización (remoción de aire), P14 |
+| `astillas.T_vaporizacion` | 100 | °C | supuesto | consigna: el vapor fresco completa lo que no da el vapor flash |
 | `alcali.carga_EA` | 18 | % | especificacion | como NaOH sobre madera seca |
 | `alcali.reparto.lb_alim` | 50 | % | especificacion |  |
 | `alcali.reparto.lb_transf` | 10 | % | especificacion |  |
@@ -258,6 +415,8 @@ Orígenes (ver capítulo 1.5): `literatura` (publicación citada), `especificaci
 | `caudales.fil_fondo` | 1180 | m3/h | supuesto |  |
 | `caudales.dilucion` | 180 | m3/h | supuesto |  |
 | `caudales.soplado` | 720 | m3/h | supuesto | licor libre que sale con la pulpa |
+| `caudales.ext_principal` | 100 | m3/h | supuesto | caudal de diseño de la válvula (apertura inicial) |
+| `caudales.imp_exceso` | 190 | m3/h | supuesto | caudal de diseño de la válvula (apertura inicial) |
 | `temperaturas_calentadores.retorno_transf` | 140 | °C | especificacion | 130-140 °C |
 | `temperaturas_calentadores.circ_sup` | 156 | °C | supuesto |  |
 | `temperaturas_calentadores.circ_inf` | 155 | °C | supuesto |  |

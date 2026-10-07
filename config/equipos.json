@@ -72,6 +72,11 @@
       "valor": 15,
       "unidad": "m3",
       "origen": "supuesto"
+    },
+    "licor_imp": {
+      "valor": 20,
+      "unidad": "m3",
+      "origen": "supuesto"
     }
   },
   "presion": {
@@ -210,7 +215,7 @@
     },
     "ext_principal": {
       "Kv": {
-        "valor": 500,
+        "valor": 200,
         "unidad": "m3/h/bar^0.5",
         "origen": "supuesto"
       },
@@ -225,12 +230,6 @@
         "valor": 20,
         "unidad": "s",
         "origen": "supuesto"
-      },
-      "P_destino": {
-        "valor": 2.5,
-        "unidad": "bar(a)",
-        "origen": "supuesto",
-        "nota": "ciclón flash 1 (P9)"
       }
     }
   },
@@ -382,6 +381,568 @@
       "tau": {
         "valor": 2,
         "unidad": "s",
+        "origen": "supuesto"
+      }
+    },
+    "bomba_licor_imp": {
+      "corrientes": [
+        "licor_imp"
+      ],
+      "P_cierre": {
+        "valor": 11,
+        "unidad": "bar(g)",
+        "origen": "supuesto"
+      },
+      "margen": {
+        "valor": 3,
+        "unidad": "bar",
+        "origen": "supuesto"
+      },
+      "tau": {
+        "valor": 3,
+        "unidad": "s",
+        "origen": "supuesto"
+      }
+    }
+  },
+  "calentadores": {
+    "_descripcion": "Calentadores indirectos con vapor de media presión. UA limpio dimensionado con ≈ 30 % de margen sobre el caso base (P8). Incrustación de CaCO3: crece el factor f (UA = UA_limpio/(1+f)); el lavado ácido la elimina. Cada calentador tiene una unidad de respaldo.",
+    "retorno_transf": {
+      "UA_limpio": {
+        "valor": 300,
+        "unidad": "kW/K",
+        "origen": "supuesto"
+      },
+      "incrustacion": {
+        "valor": 0.02,
+        "unidad": "1/d",
+        "origen": "supuesto",
+        "nota": "aumento de f por día a 150 °C"
+      },
+      "E_incrustacion": {
+        "valor": 40,
+        "unidad": "kJ/mol",
+        "origen": "supuesto"
+      }
+    },
+    "circ_sup": {
+      "UA_limpio": {
+        "valor": 800,
+        "unidad": "kW/K",
+        "origen": "supuesto"
+      },
+      "incrustacion": {
+        "valor": 0.02,
+        "unidad": "1/d",
+        "origen": "supuesto"
+      },
+      "E_incrustacion": {
+        "valor": 40,
+        "unidad": "kJ/mol",
+        "origen": "supuesto"
+      }
+    },
+    "circ_inf": {
+      "UA_limpio": {
+        "valor": 700,
+        "unidad": "kW/K",
+        "origen": "supuesto"
+      },
+      "incrustacion": {
+        "valor": 0.02,
+        "unidad": "1/d",
+        "origen": "supuesto"
+      },
+      "E_incrustacion": {
+        "valor": 40,
+        "unidad": "kJ/mol",
+        "origen": "supuesto"
+      }
+    }
+  },
+  "flash": {
+    "_descripcion": "Ciclones flash en serie (P9). Presión controlada por el consumidor de vapor (silo); nivel con control proporcional ideal hasta la Fase 2.",
+    "flash1": {
+      "P": {
+        "valor": 2.5,
+        "unidad": "bar(a)",
+        "origen": "supuesto"
+      },
+      "volumen": {
+        "valor": 60,
+        "unidad": "m3",
+        "origen": "supuesto"
+      },
+      "nivel_consigna": {
+        "valor": 50,
+        "unidad": "%",
+        "origen": "supuesto"
+      },
+      "tau_nivel": {
+        "valor": 60,
+        "unidad": "s",
+        "origen": "supuesto"
+      },
+      "destino": "flash2"
+    },
+    "flash2": {
+      "P": {
+        "valor": 1.1,
+        "unidad": "bar(a)",
+        "origen": "supuesto"
+      },
+      "volumen": {
+        "valor": 80,
+        "unidad": "m3",
+        "origen": "supuesto"
+      },
+      "nivel_consigna": {
+        "valor": 50,
+        "unidad": "%",
+        "origen": "supuesto"
+      },
+      "tau_nivel": {
+        "valor": 60,
+        "unidad": "s",
+        "origen": "supuesto"
+      },
+      "destino": "evaporadores"
+    }
+  },
+  "evaporadores": {
+    "limite_recepcion": {
+      "valor": 2500,
+      "unidad": "m3/h",
+      "origen": "supuesto",
+      "nota": "capacidad de recepción de licor negro débil; perturbable"
+    }
+  },
+  "silo": {
+    "_descripcion": "Silo de astillas con vaporización atmosférica (tipo Diamondback).",
+    "volumen": {
+      "valor": 1200,
+      "unidad": "m3",
+      "origen": "supuesto",
+      "nota": "volumen útil de astillas a granel"
+    },
+    "nivel_inicial": {
+      "valor": 70,
+      "unidad": "%",
+      "origen": "supuesto"
+    },
+    "tau_vaporizacion": {
+      "valor": 10,
+      "unidad": "min",
+      "origen": "supuesto",
+      "nota": "tiempo característico de remoción de aire"
+    },
+    "T_maxima": {
+      "valor": 100,
+      "unidad": "°C",
+      "origen": "supuesto",
+      "nota": "silo atmosférico"
+    }
+  },
+  "medidor": {
+    "_descripcion": "Medidor de astillas volumétrico (P11): caudal seco = rpm·V_rev·η·s_pila·ρ_básica.",
+    "volumen_por_revolucion": {
+      "valor": 1.6,
+      "unidad": "m3",
+      "origen": "supuesto"
+    },
+    "eficiencia_llenado": {
+      "valor": 90,
+      "unidad": "%",
+      "origen": "supuesto"
+    },
+    "fraccion_astillas_pila": {
+      "valor": 36,
+      "unidad": "%",
+      "origen": "supuesto",
+      "nota": "volumen de astillas / volumen a granel"
+    },
+    "velocidad_maxima": {
+      "valor": 25,
+      "unidad": "rpm",
+      "origen": "supuesto"
+    }
+  },
+  "tubo_astillas": {
+    "capacidad": {
+      "valor": 20000,
+      "unidad": "kg",
+      "origen": "supuesto"
+    },
+    "sobrecapacidad_bombas": {
+      "valor": 20,
+      "unidad": "%",
+      "origen": "supuesto",
+      "nota": "caudal extra para vaciar lo acumulado"
+    }
+  },
+  "estanque_soplado": {
+    "volumen": {
+      "valor": 3000,
+      "unidad": "m3",
+      "origen": "supuesto"
+    },
+    "nivel_inicial": {
+      "valor": 50,
+      "unidad": "%",
+      "origen": "supuesto"
+    }
+  },
+  "mallas": {
+    "_descripcion": "Juegos de mallas: resistencia limpia, límite de ΔP, taponamiento por finos, conmutación, retrolavado e incrustación. Todos supuestos.",
+    "separador_imp": {
+      "corrientes": [
+        "circ_tope_imp",
+        "imp_exceso"
+      ],
+      "dP_limpia": {
+        "valor": 0.15,
+        "unidad": "bar",
+        "origen": "supuesto",
+        "nota": "a caudal de diseño, limpia"
+      },
+      "Q_diseno": {
+        "valor": 600,
+        "unidad": "m3/h",
+        "origen": "supuesto"
+      },
+      "dP_maxima": {
+        "valor": 0.8,
+        "unidad": "bar",
+        "origen": "supuesto",
+        "nota": "límite de succión de la bomba"
+      },
+      "tiempo_taponamiento": {
+        "valor": 6,
+        "unidad": "h",
+        "origen": "supuesto",
+        "nota": "tiempo en que r_f crece 1 (una R0) sin conmutación, a caudal de diseño y finos normales"
+      },
+      "tiempo_limpieza_conmutacion": {
+        "valor": 1.5,
+        "unidad": "h",
+        "origen": "supuesto",
+        "nota": "la conmutación de filas mantiene r_f ≈ 0,25"
+      },
+      "eficiencia_retrolavado": {
+        "valor": 70,
+        "unidad": "%",
+        "origen": "supuesto"
+      },
+      "incrustacion": {
+        "valor": 0.01,
+        "unidad": "1/d",
+        "origen": "supuesto",
+        "nota": "CaCO3, típica en eucalipto"
+      },
+      "E_incrustacion": {
+        "valor": 40,
+        "unidad": "kJ/mol",
+        "origen": "supuesto"
+      }
+    },
+    "separador_dig": {
+      "corrientes": [
+        "retorno_transf"
+      ],
+      "dP_limpia": {
+        "valor": 0.15,
+        "unidad": "bar",
+        "origen": "supuesto",
+        "nota": "a caudal de diseño, limpia"
+      },
+      "Q_diseno": {
+        "valor": 1200,
+        "unidad": "m3/h",
+        "origen": "supuesto"
+      },
+      "dP_maxima": {
+        "valor": 0.8,
+        "unidad": "bar",
+        "origen": "supuesto",
+        "nota": "límite de succión de la bomba"
+      },
+      "tiempo_taponamiento": {
+        "valor": 6,
+        "unidad": "h",
+        "origen": "supuesto",
+        "nota": "tiempo en que r_f crece 1 (una R0) sin conmutación, a caudal de diseño y finos normales"
+      },
+      "tiempo_limpieza_conmutacion": {
+        "valor": 1.5,
+        "unidad": "h",
+        "origen": "supuesto",
+        "nota": "la conmutación de filas mantiene r_f ≈ 0,25"
+      },
+      "eficiencia_retrolavado": {
+        "valor": 70,
+        "unidad": "%",
+        "origen": "supuesto"
+      },
+      "incrustacion": {
+        "valor": 0.01,
+        "unidad": "1/d",
+        "origen": "supuesto",
+        "nota": "CaCO3, típica en eucalipto"
+      },
+      "E_incrustacion": {
+        "valor": 40,
+        "unidad": "kJ/mol",
+        "origen": "supuesto"
+      }
+    },
+    "mallas_superior": {
+      "corrientes": [
+        "ext_superior"
+      ],
+      "dP_limpia": {
+        "valor": 0.2,
+        "unidad": "bar",
+        "origen": "supuesto",
+        "nota": "a caudal de diseño, limpia"
+      },
+      "Q_diseno": {
+        "valor": 150,
+        "unidad": "m3/h",
+        "origen": "supuesto"
+      },
+      "dP_maxima": {
+        "valor": 0.8,
+        "unidad": "bar",
+        "origen": "supuesto",
+        "nota": "límite de succión de la bomba"
+      },
+      "tiempo_taponamiento": {
+        "valor": 6,
+        "unidad": "h",
+        "origen": "supuesto",
+        "nota": "tiempo en que r_f crece 1 (una R0) sin conmutación, a caudal de diseño y finos normales"
+      },
+      "tiempo_limpieza_conmutacion": {
+        "valor": 1.5,
+        "unidad": "h",
+        "origen": "supuesto",
+        "nota": "la conmutación de filas mantiene r_f ≈ 0,25"
+      },
+      "eficiencia_retrolavado": {
+        "valor": 70,
+        "unidad": "%",
+        "origen": "supuesto"
+      },
+      "incrustacion": {
+        "valor": 0.01,
+        "unidad": "1/d",
+        "origen": "supuesto",
+        "nota": "CaCO3, típica en eucalipto"
+      },
+      "E_incrustacion": {
+        "valor": 40,
+        "unidad": "kJ/mol",
+        "origen": "supuesto"
+      }
+    },
+    "mallas_circ_sup": {
+      "corrientes": [
+        "circ_sup"
+      ],
+      "dP_limpia": {
+        "valor": 0.3,
+        "unidad": "bar",
+        "origen": "supuesto",
+        "nota": "a caudal de diseño, limpia"
+      },
+      "Q_diseno": {
+        "valor": 1100,
+        "unidad": "m3/h",
+        "origen": "supuesto"
+      },
+      "dP_maxima": {
+        "valor": 1.0,
+        "unidad": "bar",
+        "origen": "supuesto",
+        "nota": "límite de succión de la bomba"
+      },
+      "tiempo_taponamiento": {
+        "valor": 6,
+        "unidad": "h",
+        "origen": "supuesto",
+        "nota": "tiempo en que r_f crece 1 (una R0) sin conmutación, a caudal de diseño y finos normales"
+      },
+      "tiempo_limpieza_conmutacion": {
+        "valor": 1.5,
+        "unidad": "h",
+        "origen": "supuesto",
+        "nota": "la conmutación de filas mantiene r_f ≈ 0,25"
+      },
+      "eficiencia_retrolavado": {
+        "valor": 70,
+        "unidad": "%",
+        "origen": "supuesto"
+      },
+      "incrustacion": {
+        "valor": 0.01,
+        "unidad": "1/d",
+        "origen": "supuesto",
+        "nota": "CaCO3, típica en eucalipto"
+      },
+      "E_incrustacion": {
+        "valor": 40,
+        "unidad": "kJ/mol",
+        "origen": "supuesto"
+      }
+    },
+    "mallas_principal": {
+      "corrientes": [
+        "ext_principal",
+        "licor_imp"
+      ],
+      "dP_limpia": {
+        "valor": 0.3,
+        "unidad": "bar",
+        "origen": "supuesto",
+        "nota": "a caudal de diseño, limpia"
+      },
+      "Q_diseno": {
+        "valor": 450,
+        "unidad": "m3/h",
+        "origen": "supuesto"
+      },
+      "dP_maxima": {
+        "valor": 1.0,
+        "unidad": "bar",
+        "origen": "supuesto",
+        "nota": "límite de succión de la bomba"
+      },
+      "tiempo_taponamiento": {
+        "valor": 6,
+        "unidad": "h",
+        "origen": "supuesto",
+        "nota": "tiempo en que r_f crece 1 (una R0) sin conmutación, a caudal de diseño y finos normales"
+      },
+      "tiempo_limpieza_conmutacion": {
+        "valor": 1.5,
+        "unidad": "h",
+        "origen": "supuesto",
+        "nota": "la conmutación de filas mantiene r_f ≈ 0,25"
+      },
+      "eficiencia_retrolavado": {
+        "valor": 70,
+        "unidad": "%",
+        "origen": "supuesto"
+      },
+      "incrustacion": {
+        "valor": 0.01,
+        "unidad": "1/d",
+        "origen": "supuesto",
+        "nota": "CaCO3, típica en eucalipto"
+      },
+      "E_incrustacion": {
+        "valor": 40,
+        "unidad": "kJ/mol",
+        "origen": "supuesto"
+      }
+    },
+    "mallas_circ_inf": {
+      "corrientes": [
+        "circ_inf"
+      ],
+      "dP_limpia": {
+        "valor": 0.3,
+        "unidad": "bar",
+        "origen": "supuesto",
+        "nota": "a caudal de diseño, limpia"
+      },
+      "Q_diseno": {
+        "valor": 1100,
+        "unidad": "m3/h",
+        "origen": "supuesto"
+      },
+      "dP_maxima": {
+        "valor": 1.0,
+        "unidad": "bar",
+        "origen": "supuesto",
+        "nota": "límite de succión de la bomba"
+      },
+      "tiempo_taponamiento": {
+        "valor": 6,
+        "unidad": "h",
+        "origen": "supuesto",
+        "nota": "tiempo en que r_f crece 1 (una R0) sin conmutación, a caudal de diseño y finos normales"
+      },
+      "tiempo_limpieza_conmutacion": {
+        "valor": 1.5,
+        "unidad": "h",
+        "origen": "supuesto",
+        "nota": "la conmutación de filas mantiene r_f ≈ 0,25"
+      },
+      "eficiencia_retrolavado": {
+        "valor": 70,
+        "unidad": "%",
+        "origen": "supuesto"
+      },
+      "incrustacion": {
+        "valor": 0.01,
+        "unidad": "1/d",
+        "origen": "supuesto",
+        "nota": "CaCO3, típica en eucalipto"
+      },
+      "E_incrustacion": {
+        "valor": 40,
+        "unidad": "kJ/mol",
+        "origen": "supuesto"
+      }
+    },
+    "mallas_final": {
+      "corrientes": [
+        "ext_final"
+      ],
+      "dP_limpia": {
+        "valor": 0.3,
+        "unidad": "bar",
+        "origen": "supuesto",
+        "nota": "a caudal de diseño, limpia"
+      },
+      "Q_diseno": {
+        "valor": 900,
+        "unidad": "m3/h",
+        "origen": "supuesto"
+      },
+      "dP_maxima": {
+        "valor": 1.0,
+        "unidad": "bar",
+        "origen": "supuesto",
+        "nota": "límite de succión de la bomba"
+      },
+      "tiempo_taponamiento": {
+        "valor": 6,
+        "unidad": "h",
+        "origen": "supuesto",
+        "nota": "tiempo en que r_f crece 1 (una R0) sin conmutación, a caudal de diseño y finos normales"
+      },
+      "tiempo_limpieza_conmutacion": {
+        "valor": 1.5,
+        "unidad": "h",
+        "origen": "supuesto",
+        "nota": "la conmutación de filas mantiene r_f ≈ 0,25"
+      },
+      "eficiencia_retrolavado": {
+        "valor": 70,
+        "unidad": "%",
+        "origen": "supuesto"
+      },
+      "incrustacion": {
+        "valor": 0.01,
+        "unidad": "1/d",
+        "origen": "supuesto",
+        "nota": "CaCO3, típica en eucalipto"
+      },
+      "E_incrustacion": {
+        "valor": 40,
+        "unidad": "kJ/mol",
         "origen": "supuesto"
       }
     }

@@ -18,17 +18,11 @@
       "origen": "especificacion",
       "nota": "base húmeda"
     },
-    "T": {
-      "valor": 95,
+    "T_vaporizacion": {
+      "valor": 100,
       "unidad": "°C",
       "origen": "supuesto",
-      "nota": "después de la vaporización"
-    },
-    "vaporizacion": {
-      "valor": 95,
-      "unidad": "%",
-      "origen": "supuesto",
-      "nota": "calidad de vaporización (remoción de aire), P14"
+      "nota": "consigna: el vapor fresco completa lo que no da el vapor flash"
     }
   },
   "alcali": {
@@ -130,13 +124,13 @@
       "nota": "licor libre que sale con la pulpa"
     },
     "ext_principal": {
-      "valor": 360,
+      "valor": 100,
       "unidad": "m3/h",
       "origen": "supuesto",
       "nota": "caudal de diseño de la válvula (apertura inicial)"
     },
     "imp_exceso": {
-      "valor": 160,
+      "valor": 190,
       "unidad": "m3/h",
       "origen": "supuesto",
       "nota": "caudal de diseño de la válvula (apertura inicial)"

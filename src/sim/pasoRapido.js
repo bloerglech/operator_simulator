@@ -5,6 +5,8 @@
 import { moverValvula, moverBomba, factorPresionBomba, caracteristica } from './valvulas.js'
 import { integrarPresion, presionDesdeExceso, pisoEbullicion } from './presion.js'
 import { P_ATM } from './agua.js'
+import { destinoBloqueado } from './equipos.js'
+import { factorMalla, resistencia } from './mallas.js'
 
 /** Registra un evento (incidente u operación) con el tiempo simulado. */
 export function registrarEvento(modelo, estado, tipo, datos = {}) {
@@ -19,7 +21,15 @@ export function registrarEvento(modelo, estado, tipo, datos = {}) {
  * bombas y, si descarga a un vaso presurizado, de la curva de la bomba.
  */
 export function factorCorriente(modelo, estado, c) {
+  if (destinoBloqueado(estado, c)) return 0
   let f = 1
+  // Mallas: las bombas no pueden succionar más de lo que deja la ΔP máxima.
+  if (c.malla && !c.valvula) {
+    const m = modelo.mallas[c.malla]
+    let pedido = 0
+    for (const id of m.corrientes) if (!modelo.corrientePorId[id].valvula) pedido += estado.ajustes[id].caudal
+    f *= factorMalla(m, estado.mallas[c.malla], pedido)
+  }
   const destino = c.destino.vaso ?? modelo.corrientePorId[c.destino.unir]?.destino.vaso
   for (const id of c.bombas) {
     const b = modelo.bombas[id]
@@ -86,6 +96,8 @@ export function pasoRapidoEquipos(modelo, estado, dt) {
       f: caracteristica(estado.valvulas[c.id].x, c.valvula.tipo, c.valvula.R),
       z: (c.origen.j + 0.5) * v.geom.dz,
       Pdest: c.valvula.Pdest,
+      bloqueada: destinoBloqueado(estado, c),
+      Rmalla: c.malla ? resistencia(modelo.mallas[c.malla], estado.mallas[c.malla]) : 0,
     }))
     const ctx = {
       Qfijo,

@@ -14,11 +14,11 @@ const CASOS = [
   ['+10 % de licor blanco (carga 18 → 19,8 %)', esc(LB, 'caudal', 1.1)],
   ['−10 % de licor blanco (carga 18 → 16,2 %)', esc(LB, 'caudal', 0.9)],
   ['+10 % de ritmo sin compensar', esc(AST, 'caudalMadera', 1.1)],
-  ['Doble filtrado a las circulaciones', esc(['fil_sup', 'fil_inf'], 'caudal', 2)],
+  ['Doble filtrado a las circulaciones (y más extracción)', [...esc(['fil_sup', 'fil_inf'], 'caudal', 2), { tipo: 'valvula', id: 'ext_principal', valor: 0.96 }]],
   ['Humedad de astillas 47,5 → 52,5 %', [{ tipo: 'fuente', id: 'astillas', campo: 'humedad', s: 0.05 }]],
   ['Madera 15 % menos reactiva', [{ tipo: 'fuente', id: 'astillas', campo: 'reactividad', f: 0.85 }]],
   ['Sulfidez 32 → 28 %', [{ tipo: 'fuente', id: 'licor_blanco', campo: 'HS', f: (0.28 / 1.72) / (0.32 / 1.68) }]],
-  ['Vaporización 95 → 70 %', [{ tipo: 'fuente', id: 'astillas', campo: 'vaporizacion', s: -0.25 }]],
+  ['Silo con poco vapor (30 % del flash, sin vapor fresco)', [{ tipo: 'servicio', id: 'vaporFlashSilo', valor: 0.3 }, { tipo: 'servicio', id: 'vaporBPMax', valor: 0 }]],
 ]
 
 const base = crearPlanta(cargarConfig())
@@ -34,6 +34,7 @@ for (const [nombre, cambios] of CASOS) {
   p.cargar(guardado)
   const e = p.estadoInterno()
   for (const c of cambios) {
+    if (c.tipo === 'valvula' || c.tipo === 'servicio') { p.enviarComando(c); continue }
     const act = c.tipo === 'ajustar' ? e.ajustes[c.id][c.campo] : c.campo === 'HS' ? e.fuentes[c.id].c[p.modelo().idx.HS] : e.fuentes[c.id][c.campo]
     p.enviarComando({ tipo: c.tipo, id: c.id, campo: c.campo, valor: c.f !== undefined ? act * c.f : act + c.s })
   }

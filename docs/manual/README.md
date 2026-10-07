@@ -14,11 +14,11 @@ simulador, para que describa lo que realmente está implementado.
 | [2. El proceso y su diseño](02-proceso-y-diseno.md) | Cocción kraft, digestor Lo-Solids, cálculos de diseño paso a paso | Fase 1a |
 | [3. Transporte, hidráulica y energía](03-transporte-hidraulica-energia.md) | Modelo de la columna, del licor y del calor; métodos numéricos | Fase 1a |
 | [4. Cinética de cocción y calibración](04-cinetica-y-calibracion.md) | Deslignificación, carbohidratos, HexA, viscosidad, álcali, impregnación, calibración | Fase 1b |
-| 5. Presión, equipos y estados de operación | Presión del vaso hidráulico, mallas, calentadores, ciclones flash, compactación | Fase 1c (pendiente) |
+| [5. Presión, equipos y estados de operación](05-presion-equipos-estados.md) | Presión del vaso hidráulico, válvulas y seguridad, calentadores, flash, silo, mallas, compactación, colgamiento | Fase 1c |
 | 6. Control, enclavamientos y alarmas | Lazos PID, tiempos muertos, control avanzado | Fase 2 (pendiente) |
 | 7. Operación y perturbaciones | Respuesta a eventos, procedimientos | Fases 5–6 (pendiente) |
-| Anexo A. Tabla de parámetros | Valor, unidad, origen y fuente de cada parámetro | Se completa en cada fase |
-| Anexo B. Referencias | Bibliografía, con el estado de verificación de cada dato | Se completa en cada fase |
+| [Anexo A. Tabla de parámetros](anexo-a-parametros.md) | Valor, unidad, origen y fuente de cada parámetro (generado) | Se completa en cada fase |
+| [Anexo B. Referencias](anexo-b-referencias.md) | Bibliografía, con el estado de verificación de cada dato | Se completa en cada fase |
 
 ## Cómo usar este manual
 

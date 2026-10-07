@@ -1,7 +1,7 @@
 # PLAN DE TRABAJO
 
 Estado: **aprobado** con los valores provisionales de la sección 6.
-Fase actual: **1b terminada** (ver sección 8).
+Fase actual: **1c terminada; Fase 1 completa** (ver sección 8).
 
 Documento rector: `docs/ESPECIFICACION.md`. Si algo de aquí lo contradice,
 manda la especificación y este plan se corrige.
@@ -332,3 +332,21 @@ eventos instructor) pero no las implementa.
   (`npm run sensibilidades` muestra las magnitudes).
 - Manual por capítulos en `docs/manual/` (capítulos 1–4 y anexos A y B).
 - Supuestos nuevos S-24 a S-29 en MODELO.md.
+
+### Fase 1c — terminada (Fase 1 completa)
+- Presión de los vasos hidráulicos (líquido comprimido, piso de ebullición,
+  venteo, rompedor de vacío), válvulas con actuador, bombas con curva,
+  alivio y seguridad, registro de incidentes.
+- Calentadores con vapor MP e incrustación (con respaldo y lavado ácido),
+  ciclones flash y evaporadores (capacidad limitada), silo con vaporización
+  por vapor flash y vapor fresco, medidor volumétrico, tubo de astillas,
+  estanque de soplado.
+- Mallas con taponamiento, conmutación, retrolavado e incrustación;
+  compactación de la columna (Janssen), colgamiento y raspadores.
+- Licor de impregnación desde la extracción principal; recalibrado.
+- Comandos nuevos: válvula, bomba, venteo, calentador, mallas, servicio y
+  perturbaciones (colgamiento, fricción, finos, incrustación).
+- Pruebas: presión (6) y equipos (10); 70 en total.
+- Pendiente para fases siguientes: control de presión y de nivel (Fase 2),
+  canalización y demás perturbaciones (Fase 5), secuencias completas de
+  partida y parada (Fase 6), estados iniciales guardados para escenarios.

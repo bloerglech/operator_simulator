@@ -9,7 +9,7 @@ export function crearHUD(contenedor, { esTactil, calidad, alOperar, alAbrirPanta
   const operar = h('button', { class: 'hud-operar', onclick: alOperar }, 'Operar')
   const relojEl = h('span', { class: 'num' })
   const alarmas = h('span', { class: 'hud-alarmas' })
-  const selCalidad = h('select', { onchange: () => alCambiarCalidad(selCalidad.value), title: 'Calidad gráfica' },
+  const selCalidad = h('select', { onchange: () => { selCalidad.blur(); alCambiarCalidad(selCalidad.value) }, title: 'Calidad gráfica' },
     ['bajo', 'medio', 'alto'].map((c) => h('option', { value: c }, `Calidad ${c}`)))
   selCalidad.value = calidad
   const ayuda = h('div', { class: 'hud-ayuda' }, esTactil
@@ -36,14 +36,8 @@ export function crearHUD(contenedor, { esTactil, calidad, alOperar, alAbrirPanta
       operar.style.display = esTactil ? 'block' : 'none'
       operar.textContent = a.pantalla ? 'Operar' : 'Usar'
     },
-    actualizar(estado) {
-      if (!visible || !estado) return
-      relojEl.textContent = reloj(estado.t)
-      const lista = estado.control.alarmas.lista
-      const sin = lista.filter((a) => !a.reconocida)
-      const p1 = lista.some((a) => a.prioridad === 1 && (a.activa || !a.reconocida))
-      reemplazar(alarmas, sin.length ? `${sin.length} alarma${sin.length > 1 ? 's' : ''} sin reconocer` : '')
-      alarmas.classList.toggle('critica', p1)
+    /** Joystick virtual: se dibuja en cada cuadro (no solo con cada instantánea). */
+    palanca() {
       const p = palanca()
       base.style.display = p ? 'block' : 'none'
       pomo.style.display = p ? 'block' : 'none'
@@ -53,6 +47,15 @@ export function crearHUD(contenedor, { esTactil, calidad, alOperar, alAbrirPanta
         pomo.style.left = `${p.x0 + p.dx * 50 - 22}px`
         pomo.style.top = `${p.y0 + p.dy * 50 - 22}px`
       }
+    },
+    actualizar(estado) {
+      if (!visible || !estado) return
+      relojEl.textContent = reloj(estado.t)
+      const lista = estado.control.alarmas.lista
+      const sin = lista.filter((a) => !a.reconocida)
+      const p1 = lista.some((a) => a.prioridad === 1 && (a.activa || !a.reconocida))
+      reemplazar(alarmas, sin.length ? `${sin.length} alarma${sin.length > 1 ? 's' : ''} sin reconocer` : '')
+      alarmas.classList.toggle('critica', p1)
     },
     mostrar(si) {
       visible = si

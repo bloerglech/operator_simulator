@@ -64,10 +64,12 @@ async function iniciarSala(raiz, cliente) {
     hud.mostrar(true)
     mundo.activar(true)
   }
-  function crear() {
+  function crear(jugador = null) {
     mundo = crearMundo(capaMundo, cliente, {
       sala,
       calidad,
+      jugador,
+      alCuadro: () => hud?.palanca(),
       alInteractuar: (a) => {
         if (a.pantalla) abrirDCS(a.pantalla)
         else if (a.tipo === 'telefono') avisar('Teléfono: sin llamadas pendientes.')
@@ -87,13 +89,16 @@ async function iniciarSala(raiz, cliente) {
     alCambiarCalidad: (c) => {
       calidad = c
       try { localStorage.setItem('digestor:calidad', c) } catch { /* sin almacenamiento */ }
+      const jugador = mundo.info().jugador
       mundo.destruir()
-      crear()
+      crear(jugador)
+      hud.cercana(null)
     },
   })
   cliente.suscribir((e) => hud.actualizar(e))
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && capaDCS.classList.contains('abierto') && !(e.target instanceof HTMLInputElement)) cerrarDCS()
+    const editando = e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement || e.target instanceof HTMLTextAreaElement
+    if (e.key === 'Escape' && capaDCS.classList.contains('abierto') && !editando) cerrarDCS()
   })
 }
 

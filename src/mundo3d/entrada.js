@@ -22,9 +22,10 @@ export function crearEntrada(lienzo, { alInteractuar, alSalir }) {
     intencion.mirarY += e.movementY * 0.0022
   }
   const onClick = () => {
-    if (habilitada && !esTactil && document.pointerLockElement !== lienzo) lienzo.requestPointerLock?.()
+    if (habilitada && document.pointerLockElement !== lienzo) lienzo.requestPointerLock?.()
   }
-  const esTactil = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window
+  // Táctil solo si el puntero principal es el dedo (un portátil con pantalla táctil usa el mouse).
+  const esTactil = matchMedia('(pointer: coarse)').matches
 
   const onTouchStart = (e) => {
     if (!habilitada) return
@@ -65,6 +66,10 @@ export function crearEntrada(lienzo, { alInteractuar, alSalir }) {
   lienzo.addEventListener('touchcancel', onTouchEnd)
   const onPointerLockChange = () => { if (document.pointerLockElement !== lienzo) teclas.clear() }
   document.addEventListener('pointerlockchange', onPointerLockChange)
+  // Si la ventana pierde el foco se pierden los keyup: se sueltan todas las teclas.
+  const soltar = () => teclas.clear()
+  window.addEventListener('blur', soltar)
+  document.addEventListener('visibilitychange', soltar)
 
   return {
     esTactil,
@@ -92,6 +97,9 @@ export function crearEntrada(lienzo, { alInteractuar, alSalir }) {
       window.removeEventListener('keyup', onKeyUp)
       document.removeEventListener('mousemove', onMouseMove)
       document.removeEventListener('pointerlockchange', onPointerLockChange)
+      window.removeEventListener('blur', soltar)
+      document.removeEventListener('visibilitychange', soltar)
+      lienzo.removeEventListener('click', onClick)
       alSalir?.()
     },
   }

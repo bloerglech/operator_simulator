@@ -43,15 +43,16 @@ export function construirSala(sala, { calidad }) {
       malla = new THREE.InstancedMesh(geo, mat, o.repetir.n)
       const m = new THREE.Matrix4()
       for (let i = 0; i < o.repetir.n; i++) {
-        m.makeTranslation(o.pos[0] + o.repetir.paso[0] * i, o.pos[1] + o.repetir.paso[1] * i, o.pos[2] + o.repetir.paso[2] * i)
+        const dy = o.tipo === 'cilindro' ? o.alto / 2 : 0
+        m.makeTranslation(o.pos[0] + o.repetir.paso[0] * i, o.pos[1] + dy + o.repetir.paso[1] * i, o.pos[2] + o.repetir.paso[2] * i)
         malla.setMatrixAt(i, m)
       }
     } else {
       malla = new THREE.Mesh(geo, mat)
       malla.position.set(...o.pos)
       if (o.tipo === 'cilindro') malla.position.y += o.alto / 2 // pos = base del cilindro
-      if (o.tipo === 'plano') malla.rotation.x = -Math.PI / 2
       rotar(malla, o.rot)
+      if (o.tipo === 'plano') malla.rotation.x += -Math.PI / 2 // los planos quedan horizontales
     }
     malla.name = o.id
     grupo.add(malla)

@@ -21,6 +21,8 @@ export function crearEfectos(definiciones, escena) {
   }
 
   return {
+    /** Olvida los eventos ocurridos hasta ahora (al volver del DCS no se reproducen). */
+    sincronizar(estado) { eventosVistos.n = estado?.eventos.at(-1)?.n ?? eventosVistos.n },
     /** Llamar en cada cuadro con el último estado y el tiempo real (s). Devuelve el desplazamiento de cámara. */
     actualizar(estado, ahora) {
       if (!estado) return { sacudida: 0 }

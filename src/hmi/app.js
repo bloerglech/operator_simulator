@@ -123,6 +123,8 @@ export function crearApp(raiz, cliente, opciones = {}) {
   }
 
   function cerrarLateral() {
+    menuAbierto?.remove()
+    menuAbierto = null
     lateral?.cerrar?.()
     lateral = null
     panelLateral.classList.remove('abierto')

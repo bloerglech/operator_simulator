@@ -40,6 +40,7 @@ export function crearMundo(contenedor, cliente, opciones) {
   escena.add(sala3d.grupo)
   const camara = new THREE.PerspectiveCamera(70, 1, 0.05, 400)
   const jugador = crearJugador(sala.jugador, sala.colisiones)
+  if (opciones.jugador) Object.assign(jugador.estado, opciones.jugador) // se conserva al cambiar la calidad
   const efectos = crearEfectos(sala.efectos, sala3d)
   const pintores = sala3d.pantallas.map((p) => ({ ...p, pintor: crearPintor(p.contenido, p.canvas, cliente, () => { p.textura.needsUpdate = true }) }))
 
@@ -88,6 +89,7 @@ export function crearMundo(contenedor, cliente, opciones) {
       const p = pintores[turno++ % pintores.length]
       p.pintor.pintar(estado) // al terminar de dibujar marca la textura para subirla
     }
+    opciones.alCuadro?.()
     renderer.render(escena, camara)
     medicion.cuadros++
     if (ahoraMs - medicion.desde > 1000) {
@@ -102,6 +104,7 @@ export function crearMundo(contenedor, cliente, opciones) {
     activar(si) {
       activo = si
       entrada.habilitar(si)
+      if (si) efectos.sincronizar(cliente.estado())
       renderer.domElement.style.visibility = si ? 'visible' : 'hidden'
       previo = performance.now()
     },
@@ -117,6 +120,16 @@ export function crearMundo(contenedor, cliente, opciones) {
       renderer.setAnimationLoop(null)
       entrada.destruir()
       window.removeEventListener('resize', ajustarTamano)
+      // Libera geometrías, materiales y texturas, y el contexto WebGL.
+      escena.traverse((o) => {
+        o.geometry?.dispose()
+        for (const m of [o.material].flat()) {
+          if (!m) continue
+          m.map?.dispose()
+          m.dispose()
+        }
+      })
+      renderer.forceContextLoss()
       renderer.dispose()
       renderer.domElement.remove()
     },

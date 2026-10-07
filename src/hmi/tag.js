@@ -4,6 +4,7 @@
 import { h, reemplazar } from './dom.js'
 import { num, hora } from './formato.js'
 import { dibujarTendencia, autoescala } from './grafico.js'
+import { bloqueAyuda } from './ayuda.js'
 
 const VENTANA = 3600
 
@@ -19,6 +20,7 @@ export function abrirTag(app, tag) {
     h('button', { class: 'cerrar', onclick: () => app.cerrarLateral() }, '✕'),
     h('h2', {}, tag),
     h('div', { class: 'desc' }, `${t0.descripcion}${t0.analizador ? ' · analizador (valor discreto)' : ''}`),
+    bloqueAyuda(tag),
     valor,
     h('div', { class: 'suave' }, `Rango ${num(t0.rango[0], t0.decimales)}–${num(t0.rango[1], t0.decimales)} ${t0.unidad}`),
     alarmas,

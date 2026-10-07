@@ -1,6 +1,7 @@
 // 6. Calidad y laboratorio: indicadores de calidad, pedidos al laboratorio y
 // control avanzado (bloques que el operador activa y ajusta).
 
+import { ayudaLaboratorio } from '../ayuda.js'
 import { h, reemplazar } from '../dom.js'
 import { num, hora } from '../formato.js'
 import { mostrarInformeTurno } from '../../ui/informe.js'
@@ -31,7 +32,7 @@ export function crearCalidad(app) {
   const bloques = h('div')
   const e0 = app.estado()
   const botonesLab = e0 ? Object.entries(e0.control.laboratorio.analisis).map(([id, a]) =>
-    h('button', { onclick: () => app.comando({ tipo: 'laboratorio', analisis: id }).catch(() => {}) }, a.nombre)) : []
+    h('button', { title: ayudaLaboratorio(id) ?? '', onclick: () => app.comando({ tipo: 'laboratorio', analisis: id }).catch(() => {}) }, a.nombre)) : []
 
   const elemento = h('div', { class: 'rejilla' },
     h('div', { class: 'panel' }, h('div', { class: 'fila' }, h('h3', { style: 'margin:0; flex:1' }, 'Calidad y operación'),

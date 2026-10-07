@@ -4,6 +4,7 @@
 import { h, reemplazar } from './dom.js'
 import { num } from './formato.js'
 import { dibujarTendencia, autoescala } from './grafico.js'
+import { bloqueAyuda } from './ayuda.js'
 
 const VENTANA = 1800 // s
 
@@ -73,6 +74,7 @@ export function abrirCaratula(app, tag) {
     h('button', { class: 'cerrar', onclick: () => app.cerrarLateral(), title: 'Cerrar' }, '✕'),
     h('h2', {}, tag),
     h('div', { class: 'desc' }, `${l0.descripcion} · acción ${l0.accion}${l0.maestro ? ` · maestro ${l0.maestro}` : ''}`),
+    bloqueAyuda(l0.transmisor),
     aviso,
     h('div', { class: 'suave' }, `PV (${l0.transmisor})`),
     pv,

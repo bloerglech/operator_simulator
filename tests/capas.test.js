@@ -14,7 +14,7 @@ const PERMITIDO = {
   escenarios: ['src/escenarios', 'src/sim', 'src/control', 'src/misiones'],
   misiones: ['src/misiones', 'src/sim', 'src/escenarios'],
   puente: ['src/puente', 'src/sim', 'src/control', 'src/escenarios', 'src/misiones', 'config'],
-  hmi: ['src/hmi', 'src/ui', 'docs/PROCEDIMIENTOS.md'], // el manual de operación se muestra en el juego
+  hmi: ['src/hmi', 'src/ui', 'docs/PROCEDIMIENTOS.md', 'config/ayuda.json'], // el manual de operación y la ayuda se muestran en el juego
   ui: ['src/ui', 'src/hmi'],
   mundo3d: ['src/mundo3d', 'src/hmi'],
 }

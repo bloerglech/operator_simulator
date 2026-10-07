@@ -1,0 +1,367 @@
+{
+ "_descripcion": "Ayuda contextual de cada variable (Fase 7): qué mide, por qué importa y qué significa que suba o baje. Texto didáctico genérico para el simulador; las cifras citadas son las del caso base y los supuestos de docs/MODELO.md.",
+ "variables": {
+  "WI-101": {
+   "mide": "Madera seca que entra al proceso, calculada con la velocidad del medidor y la densidad nominal.",
+   "importa": "Es el ritmo de producción: todo lo demás (licores, lavado, soplado) se proporciona a esta madera.",
+   "sube": "Más producción y menos tiempo de cocción: baja el factor H y el kappa sube horas después si no se compensa.",
+   "baja": "Menos producción; con las mismas temperaturas la astilla se cuece de más y el kappa baja."
+  },
+  "SI-101": {
+   "mide": "Velocidad del medidor de astillas (rueda de alvéolos).",
+   "importa": "La madera real depende de esta velocidad y de la densidad verdadera de la astilla, que el medidor no conoce.",
+   "sube": "Entra más madera (WIC-101 la mueve para seguir su consigna).",
+   "baja": "Entra menos madera. Si la astilla es más liviana, el medidor sobrestima la madera."
+  },
+  "LI-102": {
+   "mide": "Nivel del silo de astillas.",
+   "importa": "El silo da tiempo de vaporización y amortigua el patio; vacío, el medidor no entrega madera.",
+   "sube": "El patio entrega más de lo que se consume. Lleno, el transportador se limita.",
+   "baja": "Se consume más de lo que llega. Si se vacía, se corta la madera aunque el medidor gire."
+  },
+  "TI-103": {
+   "mide": "Temperatura de las astillas después de la vaporización con vapor flash y de baja presión.",
+   "importa": "La vaporización saca el aire de la astilla y ayuda a que el licor penetre.",
+   "sube": "Mejor vaporización y mejor impregnación.",
+   "baja": "Falta vapor o la astilla viene helada o mojada: impregnación más lenta, más rechazos."
+  },
+  "WI-104": {
+   "mide": "Astillas acumuladas en el tubo de astillas hacia el impregnador.",
+   "importa": "Muestra si la alimentación al impregnador fluye.",
+   "sube": "La alimentación se está atrasando (bombas de astillas o tope del impregnador).",
+   "baja": "Alimentación fluida o detenida."
+  },
+  "FI-111": {
+   "mide": "Licor blanco a la alimentación (tope del impregnador).",
+   "importa": "Es la mayor parte de la carga de álcali; lo reparte el bloque FFC-110.",
+   "sube": "Más álcali al inicio de la cocción.",
+   "baja": "Menos álcali; si falta licor blanco, todo el reparto baja en proporción."
+  },
+  "FI-112": {
+   "mide": "Licor blanco a la circulación de transferencia.",
+   "importa": "Parte de la carga de álcali que entra con la transferencia al digestor.",
+   "sube": "Más álcali al tope del digestor.",
+   "baja": "Menos álcali al tope del digestor."
+  },
+  "FI-113": {
+   "mide": "Licor blanco a la circulación de cocción superior.",
+   "importa": "Reparte álcali a lo largo de la cocción (cocción modificada).",
+   "sube": "Más álcali en la zona superior: baja el kappa y algo el rendimiento.",
+   "baja": "Menos álcali en la zona superior."
+  },
+  "FI-114": {
+   "mide": "Licor blanco a la circulación de cocción inferior.",
+   "importa": "Mantiene álcali residual al final de la cocción, clave para la viscosidad y la blanqueabilidad.",
+   "sube": "Más álcali residual en la extracción final (AI-505).",
+   "baja": "El residual final cae: riesgo de reprecipitación de lignina."
+  },
+  "FI-115": {
+   "mide": "Licor negro extraído del digestor que se envía a la impregnación.",
+   "importa": "Completa la relación licor/madera del impregnador sin gastar licor blanco.",
+   "sube": "Más licor en la impregnación; sale de la extracción principal, así que baja lo que va a flash.",
+   "baja": "Relación licor/madera baja. Si llega a cero, el impregnador puede quedar sin licor (su presión cae)."
+  },
+  "FI-116": {
+   "mide": "Circulación de licor en el tope del impregnador.",
+   "importa": "Mueve las astillas en el tope y forma parte del licor que acompaña a la madera.",
+   "sube": "Más licor en el tope (FFC-117 descuenta este caudal del licor negro).",
+   "baja": "Si cae a cero, el tope del impregnador quedó sin licor libre (vaso no lleno o tope tapado de astillas)."
+  },
+  "LW-117": {
+   "mide": "Relación licor/madera en la alimentación (m³ de licor por t de madera seca), calculada con la humedad que se le dio a FFC-117.",
+   "importa": "Fija la concentración del álcali en la impregnación. La consigna típica es 4,0.",
+   "sube": "Álcali más diluido: impregnación y cocción más lentas, el kappa sube. Pasa con astilla más húmeda si no se corrige la humedad.",
+   "baja": "Álcali más concentrado; muy baja, la astilla se impregna mal por falta de licor."
+  },
+  "PI-201": {
+   "mide": "Presión del tope del impregnador.",
+   "importa": "El impregnador trabaja lleno de líquido y presurizado: la presión evita que el licor caliente hierva.",
+   "sube": "Entra más líquido del que sale. El alivio abre a 7,5 bar.",
+   "baja": "Sale más de lo que entra o el vaso no está lleno; bajo la presión de saturación el licor hierve (vaporización súbita)."
+  },
+  "LI-202": {
+   "mide": "Nivel de la columna de astillas del impregnador.",
+   "importa": "LIC-202 lo controla con la transferencia al digestor. Lleno hasta el tope (23 m), la circulación de tope se queda sin licor.",
+   "sube": "La transferencia no alcanza a sacar lo que entra. Sobre 22,8 m, I-11 corta la madera.",
+   "baja": "Se transfiere más de lo que entra; muy bajo, se pierde el tiempo de impregnación."
+  },
+  "TI-203": {
+   "mide": "Temperatura de impregnación.",
+   "importa": "La impregnación necesita temperatura moderada: penetra el licor sin cocer todavía.",
+   "sube": "Impregnación más rápida y algo de cocción temprana.",
+   "baja": "Impregnación más lenta: más rechazos."
+  },
+  "FI-204": {
+   "mide": "Exceso de licor que sale por el separador del impregnador.",
+   "importa": "Es la salida que maneja PIC-201 para mantener la presión.",
+   "sube": "El impregnador recibe más líquido del que la transferencia saca.",
+   "baja": "Falta licor en el impregnador."
+  },
+  "II-205": {
+   "mide": "Corriente del motor del raspador del fondo del impregnador.",
+   "importa": "Indica cuánta columna de astillas se apoya en el fondo.",
+   "sube": "Columna más pesada o compactada; muy alta, falla mecánica o fondo tapado.",
+   "baja": "Columna liviana o suelta."
+  },
+  "FI-211": {
+   "mide": "Retorno de licor de la circulación de transferencia (del digestor al impregnador).",
+   "importa": "Es el licor que arrastra las astillas por la línea de transferencia.",
+   "sube": "Más licor de transporte.",
+   "baja": "Bajo 300 m³/h, I-05 corta el vapor del calentador de transferencia (no hay circulación que calentar)."
+  },
+  "TI-212": {
+   "mide": "Temperatura del licor a la salida del calentador de transferencia.",
+   "importa": "Calienta la mezcla que llega al tope del digestor.",
+   "sube": "Tope del digestor más caliente: la cocción empieza antes.",
+   "baja": "Tope más frío; con el vapor cortado (I-05) cae rápido."
+  },
+  "PI-301": {
+   "mide": "Presión del tope del digestor.",
+   "importa": "El digestor trabaja lleno de líquido: casi no hay volumen que absorba un desbalance, por eso la presión cambia en segundos o minutos. PIC-301 la controla con la extracción principal.",
+   "sube": "Entra más de lo que sale (por ejemplo, evaporadores limita la recepción). El alivio abre a 7,5 bar e I-01 corta la madera sobre 8,5 bar.",
+   "baja": "Sale más de lo que entra. Bajo la saturación del licor más caliente, el licor hierve."
+  },
+  "LI-302": {
+   "mide": "Nivel de la columna de astillas del digestor.",
+   "importa": "LIC-302 lo controla con el soplado. Junto con la madera define el tiempo de cocción.",
+   "sube": "Se sopla menos de lo que entra. Si sube aunque se sople al máximo, sospeche colgamiento. Sobre 56 m, I-02 corta la madera.",
+   "baja": "Se sopla más de lo que entra: menos tiempo de cocción."
+  },
+  "TI-303": {
+   "mide": "Temperatura del tope del digestor.",
+   "importa": "Muestra cómo llega la mezcla desde la transferencia.",
+   "sube": "Más calor en el tope (calentador de transferencia).",
+   "baja": "Tope más frío. En una parada general, debe bajar de 100 °C antes de despresurizar."
+  },
+  "TI-304": {
+   "mide": "Temperatura de la zona de cocción superior.",
+   "importa": "Junto con TI-305 define la velocidad de deslignificación (factor H). Unos pocos grados mueven el kappa varios puntos horas después.",
+   "sube": "Cocción más rápida: el kappa baja 3 a 5 horas después; también baja algo el rendimiento y la viscosidad.",
+   "baja": "Cocción más lenta: el kappa sube horas después."
+  },
+  "TI-305": {
+   "mide": "Temperatura de la zona de cocción inferior.",
+   "importa": "Termina la cocción; aporta buena parte del factor H.",
+   "sube": "Más cocción: kappa más bajo y algo menos de viscosidad.",
+   "baja": "Menos cocción: kappa más alto."
+  },
+  "TI-306": {
+   "mide": "Temperatura de la zona de lavado del fondo.",
+   "importa": "El filtrado de lavado entra frío por el fondo y detiene la cocción.",
+   "sube": "Lavado más caliente: la cocción sigue en el fondo.",
+   "baja": "La cocción se detiene antes."
+  },
+  "II-307": {
+   "mide": "Corriente del motor del raspador del fondo del digestor.",
+   "importa": "Indica cuánta columna se apoya en el fondo.",
+   "sube": "Columna más compactada o pesada; muy alta, I-07 detiene soplado y madera.",
+   "baja": "Columna liviana; si cae sin razón y el nivel no baja, puede haber colgamiento."
+  },
+  "FI-401": {
+   "mide": "Caudal de la circulación de cocción superior.",
+   "importa": "Lleva el licor a través del calentador superior y reparte calor y álcali en la zona.",
+   "sube": "Mejor reparto del calor; la ΔP de sus mallas sube.",
+   "baja": "Si la bomba cae, I-03 cierra el vapor de TIC-402: la zona se enfría."
+  },
+  "TI-402": {
+   "mide": "Temperatura del licor a la salida del calentador superior.",
+   "importa": "Es la variable que el operador mueve para la temperatura de cocción superior (TIC-402).",
+   "sube": "Calienta la zona superior (TI-304 sigue en 1 a 2 horas).",
+   "baja": "Enfría la zona superior."
+  },
+  "FI-403": {
+   "mide": "Caudal de la circulación de cocción inferior.",
+   "importa": "Lleva el licor a través del calentador inferior.",
+   "sube": "Mejor reparto del calor en la zona inferior.",
+   "baja": "Si la bomba cae, I-04 cierra el vapor de TIC-404."
+  },
+  "TI-404": {
+   "mide": "Temperatura del licor a la salida del calentador inferior.",
+   "importa": "Lo mueve TIC-404 para la temperatura de cocción inferior.",
+   "sube": "Calienta la zona inferior (TI-305 sigue).",
+   "baja": "Enfría la zona inferior."
+  },
+  "FI-405": {
+   "mide": "Filtrado de lavado agregado a la circulación superior.",
+   "importa": "Diluye la zona y ajusta la concentración de sólidos y álcali.",
+   "sube": "Menos sólidos disueltos en la cocción; más liquido que extraer.",
+   "baja": "Licor de cocción más concentrado."
+  },
+  "FI-406": {
+   "mide": "Filtrado de lavado agregado a la circulación inferior.",
+   "importa": "Diluye la zona inferior.",
+   "sube": "Menos sólidos disueltos al final de la cocción (mejor viscosidad).",
+   "baja": "Licor más concentrado al final."
+  },
+  "FI-410": {
+   "mide": "Vapor de media presión total a los calentadores.",
+   "importa": "Es el costo de energía de la cocción.",
+   "sube": "Más calor (temperaturas más altas o calentadores incrustados).",
+   "baja": "Menos calor. Con la presión de vapor baja, los calentadores no alcanzan su temperatura."
+  },
+  "FI-501": {
+   "mide": "Extracción superior (cerca del tope).",
+   "importa": "Saca licor del tope del digestor hacia flash.",
+   "sube": "Más licor a flash.",
+   "baja": "Menos licor extraído arriba."
+  },
+  "FI-502": {
+   "mide": "Extracción principal hacia el ciclón flash.",
+   "importa": "Es la salida que maneja PIC-301 para la presión del digestor. Lo extraído es licor negro hacia evaporadores.",
+   "sube": "La presión tiende a bajar.",
+   "baja": "Si llega a cero con la válvula abierta, la extracción está limitada aguas abajo (flash lleno)."
+  },
+  "FI-503": {
+   "mide": "Extracción final, sobre la zona de lavado.",
+   "importa": "FFC-503 la hace seguir al filtrado de lavado al fondo: lo que entra al fondo sale por aquí.",
+   "sube": "Más licor a flash.",
+   "baja": "Si se corta con el lavado entrando, el fondo se llena y la presión sube."
+  },
+  "AI-504": {
+   "mide": "Álcali efectivo residual en la extracción principal (analizador).",
+   "importa": "Es el indicador adelantado del kappa: cambia horas antes.",
+   "sube": "Sobra álcali: el kappa bajará.",
+   "baja": "Falta álcali (licor débil, astilla húmeda, carga baja): el kappa subirá."
+  },
+  "AI-505": {
+   "mide": "Álcali efectivo residual en la extracción final.",
+   "importa": "Debe quedar algo de álcali al final de la cocción para no reprecipitar lignina.",
+   "sube": "Más residual: algo de álcali desperdiciado.",
+   "baja": "Residual bajo: riesgo de kappa alto y pulpa oscura."
+  },
+  "LI-510": {
+   "mide": "Nivel del ciclón flash 1.",
+   "importa": "Si se llena, la extracción del digestor queda estrangulada.",
+   "sube": "Evaporadores no recibe todo el licor: la presión del digestor subirá.",
+   "baja": "El licor fluye bien hacia el segundo ciclón."
+  },
+  "LI-511": {
+   "mide": "Nivel del ciclón flash 2.",
+   "importa": "Último paso antes de evaporadores.",
+   "sube": "Evaporadores limita la recepción.",
+   "baja": "El licor fluye bien hacia evaporadores."
+  },
+  "FI-512": {
+   "mide": "Licor negro débil enviado a evaporadores.",
+   "importa": "Es todo el licor que sale del digestor por las extracciones; evaporadores tiene un límite de recepción.",
+   "sube": "Más carga para evaporadores (más lavado, más dilución).",
+   "baja": "Si baja sin que usted lo haya pedido, evaporadores está limitando: baje en lo mismo el filtrado de lavado (FIC-601)."
+  },
+  "PDI-521": {
+   "mide": "ΔP del separador del impregnador.",
+   "importa": "Mide cuán tapada está esa malla.",
+   "sube": "Taponamiento por finos.",
+   "baja": "Malla limpia."
+  },
+  "PDI-522": {
+   "mide": "ΔP del separador del digestor.",
+   "importa": "Mide cuán tapada está esa malla.",
+   "sube": "Taponamiento.",
+   "baja": "Malla limpia."
+  },
+  "PDI-523": {
+   "mide": "ΔP de las mallas de extracción superior.",
+   "importa": "Mide cuán tapadas están.",
+   "sube": "Taponamiento: retrolavar y revisar la conmutación.",
+   "baja": "Mallas limpias."
+  },
+  "PDI-524": {
+   "mide": "ΔP de las mallas de la circulación superior.",
+   "importa": "Si llega a 0,95 bar, I-09 detiene la bomba y corta el vapor.",
+   "sube": "Se tapan de a poco (finos, conmutación detenida). Retrolavar sobre 0,7 bar.",
+   "baja": "Mallas limpias (retrolavado o conmutación)."
+  },
+  "PDI-525": {
+   "mide": "ΔP de las mallas de extracción principal.",
+   "importa": "Tapadas, la extracción principal no alcanza su caudal y sube la presión.",
+   "sube": "Taponamiento: retrolavar.",
+   "baja": "Mallas limpias."
+  },
+  "PDI-526": {
+   "mide": "ΔP de las mallas de la circulación inferior.",
+   "importa": "Si llega a 0,95 bar, I-10 detiene la bomba y corta el vapor.",
+   "sube": "Se tapan de a poco. Retrolavar sobre 0,7 bar.",
+   "baja": "Mallas limpias."
+  },
+  "PDI-527": {
+   "mide": "ΔP de las mallas de extracción final.",
+   "importa": "Mide cuán tapadas están.",
+   "sube": "Taponamiento.",
+   "baja": "Mallas limpias."
+  },
+  "FI-601": {
+   "mide": "Filtrado de lavado que entra por el fondo del digestor.",
+   "importa": "Lava y enfría la pulpa en contracorriente. Normalmente lo fija FDC-607 (factor de dilución). Es la entrada de líquido más grande del digestor.",
+   "sube": "Mejor lavado y más licor a evaporadores; la extracción final lo sigue (FFC-503).",
+   "baja": "Peor lavado. Bajarlo es la forma rápida de reducir lo que sale hacia evaporadores."
+  },
+  "FI-602": {
+   "mide": "Dilución del fondo (sigue al licor del soplado con FFC-602).",
+   "importa": "Ajusta la consistencia de la lechada en el fondo.",
+   "sube": "Lechada más diluida.",
+   "baja": "Lechada más espesa."
+  },
+  "FI-603": {
+   "mide": "Caudal de lechada de pulpa soplada al estanque.",
+   "importa": "Lo mueve LIC-302 para el nivel de astillas: es la salida de pulpa del digestor.",
+   "sube": "Sale más pulpa: el nivel baja.",
+   "baja": "Sale menos pulpa: el nivel sube."
+  },
+  "TI-604": {
+   "mide": "Temperatura de la pulpa soplada.",
+   "importa": "El filtrado de lavado frío la mantiene bajo control; caliente, la pulpa sigue cociéndose y daña su resistencia.",
+   "sube": "Falta filtrado frío en el fondo. Muy alta, I-06 detiene el soplado.",
+   "baja": "Buen enfriamiento del fondo."
+  },
+  "CI-605": {
+   "mide": "Consistencia de la lechada de soplado.",
+   "importa": "Una consistencia estable indica que la columna baja de forma pareja.",
+   "sube": "Lechada más espesa.",
+   "baja": "Lechada aguada: si cae sin razón, la columna puede estar colgada."
+  },
+  "LI-606": {
+   "mide": "Nivel del estanque de soplado.",
+   "importa": "El lavado toma la pulpa de este estanque.",
+   "sube": "Se sopla más de lo que el lavado recibe. A 95 %, I-08 corta el soplado.",
+   "baja": "El lavado toma más de lo que llega."
+  },
+  "FD-607": {
+   "mide": "Factor de dilución: m³ de filtrado neto por tonelada de pulpa (calculado).",
+   "importa": "Mide cuánta agua de lavado se usa por tonelada. FDC-607 lo controla con FIC-601. Sin soplado no se puede calcular y el lazo queda retenido.",
+   "sube": "Mejor lavado pero más licor para evaporadores.",
+   "baja": "Menos lavado: más arrastre de sólidos al lavado."
+  },
+  "AI-701": {
+   "mide": "Kappa de la pulpa soplada (analizador en línea).",
+   "importa": "Es la calidad que se vende: la banda es 16 a 18. El analizador puede congelarse: compare con el laboratorio.",
+   "sube": "Pulpa menos cocida: más lignina, más químicos de blanqueo. Sobre 22 la pulpa no sirve.",
+   "baja": "Pulpa sobrecocida: menos rendimiento y menos viscosidad."
+  },
+  "QI-702": {
+   "mide": "Producción en toneladas secas al aire por día (calculada en el soplado).",
+   "importa": "La meta del turno.",
+   "sube": "Más producción.",
+   "baja": "Menos producción."
+  },
+  "HI-703": {
+   "mide": "Factor H de la pulpa que se sopla (calculado).",
+   "importa": "Resume temperatura y tiempo de cocción en un número: a más H, menos kappa.",
+   "sube": "Cocción más intensa: el kappa baja.",
+   "baja": "Cocción más débil (por ejemplo, al subir el ritmo): el kappa sube."
+  }
+ },
+ "laboratorio": {
+  "kappa": "Kappa de la pulpa del soplado. Llega en 20 a 40 minutos y tiene su propio error: sirve para confirmar el analizador AI-701.",
+  "viscosidad": "Viscosidad de la pulpa (resistencia de la celulosa). Baja con cocción muy intensa o con temperaturas altas.",
+  "rendimiento": "Rendimiento de la cocción: pulpa por madera. Baja si se cuece de más.",
+  "rechazos": "Astillas mal cocidas que no se separan en fibras. Suben con astilla gruesa, impregnación pobre o poca cocción.",
+  "alcali_ext_principal": "Álcali residual en la extracción principal, medido en laboratorio: confirma el analizador AI-504.",
+  "alcali_ext_final": "Álcali residual en la extracción final: confirma AI-505.",
+  "alcali_soplado": "Álcali residual en el licor del soplado.",
+  "humedad_astillas": "Humedad de la astilla. Si sube (lluvia), corrija la humedad en FFC-117 para que la relación licor/madera vuelva a su consigna.",
+  "densidad_astillas": "Densidad básica de la astilla. Si baja, el medidor sobrestima la madera: suba la velocidad para mantener la producción.",
+  "finos_astillas": "Contenido de finos. Muchos finos tapan las mallas.",
+  "licor_blanco_EA": "Álcali efectivo del licor blanco. FFC-110 usa el último valor para calcular el caudal que da la carga pedida: si el licor se debilita y nadie lo mide, la carga real baja.",
+  "licor_blanco_sulfidez": "Sulfidez del licor blanco. Más baja, cocción más lenta y menos selectiva."
+ }
+}

@@ -56,6 +56,8 @@ try {
   await sp.fill('157'); await sp.press('Enter')
   await pag.waitForTimeout(1200)
   verificar(await leer(() => window.__app.estado().control.lazos['TIC-402'].sp) === 157, 'cambio de consigna de TIC-402 desde la carátula')
+  await pag.click('.caratula details.ayuda summary')
+  verificar(await pag.locator('.caratula details.ayuda[open]').innerText().then((t) => t.includes('Si sube')), 'ayuda contextual en la carátula')
   await pag.getByRole('button', { name: 'MAN', exact: true }).click()
   await pag.waitForTimeout(800)
   verificar(await leer(() => window.__app.estado().control.lazos['TIC-402'].modo) === 'MAN', 'cambio de modo a MAN')

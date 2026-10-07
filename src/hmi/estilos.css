@@ -271,3 +271,8 @@ tr.sin-reconocer td { font-weight: 600; }
   .mision-objetivos { top: auto; bottom: 150px; right: 6px; max-width: 70vw; }
   .mision-titulo .nombre { font-size: 30px; }
 }
+
+/* Ayuda contextual (carátulas). */
+.caratula details.ayuda { margin: 6px 0; padding: 4px 8px; background: #e9e9e9; border-left: 3px solid #8a8a8a; font-size: 13px; }
+.caratula details.ayuda summary { cursor: pointer; color: #3a3a3a; }
+.caratula details.ayuda p { margin: 4px 0; }

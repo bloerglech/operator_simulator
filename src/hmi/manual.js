@@ -4,6 +4,7 @@
 
 import texto from '../../docs/PROCEDIMIENTOS.md?raw'
 import { h } from './dom.js'
+import { glosario } from './ayuda.js'
 
 function enLinea(t) {
   const frag = document.createDocumentFragment()
@@ -54,7 +55,8 @@ export function abrirManual(app) {
   return {
     elemento: h('div', { class: 'panel' },
       h('button', { class: 'cerrar', style: 'float:right', onclick: () => app.cerrarLateral() }, '✕'),
-      contenido),
+      contenido,
+      glosario()),
     actualizar() {},
   }
 }

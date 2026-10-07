@@ -17,13 +17,17 @@ manda la especificación y este plan se corrige.
    Si quieres que reutilice algo de ellos, súbelos a una carpeta
    `prototipos/` y los reviso antes de la Fase 3/4 (que es donde serían
    útiles).
-2. **Cambio de alcance respecto de la conversación inicial.** El primer
-   mensaje hablaba de un digestor Kamyr de un vaso, pino radiata y kappa 30.
-   La especificación define un Lo-Solids de dos vasos (impregnador +
-   digestor hidráulico), eucalipto y kappa 17. Trabajo con la
-   especificación. La topología de un vaso queda disponible por
-   configuración (`config/topologia.json`), pero la calibración solo se hará
-   para el caso base eucalipto.
+2. **Alcance de la madera (decisión tuya, modifica las secciones 6.3, 7,
+   10, 11 y 13 de la especificación).** Solo eucalipto, una sola especie:
+   *E. nitens*, con todas sus propiedades configurables. No hay mezcla de
+   especies ni parámetros de pino. En consecuencia:
+   - "Cambio de mezcla de especies" pasa a ser **cambio de lote/campaña de
+     nitens** (densidad, composición, reactividad).
+   - La prueba "más nitens exige más carga" pasa a ser **"madera menos
+     reactiva o con más lignina exige más carga"**.
+   - El caso base es 100 % nitens.
+   La topología de un vaso sigue disponible por configuración, siempre con
+   eucalipto.
 3. **Consistencia del caso base (sección 7).** Con las temperaturas dadas,
    la velocidad relativa de Vroom es ≈ 139 a 148 °C y ≈ 167 a 150 °C. Si
    toda la "cocción total" de 180–240 min estuviera a 147–152 °C, el factor
@@ -122,8 +126,8 @@ no puede depender de ella.
 Cada parámetro de proceso es un objeto:
 
 ```json
-"Ea_principal_OH": { "valor": 143, "unidad": "kJ/mol", "origen": "literatura",
-                  "fuente": "Gustafson et al. (1983), pino", "nota": "verificar para eucalipto" }
+"Ea_principal_OH": { "valor": 130, "unidad": "kJ/mol", "origen": "supuesto",
+                      "nota": "eucalipto; reemplazar con datos de nitens" }
 ```
 
 `origen` ∈ {`literatura`, `calibrado`, `supuesto`, `planta`} (`planta` para
@@ -232,7 +236,7 @@ Subdividida para poder revisar avances:
 | Cierre de masa total y por componente (< 0,1 %), energía (< 1 %) | 1a/1b |
 | Factor H: 1 h a 100 °C ≈ 1 (la fórmula da 1,014); 150 °C ≈ 167; 160 °C ≈ 402 por hora | 1b |
 | Estado estacionario del caso base en rangos | 1b |
-| Respuestas cualitativas (T, álcali, ritmo, dilución, humedad, nitens) | 1b |
+| Respuestas cualitativas (T, álcali, ritmo, dilución, humedad, madera menos reactiva) | 1b |
 | Tiempos muertos y residencia vs ritmo | 1a |
 | Determinismo: misma semilla + mismo registro de comandos ⇒ estado idéntico bit a bit, con distintos tamaños de "avanzar" (simula x1, x60, x300) | 1a |
 | Guardar → cargar → continuar = continuar sin guardar (bit a bit) | 1a |
@@ -277,8 +281,8 @@ reemplazas después.
 | P7 | Caudales de diseño de cada circulación (transferencia, superior, inferior, lavado) | 0,25 / 0,20 / 0,20 / 0,10 m³/s |
 | P8 | Calentadores: área, coeficiente limpio, presión de vapor MP | U·A limpio para dar +12 °C con 30 % de margen; vapor MP 12 bar(g) |
 | P9 | Presión de los ciclones flash 1 y 2 | 2,5 bar(a) y 1,1 bar(a) |
-| P10 | Densidad básica y composición de globulus y nitens (lignina, glucano, xilano, extraíbles, acetilos, MeGlcA) | Ver tabla en MODELO.md §3; requiere tu confirmación |
-| P11 | Medidor de astillas: volumen por revolución y rango de velocidad | Dimensionado para 110 % con la mezcla base a 80 % de velocidad |
+| P10 | Densidad básica y composición de tu *E. nitens* (lignina, glucano, xilano, extraíbles, acetilos, MeGlcA) | Ver tabla en MODELO.md §3; requiere tu confirmación |
+| P11 | Medidor de astillas: volumen por revolución y rango de velocidad | Dimensionado para 110 % con la madera base a 80 % de velocidad |
 | P12 | Temperatura y composición del filtrado de lavado | 75 °C, 2 g/L álcali efectivo, 40 g/L sólidos disueltos |
 | P13 | Temperatura del licor blanco y eficiencia de caustificación | 90 °C, 82 % |
 | P14 | ¿Interesa modelar la vaporización del silo con vapor flash + vapor fresco BP, o basta con un índice de calidad de vaporización? | Modelo simple de energía + índice de remoción de aire |
@@ -286,6 +290,7 @@ reemplazas después.
 | P16 | Analizador de kappa: período y error | 25 min, σ = 0,5 kappa |
 | P17 | Confirmar que los 180–240 min de "cocción total" incluyen calentamiento y zona de lavado (ver §1.3) | Sí |
 | P18 | Precios para el resumen económico (madera, álcali, vapor, pulpa) | Valores genéricos en USD, marcados supuesto |
+| P19 | ¿Tienes datos cinéticos de nitens (cocciones de laboratorio o de planta a distintas temperaturas o cargas) para fijar energías de activación? | E como supuesto; solo se calibran preexponenciales |
 
 ---
 

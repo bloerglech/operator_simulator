@@ -97,27 +97,31 @@ iones activos (Na⁺, OH⁻, HS⁻)`.
 
 ## 3. Materia prima (`config/madera.json`)
 
-Mezcla de E. globulus y E. nitens con fracciones x_g, x_n. La composición de
-la mezcla es el promedio ponderado por masa seca. Cada especie tiene:
-densidad básica, lignina total (y su reparto inicial en f/p/r), glucano,
-xilano, otros carbohidratos, extraíbles, acetilos, MeGlcA y un **factor de
-reactividad** que multiplica las velocidades de deslignificación (1 para
-globulus; < 1 para nitens).
+Una sola especie: **Eucalyptus nitens**. No hay mezcla de especies ni
+parámetros de otras maderas. Todas las propiedades están en
+`config/madera.json` y son configurables: densidad básica, lignina total
+(y su reparto inicial en f/p/r), glucano, xilano, otros carbohidratos,
+extraíbles, acetilos, MeGlcA y un **factor de reactividad** (1 por
+defecto) que multiplica las velocidades de deslignificación. Este factor
+permite representar lotes de nitens que cuecen más fácil o más difícil
+(edad, procedencia) sin tocar la cinética.
 
 Valores provisionales (orden de magnitud; **todos `supuesto` hasta que los
 confirmes, pregunta P10**):
 
-| Propiedad | globulus | nitens |
-|-----------|----------|--------|
-| Densidad básica (kg/m³) | 560 | 480 |
-| Lignina total (% bs) | 21 | 25 |
-| Glucano (% bs) | 48 | 46 |
-| Xilano (% bs) | 16 | 15 |
-| Extraíbles (% bs) | 2 | 3 |
-| Reactividad relativa | 1,00 | 0,85 |
+| Propiedad (E. nitens) | Valor provisional |
+|-----------------------|-------------------|
+| Densidad básica (kg/m³) | 480 |
+| Lignina total (% bs) | 25 |
+| Glucano (% bs) | 46 |
+| Xilano (% bs) | 15 |
+| Otros carbohidratos (% bs) | 4 |
+| Extraíbles (% bs) | 3 |
+| Reactividad relativa | 1,00 |
 
-Variables en el tiempo (perturbables): fracción de mezcla, humedad
-(base húmeda), densidad aparente en el medidor, distribución de tamaños,
+Variables en el tiempo (perturbables): propiedades del lote (densidad,
+lignina, reactividad: "cambio de campaña de madera"), humedad (base
+húmeda), densidad aparente en el medidor, distribución de tamaños,
 contenido de corteza (aporta lignina y extraíbles extra, más finos y
 consumo de álcali), envejecimiento (menos extraíbles, más consumo inicial).
 
@@ -230,8 +234,9 @@ k_i(T) = A_i · ρ_esp · exp(−E_i/R · (1/T − 1/T_ref))
 ```
 
 A_i (preexponencial a T_ref) se **calibra**; E_i y los órdenes de reacción
-vienen de literatura o son supuestos (documentados). ρ_esp es el factor de
-reactividad de la mezcla de especies (solo deslignificación).
+son `supuesto` para eucalipto mientras no haya datos propios (ver 6.3).
+ρ_esp es el factor de reactividad del lote de nitens (solo
+deslignificación).
 
 Las reacciones usan las concentraciones del **licor retenido** (dentro de
 la astilla) y solo ocurren en la fracción impregnada (1 − φ̄), salvo una
@@ -259,10 +264,11 @@ avanzado.
 
 ### 6.3 Deslignificación (tres fracciones en paralelo)
 
-Estructura tipo Purdue (fracciones en paralelo) con energías de activación
-y órdenes de Gustafson et al. (1983), que es la referencia de tres fases
-más usada. Las tres fracciones reaccionan simultáneamente; la "fase" que
-domina en cada momento emerge de sus velocidades.
+Estructura de tres fases (inicial, principal, residual) tipo Gustafson,
+escrita como fracciones en paralelo (tipo Purdue): las tres fracciones
+reaccionan simultáneamente y la "fase" que domina en cada momento emerge de
+sus velocidades. Solo se toma la **forma** de las ecuaciones; ningún
+parámetro proviene de modelos para otras maderas.
 
 ```
 r_f = k_f(T) · [OH]^a_f · L_f                                  (inicial)
@@ -286,22 +292,28 @@ lignina disuelta al licor retenido: + (r_f + r_p + r_r − r_rep)
 - La dependencia de la lignina residual con el álcali proviene de
   `r_cond` (más condensación cuanto menos álcali) y de `r_rep`.
 
-Energías de activación provisionales (Gustafson et al. 1983, **pino**,
-`literatura`, a verificar para eucalipto; equivalencias calculadas de las
-temperaturas características del artículo):
+**Parámetros para eucalipto.** Energías de activación y órdenes de
+reacción quedan en configuración como `supuesto` hasta contar con datos de
+eucalipto (pregunta P19). La calibración a un solo estado estacionario
+ajusta los preexponenciales, pero no puede identificar las energías de
+activación (limitación L-04); por eso conviene calibrarlas con datos de
+planta o de laboratorio de nitens a dos o más temperaturas. Mientras
+tanto, la rutina de calibración verifica que con las E elegidas el modelo
+reproduzca el caso base **y** tenga sensibilidad a la temperatura
+coherente con el factor H (Vroom usa ≈ 134 kJ/mol, que se usa como
+referencia de orden para la fase principal).
 
-| Fase | E (kJ/mol) | Órdenes |
-|------|-----------|---------|
-| Inicial | ≈ 40 | a_f = 0 |
-| Principal, término OH | ≈ 143 | a_p1 = 1 |
-| Principal, término OH·HS | ≈ 120 | a_p2 = 0,5; b_p2 = 0,4 |
-| Residual | ≈ 90 (a verificar) | a_r = 0,7 |
+| Fase | E (kJ/mol) | Órdenes | Origen |
+|------|-----------|---------|--------|
+| Inicial | E_f (baja) | a_f | supuesto |
+| Principal, término OH | E_p1 | a_p1 | supuesto |
+| Principal, término OH·HS | E_p2 | a_p2, b_p2 | supuesto |
+| Residual | E_r | a_r | supuesto |
 
 Reparto inicial de la lignina (supuesto, eucalipto): rápida ≈ 20 %,
-principal ≈ 72 %, residual ≈ 8 %. Para eucalipto se espera menor
-requerimiento de factor H en la fase principal (especificación 6.2): eso
-lo produce la calibración de A_p1, A_p2 al caso base (kappa 17 con H en
-350–500), no un valor inventado.
+principal ≈ 72 %, residual ≈ 8 %. El menor requerimiento de factor H del
+eucalipto en la fase principal (especificación 6.2) lo produce la
+calibración de A_p1, A_p2 al caso base (kappa 17 con H en 350–500).
 
 ### 6.4 Carbohidratos
 
@@ -346,10 +358,9 @@ kappa_HexA    = (HexA, mmol/kg pulpa) / 11,6
 kappa         = kappa_lignina + kappa_HexA
 ```
 
-- c_κ ≈ 0,15 % lignina por unidad de kappa en pino; para eucalipto se
-  usan valores algo menores (≈ 0,13). Queda como parámetro `supuesto`
-  (pregunta abierta implícita: si tienes tu correlación de planta, se
-  usa).
+- c_κ: % de lignina en pulpa por unidad de kappa de lignina, para
+  eucalipto (provisional 0,13, `supuesto`). Si tienes tu correlación de
+  planta, se usa esa.
 - 11,6 mmol/kg por punto de kappa: dato de la especificación (`literatura`).
 - La lignina reprecipitada cuenta como lignina en el kappa.
 
@@ -611,11 +622,11 @@ mínimas).
 | S-03 | Una temperatura por celda (astilla y licores en equilibrio térmico). |
 | S-04 | Calor de reacción despreciable. |
 | S-05 | Química del sólido común a todas las clases de tamaño; solo la impregnación es por clase. |
-| S-06 | Composición de la mezcla de especies = promedio ponderado; reactividad como factor multiplicativo. |
+| S-06 | Una sola especie (E. nitens) con propiedades de lote configurables; las diferencias entre lotes se representan con composición, densidad y un factor de reactividad multiplicativo. |
 | S-07 | Los 180–240 min de cocción incluyen calentamiento y zona de lavado (ver PLAN §1.3). |
 | S-08 | Lo no impregnado reacciona a una fracción ψ de la velocidad normal. |
 | S-09 | Xilano redepositado trae HexA en la proporción del xilano disuelto. |
-| S-10 | Energías de activación y órdenes de Gustafson (pino) como punto de partida para eucalipto; la diferencia de especie se absorbe en los preexponenciales calibrados. |
+| S-10 | Energías de activación y órdenes de reacción provisionales (supuesto) hasta tener datos de eucalipto; solo la estructura de las ecuaciones se toma de la literatura general de cocción kraft. |
 | S-11 | Densidad de pared celular 1 500 kg/m³. |
 | S-12 | cp de la madera y del licor constantes por tramo (el del licor según sólidos). |
 | S-13 | Sin intercambio de especies entre clases de tamaño. |
@@ -629,7 +640,7 @@ mínimas).
 |----|-----------|
 | L-01 | Modelo 1D: no hay gradientes radiales (salvo la canalización como fracción de bypass). |
 | L-02 | Sin perfil de concentración dentro de la astilla (fuerza impulsora lineal). |
-| L-03 | Cinética de eucalipto basada en estructura de pino + calibración a un punto: válida cerca del caso base; extrapolaciones lejanas son cualitativas. |
+| L-03 | Cinética calibrada a un punto de operación: válida cerca del caso base; extrapolaciones lejanas son cualitativas hasta calibrar con más datos de nitens. |
 | L-04 | La calibración a un solo estado estacionario no identifica bien las energías de activación; se recomienda agregar datos de planta a otras temperaturas. |
 | L-05 | Viscosidad solo por celulosa. |
 | L-06 | Índices de blanqueabilidad y color cualitativos. |
@@ -641,10 +652,10 @@ mínimas).
 - Vroom, K. E. (1957). The "H" factor: a means of expressing cooking times
   and temperatures as a single variable. Pulp Pap. Mag. Can.
 - Gustafson, R. R., Sleicher, C. A., McKean, W. T., Finlayson, B. A. (1983).
-  Theoretical model of the kraft pulping process. Ind. Eng. Chem. Process
-  Des. Dev.
-- Christensen, T., Albright, L. F., Williams, T. J. (1982). Modelo Purdue de
-  cocción kraft (fracciones en paralelo).
+  Theoretical model of the kraft pulping process (solo estructura de tres
+  fases).
+- Christensen, T., Albright, L. F., Williams, T. J. (1982). Modelo Purdue
+  (solo estructura de fracciones en paralelo).
 - Kubes, G. J., Fleming, B. I., MacLeod, J. M., Bolker, H. I. (1983).
   Viscosities of unbleached alkaline pulps — factor G.
 - Stone, J. E. (1957). Difusión en astillas y ECCSA.
@@ -652,5 +663,6 @@ mínimas).
 - Li, J., Gellerstedt, G. — aporte de HexA al número kappa.
 
 Las referencias se usan solo para la **estructura** de las ecuaciones y para
-energías de activación y órdenes marcados `literatura`; ningún valor se
-usa sin pasar por la calibración o sin marcarse como supuesto.
+constantes generales (factor H, HexA/kappa, viscosidad–DP). Ningún
+parámetro cinético de otras maderas se usa: los de eucalipto se calibran o
+se marcan como supuesto.

@@ -1,7 +1,7 @@
 # Misiones
 
 Generado por `npm run documentar` desde `src/misiones/campana.js` (no editar a mano).
-Orden de la campaña: `tutorial` → `turno_noche` → `mas_toneladas` → `licor_debil` → `mallas` → `presurizacion` → `columna_colgada` → `parada_corta` → `parada_general` → `apagon` → `record`.
+Orden de la campaña: `tutorial` → `turno_noche` → `mas_toneladas` → `licor_debil` → `mallas` → `presurizacion` → `columna_colgada` → `parada_corta` → `parada_general` → `puesta_en_marcha` → `apagon` → `record`.
 Cada misión superada desbloquea la siguiente. Medallas según la fracción de
 puntos: oro ≥ 90 %, plata ≥ 70 %, bronce con todos los objetivos principales.
 La prueba `tests/misiones.test.js` juega cada misión con la respuesta
@@ -71,7 +71,7 @@ esperada (debe aprobar) y sin hacer nada (debe fallar).
 
 **Qué enseña:** La coordinación de ritmo: madera, álcali, licores, extracciones y temperaturas se mueven juntos; a más ritmo, menos tiempo de cocción y menos factor H.
 
-**Situación inicial:** caso base tras 8 h de operación, y luego 9 h con `{"tipo":"bloque","id":"RC-700","accion":"parametro","campo":"produccion","valor":2550}`, `{"tipo":"bloque","id":"RC-700","accion":"parametro","campo":"rampa","valor":300}`, `{"tipo":"bloque","id":"RC-700","accion":"activar"}`, `{"tipo":"bloque","id":"HIC-703","accion":"parametro","campo":"objetivo","valor":440}`, `{"tipo":"bloque","id":"HIC-703","accion":"activar"}`. Subir del 85 % al 100 % del ritmo sin sacar el kappa de banda.
+**Situación inicial:** caso base tras 8 h de operación, y luego `{"tipo":"bloque","id":"RC-700","accion":"parametro","campo":"produccion","valor":2550}`, `{"tipo":"bloque","id":"RC-700","accion":"parametro","campo":"rampa","valor":300}`, `{"tipo":"bloque","id":"RC-700","accion":"activar"}`, `{"tipo":"bloque","id":"HIC-703","accion":"parametro","campo":"objetivo","valor":440}`, `{"tipo":"bloque","id":"HIC-703","accion":"activar"}` (9 h); `{"tipo":"bloque","id":"RC-700","accion":"parametro","campo":"rampa","valor":150}`, `{"tipo":"bloque","id":"HIC-703","accion":"desactivar"}` (0 h). Subir del 85 % al 100 % del ritmo sin sacar el kappa de banda.
 
 **Guion:**
 
@@ -261,6 +261,34 @@ esperada (debe aprobar) y sin hacer nada (debe fallar).
 **Criterios de evaluación:** Planta entregada en menos de 18 horas (1 pt) · Sin aperturas de la válvula de alivio (1 pt) · Sin enclavamientos disparados (1 pt); cada objetivo secundario suma 1 pt.
 
 **Respuesta ideal:** En orden: (1) bajar el ritmo al 60 % con RC-700 y rampa, para que el fondo y el lavado se adapten; (2) cortar astillas y transferencia juntas (WIC-101 en 0 y LIC-202 en manual con salida 0), con FIC-115 fuera de cascada para que el impregnador siga lleno de licor; (3) detener el soplado (LIC-302 en manual, salida 0); (4) cortar el vapor de los tres calentadores con las bombas andando; (5) enfriar desplazando con filtrado de lavado (FIC-601 en AUTO, ≈ 600 m³/h): el licor frío entra por el fondo y sale por las extracciones; tarda muchas horas; (6) recién con el digestor bajo 100 °C (TI-303, TI-304 y TI-305), detener el filtrado (un vaso lleno de líquido no baja su presión mientras le entra líquido), bajar las consignas de PIC-301 y PIC-201 y abrir los venteos. Despresurizar caliente hace hervir el licor dentro del digestor.
+
+## Capítulo 9. Puesta en marcha
+
+**Qué enseña:** El orden de una partida: cerrar venteos y llenar (el impregnador también), presurizar, calentar en rampa con las circulaciones andando, partir madera, soplado y lavado juntos en escalones y esperar el kappa: lo que estuvo detenido sale fuera de especificación por horas.
+
+**Situación inicial:** caso base tras 8 h de operación, y luego `{"tipo":"lazo","id":"WIC-101","accion":"consigna","valor":130}` (1.5 h); `{"tipo":"lazo","id":"WIC-101","accion":"consigna","valor":0}`, `{"tipo":"lazo","id":"FIC-115","accion":"modo","valor":"AUTO"}`, `{"tipo":"lazo","id":"FIC-601","accion":"modo","valor":"AUTO"}`, `{"tipo":"lazo","id":"LIC-202","accion":"modo","valor":"MAN"}`, `{"tipo":"lazo","id":"LIC-302","accion":"modo","valor":"MAN"}`, `{"tipo":"lazo","id":"TIC-402","accion":"modo","valor":"MAN"}`, `{"tipo":"lazo","id":"TIC-404","accion":"modo","valor":"MAN"}`, `{"tipo":"lazo","id":"TIC-212","accion":"modo","valor":"MAN"}` (0 h); `{"tipo":"lazo","id":"LIC-202","accion":"salida","valor":0}`, `{"tipo":"lazo","id":"LIC-302","accion":"salida","valor":0}`, `{"tipo":"lazo","id":"TIC-402","accion":"salida","valor":0}`, `{"tipo":"lazo","id":"TIC-404","accion":"salida","valor":0}`, `{"tipo":"lazo","id":"TIC-212","accion":"salida","valor":0}`, `{"tipo":"lazo","id":"FIC-601","accion":"consigna","valor":600}` (13.5 h); `{"tipo":"lazo","id":"FIC-601","accion":"consigna","valor":0}`, `{"tipo":"lazo","id":"PIC-301","accion":"consigna","valor":1}`, `{"tipo":"lazo","id":"PIC-201","accion":"consigna","valor":1.5}` (0.2 h); `{"tipo":"venteo","id":"dig","accion":"abrir"}`, `{"tipo":"venteo","id":"imp","accion":"abrir"}` (2 h). Arranque después de la parada general: el digestor está lleno de astillas, frío y venteado.
+
+**Guion:**
+
+- a los 0 min: Carmen Soto, jefa de turno (telefono): «Mantención terminó. El digestor está lleno de astillas, frío y venteado. Hay que partir: cierra los venteos, llena y presuriza, calienta de a poco y después parte madera y soplado. Quiero ritmo completo y kappa en banda para mañana.»
+- `{"objetivo":"presurizar"}`: Luis Paredes, terreno (radio): «Sala, los dos vasos con presión y sin fugas en terreno. Puedes calentar.»
+- `{"objetivo":"calentar"}`: Carmen Soto, jefa de turno (telefono): «Temperaturas de cocción arriba. Parte la madera de a poco, con el soplado y el lavado en la misma proporción.»
+- a los 20 h: Carmen Soto, jefa de turno (telefono): «Veinte horas de partida. Revisemos cómo quedó.» · fin de la misión
+
+**Objetivos:**
+
+- (principal) Cerrar los venteos, llenar el impregnador y presurizar ambos vasos (PI-301 y PI-201 sobre 5 bar)
+- (principal) Calentar en rampa hasta la temperatura de cocción (TI-304 sobre 148 °C)
+- (principal) Llegar al ritmo nominal (WI-101 sobre 200 t/h) con soplado y lavado en proporción
+- (secundario) Dejar los lazos en su modo normal (LIC-302, LIC-202 y TIC-604 en AUTO; FIC-601 y FIC-115 en CAS)
+- (principal, al final) Terminar con kappa entre 16 y 18
+- (principal, al final) Terminar con la presión del digestor entre 5 y 6 bar
+
+**Condiciones de falla:** Abrió la válvula de seguridad del digestor. · El nivel de astillas del digestor llegó al enclavamiento. · El estanque de soplado se llenó. · El impregnador se llenó de astillas: enclavamiento I-11.
+
+**Criterios de evaluación:** A lo más 40 aperturas del alivio en la partida (1 pt) · Menos de 10 horas de pulpa fuera de especificación (2 pt) · Sin enclavamientos disparados (1 pt); cada objetivo secundario suma 1 pt.
+
+**Respuesta ideal:** Partir es el camino inverso de la parada, en orden: (1) cerrar los venteos y llenar: filtrado de lavado al fondo (FIC-601, ≈ 300 m³/h) y licor negro al impregnador (FIC-115 en AUTO, ≈ 400 m³/h hasta que PI-201 suba): un vaso que no está lleno de líquido no toma presión y su circulación de tope no anda; (2) calentar en rampa con los tres TIC en AUTO, unos 15 °C cada media hora; (3) con la zona de cocción caliente, partir la transferencia (LIC-202 en AUTO) y madera, soplado manual y lavado juntos en escalones; (4) con el ritmo completo, LIC-302 a AUTO con la consigna en el nivel actual y FIC-601 y FIC-115 a CAS. Las astillas que estuvieron detenidas salen sobrecocidas y luego crudas: el kappa entra en banda recién unas 10 horas después de partir.
 
 ## Capítulo 10. Apagón
 

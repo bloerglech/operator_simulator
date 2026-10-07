@@ -59,7 +59,15 @@ function condicionTexto(c) {
   return `\`${JSON.stringify(c)}\``
 }
 
-export function misionesMd(config) {
+export /** Preparación de una misión: comandos y horas, o etapas sucesivas. */
+function preparacionMd(prep) {
+  if (!prep) return ''
+  const etapas = prep.etapas ?? [{ comandos: prep.comandos ?? [], horas: prep.horas ?? 0 }, ...(prep.despues ? [{ comandos: prep.despues, horas: 0 }] : [])]
+  const cmd = (c) => `\`${JSON.stringify(c)}\``
+  return ', y luego ' + etapas.map((e) => `${(e.comandos ?? []).map(cmd).join(', ')} (${e.horas} h)`).join('; ')
+}
+
+function misionesMd(config) {
   const partes = [`# Misiones
 
 Generado por \`npm run documentar\` desde \`src/misiones/campana.js\` (no editar a mano).
@@ -75,7 +83,7 @@ esperada (debe aprobar) y sin hacer nada (debe fallar).
 
 **Qué enseña:** ${d.ensena}
 
-**Situación inicial:** caso base tras ${d.inicio?.horasPrevias ?? 8} h de operación${d.inicio?.preparacion ? `, y luego ${d.inicio.preparacion.horas} h con ${d.inicio.preparacion.comandos.map((c) => `\`${JSON.stringify(c)}\``).join(', ')}` : ''}. ${d.resumen}
+**Situación inicial:** caso base tras ${d.inicio?.horasPrevias ?? 8} h de operación${preparacionMd(d.inicio?.preparacion)}. ${d.resumen}
 
 **Guion:**
 

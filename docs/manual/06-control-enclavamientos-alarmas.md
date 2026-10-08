@@ -275,8 +275,9 @@ menos 161 (licor blanco) y 230 (circulación de tope): licor negro
 ### Seguimiento (FFC-503, FFC-602)
 
 Si el operador sube el filtrado de lavado y nada más, el filtrado extra
-sube por el digestor hasta la zona de cocción, la enfría y diluye su
-álcali (capítulo 2). Por eso la extracción final **sigue** los cambios del
+sube por el digestor hasta las mallas de extracción principal: baja el
+caudal que desciende por la cocción inferior y, con él, el álcali que
+acompaña a las astillas, y el kappa sube (secciones 2.4 y 4.10). Por eso la extracción final **sigue** los cambios del
 filtrado: $SP_{503} = SP^{0}_{503} + (SP_{601} - SP^{0}_{601})$. Lo mismo
 con la dilución, que sigue al licor de soplado.
 

@@ -45,6 +45,10 @@ marcado en `config/` (ver Anexo A): las constantes cinéticas de eucalipto son
   hexeneuronic acid groups in pulp xylan. *Carbohydrate Research* 302.
   *(por verificar)* — Aporte de los HexA al kappa (la especificación usa
   11,6 mmol/kg por punto).
+- Foelkel, C. (2019). Revisitando o número kappa. *Eucalyptus Online Book
+  & Newsletter*. https://www.eucalyptus.com.br/artigos/2019_Revisitando+Numero+Kappa.pdf
+  *(por verificar)* — Relación lignina Klason / kappa total por tipo de
+  madera (0,160 en eucalipto, 0,152 en fibra larga, 0,165 en abedul).
 - SCAN-CM 15 (Scandinavian Pulp, Paper and Board Testing Committee).
   Viscosidad en solución de cuprietilendiamina. *(por verificar la edición)* —
   Relación $DP^{0,905} = 0{,}75\,[\eta]$.

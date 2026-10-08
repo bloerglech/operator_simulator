@@ -328,17 +328,17 @@ Orígenes (ver capítulo 1.5): `literatura` (publicación citada), `especificaci
 | `fraccion_reactiva.celulosa` | 5 | % | supuesto | accesible al peeling |
 | `fraccion_reactiva.xilano` | 50 | % | supuesto | disoluble |
 | `fraccion_reactiva.otros_carbohidratos` | 70 | % | supuesto | accesible al peeling |
-| `reacciones.lignina_rapida.A` | 0.008832 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: kappa) |
+| `reacciones.lignina_rapida.A` | 0.008301 | 1/s | calibrado | calibrado 2026-10-08 (objetivo: kappa) |
 | `reacciones.lignina_rapida.E` | 50 | kJ/mol | supuesto |  |
 | `reacciones.lignina_rapida.a_OH` | 0 | - | supuesto |  |
-| `reacciones.lignina_principal_OH.A` | 0.0008832 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: kappa) |
+| `reacciones.lignina_principal_OH.A` | 0.0008301 | 1/s | calibrado | calibrado 2026-10-08 (objetivo: kappa) |
 | `reacciones.lignina_principal_OH.E` | 130 | kJ/mol | supuesto |  |
 | `reacciones.lignina_principal_OH.a_OH` | 1 | - | supuesto |  |
-| `reacciones.lignina_principal_HS.A` | 0.001178 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: kappa) |
+| `reacciones.lignina_principal_HS.A` | 0.001107 | 1/s | calibrado | calibrado 2026-10-08 (objetivo: kappa) |
 | `reacciones.lignina_principal_HS.E` | 120 | kJ/mol | supuesto |  |
 | `reacciones.lignina_principal_HS.a_OH` | 0.5 | - | supuesto |  |
 | `reacciones.lignina_principal_HS.b_HS` | 0.4 | - | supuesto |  |
-| `reacciones.lignina_residual.A` | 0.0004122 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: kappa) |
+| `reacciones.lignina_residual.A` | 0.0003874 | 1/s | calibrado | calibrado 2026-10-08 (objetivo: kappa) |
 | `reacciones.lignina_residual.E` | 117 | kJ/mol | supuesto |  |
 | `reacciones.lignina_residual.a_OH` | 0.7 | - | supuesto |  |
 | `reacciones.condensacion.A` | 0.00005 | 1/s | supuesto | lignina principal → residual con álcali bajo |
@@ -347,50 +347,50 @@ Orígenes (ver capítulo 1.5): `literatura` (publicación citada), `especificaci
 | `reacciones.condensacion.n` | 4 | - | supuesto |  |
 | `reacciones.reprecipitacion.k` | 0.0005 | 1/s | supuesto | por mol/L bajo el umbral |
 | `reacciones.reprecipitacion.OH_umbral` | 3 | g/L NaOH | supuesto |  |
-| `reacciones.celulosa_peeling.A` | 0.0003975 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: rendimiento) |
+| `reacciones.celulosa_peeling.A` | 0.0004085 | 1/s | calibrado | calibrado 2026-10-08 (objetivo: rendimiento) |
 | `reacciones.celulosa_peeling.E` | 100 | kJ/mol | supuesto |  |
-| `reacciones.celulosa_hidrolisis.A` | 0.00003533 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: rendimiento) |
+| `reacciones.celulosa_hidrolisis.A` | 0.00003631 | 1/s | calibrado | calibrado 2026-10-08 (objetivo: rendimiento) |
 | `reacciones.celulosa_hidrolisis.E` | 150 | kJ/mol | supuesto |  |
-| `reacciones.xilano_disolucion.A` | 0.0006223 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: rendimiento) |
+| `reacciones.xilano_disolucion.A` | 0.0006396 | 1/s | calibrado | calibrado 2026-10-08 (objetivo: rendimiento) |
 | `reacciones.xilano_disolucion.E` | 80 | kJ/mol | supuesto |  |
 | `reacciones.xilano_disolucion.a_OH` | 1 | - | supuesto |  |
-| `reacciones.xilano_hidrolisis.A` | 0.00004416 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: rendimiento) |
+| `reacciones.xilano_hidrolisis.A` | 0.00004539 | 1/s | calibrado | calibrado 2026-10-08 (objetivo: rendimiento) |
 | `reacciones.xilano_hidrolisis.E` | 120 | kJ/mol | supuesto |  |
-| `reacciones.otros_peeling.A` | 0.0006621 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: rendimiento) |
+| `reacciones.otros_peeling.A` | 0.0006805 | 1/s | calibrado | calibrado 2026-10-08 (objetivo: rendimiento) |
 | `reacciones.otros_peeling.E` | 90 | kJ/mol | supuesto |  |
-| `reacciones.otros_hidrolisis.A` | 0.00004416 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: rendimiento) |
+| `reacciones.otros_hidrolisis.A` | 0.00004539 | 1/s | calibrado | calibrado 2026-10-08 (objetivo: rendimiento) |
 | `reacciones.otros_hidrolisis.E` | 120 | kJ/mol | supuesto |  |
 | `reacciones.extraibles.A` | 0.001 | 1/s | supuesto |  |
 | `reacciones.extraibles.E` | 40 | kJ/mol | supuesto |  |
 | `reacciones.acetilos.A` | 0.005 | 1/s | supuesto | desacetilación rápida |
 | `reacciones.acetilos.E` | 40 | kJ/mol | supuesto |  |
-| `reacciones.hexa_formacion.A` | 0.0003594 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: kappaHexA) |
+| `reacciones.hexa_formacion.A` | 0.0003699 | 1/s | calibrado | calibrado 2026-10-08 (objetivo: kappaHexA) |
 | `reacciones.hexa_formacion.E` | 110 | kJ/mol | supuesto |  |
 | `reacciones.hexa_formacion.a_OH` | 1 | - | supuesto |  |
 | `reacciones.hexa_degradacion.A` | 0.00003 | 1/s | supuesto |  |
 | `reacciones.hexa_degradacion.E` | 120 | kJ/mol | supuesto |  |
 | `reacciones.hexa_degradacion.a_OH` | 0 | - | supuesto | sobre todo térmica |
-| `reacciones.viscosidad.A` | 6.269e-8 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: viscosidad) |
+| `reacciones.viscosidad.A` | 6.344e-8 | 1/s | calibrado | calibrado 2026-10-08 (objetivo: viscosidad) |
 | `reacciones.viscosidad.E` | 179 | kJ/mol | especificacion | Kubes et al. (1983), factor G; verificar |
 | `reacciones.viscosidad.a_OH` | 1 | - | supuesto |  |
 | `reacciones.viscosidad.beta_DS` | 0.005 | L/g | supuesto | daño extra por sólidos orgánicos disueltos (efecto Lo-Solids) |
 | `reacciones.redeposito_xilano.k` | 0.0001 | 1/s | supuesto | por mol/L bajo el umbral |
 | `reacciones.redeposito_xilano.OH_umbral` | 10 | g/L NaOH | supuesto |  |
 | `solidos_disueltos.kappa_DS` | 0.002 | L/g | supuesto | freno de la deslignificación: f = 1/(1 + kappa_DS·DS_org) |
-| `consumo_alcali.alfa_lignina` | 3.83 | mol/kg | calibrado | calibrado 2026-10-07 (objetivo: alcaliExtraccion) |
+| `consumo_alcali.alfa_lignina` | 3.831 | mol/kg | calibrado | calibrado 2026-10-08 (objetivo: alcaliExtraccion) |
 | `consumo_alcali.alfa_carbohidratos` | 6 | mol/kg | supuesto | OH⁻ por kg de carbohidrato degradado (ácidos) |
 | `consumo_alcali.alfa_extraibles` | 3 | mol/kg | supuesto |  |
 | `consumo_alcali.A_DS` | 0.00009 | 1/s | supuesto | mol OH⁻ por kg de sólido orgánico disuelto, por s y por mol/L de OH⁻ |
 | `consumo_alcali.E_DS` | 100 | kJ/mol | supuesto |  |
 | `consumo_alcali.beta_HS_lignina` | 0.5 | mol/kg | supuesto | HS⁻ por kg de lignina disuelta |
-| `impregnacion.A` | 0.007791 | 1/s | calibrado | calibrado 2026-10-07 (objetivo: rechazos) |
+| `impregnacion.A` | 0.007708 | 1/s | calibrado | calibrado 2026-10-08 (objetivo: rechazos) |
 | `impregnacion.E` | 30 | kJ/mol | supuesto |  |
 | `impregnacion.K_OH` | 2 | g/L NaOH | supuesto |  |
 | `impregnacion.espesor_ref` | 4 | mm | supuesto |  |
 | `impregnacion.psi` | 10 | % | supuesto | velocidad relativa de reacción en lo no impregnado (S-08) |
 | `impregnacion.T_inicio_coccion` | 140 | °C | supuesto | lo no impregnado al pasar esta temperatura termina como rechazo |
 | `impregnacion.rendimiento_nucleo` | 85 | % | supuesto | fracción de la madera no impregnada que sale como rechazo |
-| `kappa.lignina_por_kappa` | 0.13 | % | supuesto | % de lignina en pulpa por unidad de kappa (eucalipto) |
+| `kappa.lignina_por_kappa` | 0.15 | % | supuesto | % de lignina en pulpa por unidad del kappa de lignina (sin HexA). Provisional: la literatura da lignina Klason ≈ 0,160 × kappa total en eucalipto y 0,152 en fibra larga, pero ese factor es sobre el kappa total (incluye HexA), y aquí los HexA se suman aparte. Definitivo: laboratorio de planta (Klason + soluble, kappa y HexA sobre la misma muestra). Antes 0,13. |
 | `kappa.HexA_por_kappa` | 11.6 | mmol/kg | especificacion |  |
 | `viscosidad.exponente` | 0.905 | - | literatura | Fuente: SCAN-CM 15: DP^0,905 = 0,75·[η]. verificar |
 | `viscosidad.factor` | 0.75 | - | literatura | Fuente: SCAN-CM 15. verificar |
@@ -592,7 +592,7 @@ Analizadores: periodo de muestreo / tiempo de análisis (s) / error (desv. est.)
 | I-08 | Estanque de soplado lleno: detiene el soplado | LI-606 > 95 (10 s) | LIC-302 → 0 % |
 | I-09 | Protección de la bomba de circulación superior (ΔP de mallas muy alta) | PDI-524 > 0.95 (60 s) | bomba bomba_circ_sup detener; TIC-402 → 0 % |
 | I-10 | Protección de la bomba de circulación inferior (ΔP de mallas muy alta) | PDI-526 > 0.95 (60 s) | bomba bomba_circ_inf detener; TIC-404 → 0 % |
-| I-11 | Parada de alimentación por nivel de astillas muy alto en el impregnador | LI-202 > 22.8 (30 s) | WIC-101 → 0 % |
+| I-11 | Parada de alimentación por nivel de astillas muy alto en el impregnador | LI-202 > 22.9 (60 s) | WIC-101 → 0 % |
 
 ### Alarmas configuradas
 

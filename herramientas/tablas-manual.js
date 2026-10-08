@@ -77,6 +77,8 @@ function umbrales(config) {
 }
 
 const extFinal = (config) => num(config.caso_base.caudales.ext_final.valor)
+const filFondo = (config) => num(config.caso_base.caudales.fil_fondo.valor)
+const ligPorKappa = (config) => num(config.cinetica.kappa.lignina_por_kappa.valor, 2)
 
 /** 8.79e-4 → «8{,}79\times10^{-4}» (3 cifras, para fórmulas). */
 function tex(x) {
@@ -254,13 +256,44 @@ export function lecturaSensibilidades(res) {
 }
 
 // ---------------------------------------------------------------------------
+// Filtrado al fondo sin compensar (revisión B-03; secciones 2.4 y 4.10)
+
+const ALTO_COCCION_INF = [30, 47] // m desde el tope: cocción inferior
+
+/** Base, +70 m³/h de filtrado al fondo, y lo mismo con +70 de extracción final; 8 h. */
+export function filtradoFondo(config, base) {
+  const guardado = base.guardar()
+  const casos = [['Caso base', base]]
+  for (const [nombre, compensar] of [['+70 m³/h de filtrado al fondo', false], ['+70 de filtrado y +70 de extracción final', true]]) {
+    const p = crearPlanta(config)
+    p.cargar(guardado)
+    const a = p.estadoInterno().ajustes
+    p.enviarComando({ tipo: 'ajustar', id: 'fil_fondo', campo: 'caudal', valor: a.fil_fondo.caudal + 70 / 3600 })
+    if (compensar) p.enviarComando({ tipo: 'ajustar', id: 'ext_final', campo: 'caudal', valor: a.ext_final.caudal + 70 / 3600 })
+    p.avanzar(8 * 3600)
+    casos.push([nombre, p])
+  }
+  const filas = casos.map(([nombre, pl]) => {
+    const k = indicadoresCalidad(pl)
+    const pr = pl.leerEstado({ perfiles: true }).vasos.dig.perfil
+    const Q = (z) => pr.flujo[celda(pr, z)] * 3600
+    const enZona = pr.z.map((z, j) => j).filter((j) => pr.z[j] >= ALTO_COCCION_INF[0] && pr.z[j] <= ALTO_COCCION_INF[1])
+    const minRet = Math.min(...enZona.map((j) => pr.OHRetenido[j] * 40))
+    const j = celda(pr, 38.5)
+    return `| ${nombre} | ${num(k.kappa, 1)} | ${num(k.H)} | ${signo(Q(38.5))} | ${signo(Q(28))} | ${num(pr.especies.OH[j] * 40, 1)} | ${num(pr.OHRetenido[j] * 40, 1)} | ${num(minRet, 1)} | ${num(pr.T[celda(pr, 46.1)])} |`
+  })
+  return '| Caso (a las 8 h) | Kappa | H | Caudal en la cocción inferior (m³/h) | Caudal hacia las mallas de extracción (m³/h) | EA libre a 38,5 m (g/L) | EA dentro de la astilla a 38,5 m (g/L) | EA mínimo dentro de la astilla, cocción inferior (g/L) | T a 46 m (°C) |\n' +
+    '|---|---|---|---|---|---|---|---|---|\n' + filas.join('\n')
+}
+
+// ---------------------------------------------------------------------------
 
 /**
  * Todos los bloques generados, por nombre. Con `rapido` solo los que salen de
  * config/ (sin simular).
  */
 export function generarBloques(config = cargarConfig(), { rapido = false } = {}) {
-  const b = { constantes: constantes(config), umbrales: umbrales(config), ext_final: extFinal(config), orden_magnitud: ordenMagnitud(config) }
+  const b = { constantes: constantes(config), umbrales: umbrales(config), ext_final: extFinal(config), fil_fondo: filFondo(config), lignina_por_kappa: ligPorKappa(config), orden_magnitud: ordenMagnitud(config) }
   if (rapido) return b
   const planta = casoBase(config)
   const s = planta.leerEstado({ perfiles: true })
@@ -271,6 +304,7 @@ export function generarBloques(config = cargarConfig(), { rapido = false } = {})
     hidraulica: hidraulica(s),
     factor_h: num(k.H),
   })
+  b.filtrado_fondo = filtradoFondo(config, planta)
   const sens = sensibilidades(config, planta)
   b.sensibilidades = tablaSensibilidades(sens)
   b.lectura_sensibilidades = lecturaSensibilidades(sens)

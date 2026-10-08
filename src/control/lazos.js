@@ -289,7 +289,8 @@ function pasoBloques(lz, inst, ctx, ce, dt) {
     } else if (b.tipo === 'seguimiento') {
       // El esclavo (en CAS) sigue los cambios de la fuente desde la
       // activación. Ej.: la extracción final sigue al filtrado de lavado (si
-      // no, el filtrado extra sube a la zona de cocción: manual, cap. 2).
+      // no, el filtrado extra sube a la extracción principal y baja el álcali
+      // de la cocción inferior: manual, 2.4 y 4.10).
       // Mientras el esclavo no está en CAS la base se renueva, así la vuelta
       // a cascada es sin golpe.
       const [clase, id] = pr.fuente.split(':')

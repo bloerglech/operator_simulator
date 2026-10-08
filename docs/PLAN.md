@@ -520,5 +520,13 @@ eventos instructor) pero no las implementa.
   (`npm run tablas-manual`); `tests/manual.test.js` falla si el manual se
   desactualiza. Corregidos la extracción final del ejercicio 3.12 y la
   rapidez de la presión en 7.1.
+- Bloque 2 (B-03 y B-01): el salto de kappa con filtrado al fondo sin
+  compensar no venía de filtrado frío en la cocción inferior (sigue en
+  cocorriente y no se enfría): el filtrado extra sube a la extracción
+  principal, baja a la mitad el caudal que desciende por la cocción inferior
+  y con él el álcali. Con el modelo actual es ≈ +1 punto; los umbrales de
+  condensación casi no participan. Explicación corregida en 2.4, 4.10 y 6.5
+  con una tabla generada. Lignina por kappa 0,13 → 0,15 (supuesto
+  provisional) y recalibración (deslignificación ×0,94).
 - Pendiente: medir los cuadros por segundo en un celular real (la prueba e2e
   usa render por software).

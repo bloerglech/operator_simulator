@@ -240,7 +240,7 @@ k_rel vale ≈ 1 a 100 °C y se duplica cada ≈ 8 °C cerca de 150 °C:
 
 Estimación del caso base: cocción superior 1,0 h × 137 ≈ 137; cocción
 inferior (≈ 152–153 °C) 1,1 h × 210 ≈ 230; transiciones, tope y lavado ≈ 60;
-impregnación ≈ 4. Total ≈ **430**. El simulador da <!-- generado:factor_h -->461<!-- /generado -->: la diferencia está sobre todo en los tiempos por zona, algo mayores en el simulador que en el paso 5.
+impregnación ≈ 4. Total ≈ **430**. El simulador da <!-- generado:factor_h -->460<!-- /generado -->: la diferencia está sobre todo en los tiempos por zona, algo mayores en el simulador que en el paso 5.
 
 Nota sobre el rango de la especificación: si los 180–240 min de cocción
 fueran todos a 148–152 °C, H sería de 420 a 800. El rango 350–500 implica que
@@ -259,9 +259,9 @@ El caso base da (tabla generada desde el simulador con `npm run tablas-manual`):
 | Entrada por el tope (transferencia) | +1 080 m³/h | ↓ |
 | Bajo el separador (sale el retorno, 900 m³/h) | +180 | ↓ |
 | Bajo la extracción superior (sale 72) | +108 | ↓ |
-| Cocción superior (entran 64 de licor blanco y 144 de filtrado por la circulación: +316) | +309 → +285 | ↓ cocorriente |
+| Cocción superior (entran 64 de licor blanco y 144 de filtrado por la circulación: +316) | +308 → +286 | ↓ cocorriente |
 | Entre las mallas de extracción principal y la circulación inferior (sube licor hacia las mallas) | −76 | ↑ |
-| Cocción inferior (entran 64 de licor blanco y 180 de filtrado: +167) | +165 → +150 | ↓ cocorriente |
+| Cocción inferior (entran 64 de licor blanco y 180 de filtrado: +168) | +165 → +150 | ↓ cocorriente |
 | Zona de lavado (sube el filtrado del fondo) | −640 | ↑ contracorriente |
 <!-- /generado -->
 
@@ -290,11 +290,14 @@ evaporadores. El caso base apunta a 2,0–2,5 m³/ADt.
 FD = (0,378 − 0,301)/0,0347 ≈ **2,2 m³/ADt**.
 
 **Atención:** si se sube el filtrado del fondo, hay que subir en la misma
-cantidad la extracción final. Si no, el filtrado extra (frío, a 75 °C) sube
-por la columna hasta la zona de cocción inferior, la enfría y diluye el
-álcali. En el simulador, +70 m³/h de filtrado sin tocar la extracción final
-llevaron el kappa de 17 a 27. Por eso el caso base usa 1 180 m³/h de filtrado
-y 790 m³/h de extracción final.
+cantidad la extracción final. Si no, el filtrado extra no tiene salida abajo:
+sube por la columna hasta las mallas de extracción principal, que lo sacan
+(PIC-301 mantiene la presión). La cocción inferior sigue en cocorriente y
+no se enfría, pero el caudal que baja por ella se reduce a la mitad, y con
+él la parte del licor blanco de la circulación inferior que acompaña a las
+astillas: el álcali de la zona baja y el kappa sube (tabla en la sección
+4.10). Por eso el caso base usa <!-- generado:fil_fondo -->1 180<!-- /generado --> m³/h de
+filtrado y <!-- generado:ext_final -->790<!-- /generado --> m³/h de extracción final.
 
 ### Paso 9 — Energía
 

@@ -16,6 +16,13 @@ describe('cifras generadas del manual', () => {
     expect(num(-0.04, 1)).toBe('0,0')
   })
 
+  it('las marcas en línea no empiezan una línea (romperían el párrafo al compilar)', () => {
+    for (const a of ARCHIVOS_MANUAL) {
+      const malas = leerManual(a).split('\n').filter((l) => /^<!-- generado:[\w-]+ -->\S/.test(l))
+      expect(malas, a).toEqual([])
+    }
+  })
+
   it('las que salen de config/ (constantes calibradas, umbrales, caudales) coinciden', () => {
     const manual = enManual()
     for (const [nombre, valor] of Object.entries(generarBloques(config(), { rapido: true }))) {

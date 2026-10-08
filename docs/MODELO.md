@@ -427,8 +427,11 @@ kappa         = kappa_lignina + kappa_HexA
 ```
 
 - c_κ: % de lignina en pulpa por unidad de kappa de lignina, para
-  eucalipto (provisional 0,13, `supuesto`). Si tienes tu correlación de
-  planta, se usa esa.
+  eucalipto (provisional 0,15, `supuesto`; antes 0,13). La literatura da
+  lignina Klason ≈ 0,160 × kappa total en eucalipto (Foelkel, 2019, por
+  verificar), pero ese factor incluye el aporte de los HexA, que aquí se
+  suman aparte. Si tienes tu correlación de planta (Klason + soluble, kappa
+  y HexA sobre la misma muestra), se usa esa.
 - 11,6 mmol/kg por punto de kappa: dato de la especificación (`literatura`).
 - La lignina reprecipitada cuenta como lignina en el kappa.
 

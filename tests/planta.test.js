@@ -23,6 +23,21 @@ describe('balances de masa y energía', () => {
   })
 })
 
+describe('soplado cerrado (L-15)', () => {
+  it('sin pulpa pedida no sale licor por el soplado y los balances siguen cerrando', () => {
+    const planta = plantaBase()
+    planta.avanzar(HORA)
+    planta.enviarComando({ tipo: 'ajustar', id: 'astillas', campo: 'caudalMadera', valor: 0 })
+    planta.enviarComando({ tipo: 'ajustar', id: 'soplado', campo: 'caudalMadera', valor: 0 })
+    planta.avanzar(HORA)
+    const d = planta.estadoInterno().diag.dig
+    expect(d.maderaSalida).toBe(0)
+    expect(d.licorSalida?.v ?? 0).toBe(0)
+    const b = peorBalance(planta.balances())
+    expect(b.masa).toBeLessThan(1e-3)
+  })
+})
+
 describe('caso base en estado estacionario (sección 7 de la especificación)', () => {
   it('residencias, factor H, temperaturas, relaciones y calidad dentro de los rangos', () => {
     const planta = plantaBase()

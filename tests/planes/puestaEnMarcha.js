@@ -33,6 +33,8 @@ export function planPuestaEnMarcha({ rampaC = 15 } = {}) {
       c({ tipo: 'lazo', id: 'LIC-202', accion: 'consigna', valor: 21 })
     }
     if (fase === 'partir' && m === t + 1) c({ tipo: 'lazo', id: 'LIC-202', accion: 'modo', valor: 'AUTO' })
+    // La extracción final quedó en AUTO con 0 desde la parada: a cascada antes del primer escalón (sigue al filtrado).
+    if (fase === 'partir' && m === t + 1) c({ tipo: 'lazo', id: 'FIC-503', accion: 'modo', valor: 'CAS' })
     // Madera, soplado y lavado juntos, en escalones de 25 t/h cada 15 min.
     if (fase === 'partir' && (m - t) % 15 === 0 && m - t <= 90) {
       const w = Math.min(NOMINAL.W, 60 + (m - t) / 15 * 25)
@@ -44,6 +46,8 @@ export function planPuestaEnMarcha({ rampaC = 15 } = {}) {
     if (fase === 'partir' && m === t + 101) for (const k of ['LIC-302', 'TIC-604']) c({ tipo: 'lazo', id: k, accion: 'modo', valor: 'AUTO' })
     if (fase === 'partir' && m === t + 110) c({ tipo: 'lazo', id: 'FIC-601', accion: 'modo', valor: 'CAS' })
     if (fase === 'partir' && m === t + 120) c({ tipo: 'lazo', id: 'FIC-115', accion: 'modo', valor: 'CAS' })
+    // El vaso viene de enfriarse: 1 °C más en la cocción acorta la cola de kappa alto.
+    if (fase === 'partir' && m === t + 60) for (const k of ['TIC-402', 'TIC-404']) c({ tipo: 'lazo', id: k, accion: 'consigna', valor: NOMINAL[k] + 1 })
     if (fase === 'partir' && m > t + 101 && m % 10 === 0 && Math.abs(lz['LIC-302'].sp - 50) > 0.2) c({ tipo: 'lazo', id: 'LIC-302', accion: 'consigna', valor: lz['LIC-302'].sp + Math.sign(50 - lz['LIC-302'].sp) * 0.5 })
     if (fase === 'partir' && m > t + 101 && m % 10 === 5 && Math.abs(lz['LIC-202'].sp - 22.1) > 0.05) c({ tipo: 'lazo', id: 'LIC-202', accion: 'consigna', valor: lz['LIC-202'].sp + Math.sign(22.1 - lz['LIC-202'].sp) * 0.2 })
   }

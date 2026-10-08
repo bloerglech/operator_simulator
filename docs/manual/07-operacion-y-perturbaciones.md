@@ -104,11 +104,17 @@ parada: FIC-115 fuera de cascada (sin madera, FFC-117 lleva el licor negro a
 cero y la transferencia vacía el impregnador) y temperaturas unos grados
 abajo. Para partir, el filtrado de lavado va **primero**: sin él, el fondo
 está caliente y el soplado parte con la temperatura sobre el límite de I-06.
+Pero va moderado (≈ 250 m³/h) y seguido de cerca por el primer escalón de
+madera y soplado: con la válvula de soplado cerrada no sale licor por el
+fondo, todo el filtrado tiene que salir por las extracciones, y 400 m³/h
+sin soplado llevan PIC-301 al 100 % y la presión al alivio en minutos.
 
 ## 7.9 Parada general y puesta en marcha (capítulos 8 y 9)
 
 Enfriar un digestor de ≈ 4 000 m³ lleno de astillas toma más de 12 horas
-desplazando con filtrado a 75 °C. Despresurizar caliente hace hervir el licor
+desplazando con filtrado a 75 °C; sin soplado todo ese filtrado sale por las
+extracciones, así que la final se saca de cascada y se sube (≈ 400 m³/h)
+para que la principal no se sature. Despresurizar caliente hace hervir el licor
 dentro del vaso (la presión cae bajo la de saturación). Un vaso lleno de
 líquido no baja su presión mientras le entra líquido: primero se detiene el
 filtrado, después se bajan las consignas y se abren los venteos.
@@ -117,7 +123,9 @@ La partida es el camino inverso. Un vaso que no está lleno de líquido no
 toma presión, y la circulación de tope del impregnador no anda sin licor
 libre arriba: hay que llenar el impregnador con licor negro antes de
 presurizar. Se calienta en rampa (≈ 15 °C cada media hora) y se parte en
-escalones; el kappa entra en banda unas 10 horas después de partir.
+escalones, con la extracción final de vuelta en cascada para que siga al
+filtrado; el kappa entra en banda unas 10 horas después de partir (un grado
+más en la cocción al terminar los escalones acorta la cola de kappa alto).
 
 ## 7.10 Apagón (capítulo 10)
 
@@ -133,8 +141,7 @@ retorno y se pueda rearmar I-05), extracciones, licores y astillas.
 
 - La sensibilidad del kappa al factor H es unas dos veces la habitual (L-13):
   los cambios de ritmo y las paradas mueven el kappa más que en la práctica.
-- Con la válvula de soplado cerrada sigue saliendo el licor de la lechada
-  (L-15) y el arranque o la detención simultánea de todas las bombas da un
+- El arranque o la detención simultánea de todas las bombas da un
   transitorio de presión de segundos (L-16).
 - Los procedimientos son genéricos: deben reemplazarse por los de la planta.
 

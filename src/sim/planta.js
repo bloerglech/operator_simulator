@@ -365,7 +365,10 @@ function pasoLento(modelo, estado) {
     const e = entradas[c.origen.vaso]
     const a = estado.ajustes[c.id]
     const fc = factorCorriente(modelo, estado, c)
-    if (c.tipo === 'fondo') e.fondo = { masa: a.caudalMadera * dt * fc, licor: a.caudal * dt * fc }
+    // Soplado: con la válvula cerrada (sin pulpa pedida) tampoco sale licor. La transferencia
+    // sí mueve licor sin astillas: la circulación de transferencia sigue andando.
+    const cerrada = c.destino.equipo && a.caudalMadera <= 1e-3
+    if (c.tipo === 'fondo') e.fondo = { masa: a.caudalMadera * dt * fc, licor: cerrada ? 0 : a.caudal * dt * fc }
     else if (c.valvula) e.extracciones.push({ id: c.id, j: c.origen.j, v: estado.vasos[c.origen.vaso].presion.acumulado[c.id] ?? 0 })
     else e.extracciones.push({ id: c.id, j: c.origen.j, v: a.caudal * dt * fc })
   }

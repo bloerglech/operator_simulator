@@ -451,7 +451,7 @@ const paradaCorta = {
     { texto: 'Menos de 4 horas de pulpa fuera de especificación', condicion: { indicador: 'tiempoFueraEspec', op: '<=', valor: 4 * H }, puntos: 1 },
     { texto: 'Sin enclavamientos disparados', condicion: { no: { incidente: 'enclavamiento' } }, puntos: 1 },
   ],
-  respuestaIdeal: 'Al saber que el lavado no recibirá pulpa, parar antes que los enclavamientos: WIC-101 a 0 y LIC-302 en manual con salida 0 (el estanque deja de subir). Durante la parada: FIC-115 fuera de cascada para que el impregnador siga lleno (si no, la transferencia lo vacía y al partir falta presión), las temperaturas de cocción unos 10 °C abajo y las circulaciones andando; FDC-607 queda retenido sin soplado. Para partir: primero el filtrado de lavado al fondo (FIC-601 en AUTO, unos 400 m³/h) para enfriar el fondo; después madera y soplado juntos en escalones de unas 25 t/h cada 10 minutos, con las temperaturas de vuelta a su valor. Con el ritmo completo, LIC-302 a AUTO con la consigna en el nivel actual y FIC-115 y FIC-601 a CAS. La pulpa que estuvo detenida sale sobrecocida (kappa bajo) unas horas: es el costo de la parada.',
+  respuestaIdeal: 'Al saber que el lavado no recibirá pulpa, parar antes que los enclavamientos: WIC-101 a 0 y LIC-302 en manual con salida 0 (el estanque deja de subir). Durante la parada: FIC-115 fuera de cascada para que el impregnador siga lleno (si no, la transferencia lo vacía y al partir falta presión), las temperaturas de cocción unos 10 °C abajo y las circulaciones andando; FDC-607 queda retenido sin soplado. Para partir: primero el filtrado de lavado al fondo (FIC-601 en AUTO, unos 250 m³/h) para enfriar el fondo y, un par de minutos después, madera y soplado juntos (sin soplado el filtrado solo sale por las extracciones: mucho filtrado antes del soplado lleva la presión al alivio); después en escalones de unas 25 t/h cada 10 minutos, con las temperaturas de vuelta a su valor. Con el ritmo completo, LIC-302 a AUTO con la consigna en el nivel actual y FIC-115 y FIC-601 a CAS. La pulpa que estuvo detenida sale sobrecocida (kappa bajo) unas horas: es el costo de la parada.',
 }
 
 // ---------------------------------------------------------------------------
@@ -494,10 +494,11 @@ const paradaGeneral = {
       pistas: [pista(10 * MIN, 'Pantalla «3 Circulaciones»: los tres TIC a MAN con salida 0. Las bombas de circulación siguen andando.', 'TIC-402', 'ayuda')] },
     { id: 'desplazar', tipo: 'secundario', texto: 'Enfriar desplazando con filtrado de lavado (FIC-601 en automático, 500 m³/h o más)', desde: { objetivo: 'soplado' }, anticipable: true,
       condicion: { y: [{ lazo: 'FIC-601', modo: 'AUTO' }, { lazo: 'FIC-601', campo: 'sp', op: '>=', valor: 500 }] },
-      pistas: [pista(20 * MIN, 'El filtrado de lavado entra a unos 75 °C por el fondo y sale por las extracciones: es lo que enfría el digestor. Sin soplado, FDC-607 queda retenido; pasa FIC-601 a AUTO con unos 600 m³/h.', 'FIC-601', 'ayuda')] },
+      pistas: [pista(20 * MIN, 'El filtrado de lavado entra a unos 75 °C por el fondo y sale por las extracciones: es lo que enfría el digestor. Sin soplado, FDC-607 queda retenido; pasa FIC-601 a AUTO con unos 600 m³/h.', 'FIC-601', 'ayuda'),
+        pista(40 * MIN, 'Sin soplado todo el filtrado tiene que salir por las extracciones: si PIC-301 llega al 100 % y la presión sube, saca FIC-503 de cascada y pon la extracción final en unos 400 m³/h.', 'FIC-503', 'ayuda')] },
     { id: 'despresurizar', tipo: 'principal', texto: 'Con el digestor bajo 100 °C, detener el filtrado y despresurizar (venteos abiertos, PI-301 bajo 0,5 bar)', desde: { paso: 'frio' },
       condicion: { tag: 'PI-301', op: '<=', valor: 0.5 },
-      pistas: [pista(10 * MIN, 'Mientras entre filtrado, el digestor lleno de líquido no puede bajar su presión. Pon FIC-601 en 0 y baja las consignas de PIC-301 y PIC-201.', 'FIC-601'),
+      pistas: [pista(10 * MIN, 'Mientras entre filtrado, el digestor lleno de líquido no puede bajar su presión. Pon FIC-601 y FIC-503 en 0 y baja las consignas de PIC-301 y PIC-201.', 'FIC-601'),
         pista(20 * MIN, 'Después abre los venteos del digestor (pantalla «2 Digestor», sobre el tope) y del impregnador (pantalla «1 Alimentación»).', null, 'ayuda')] },
   ],
   fallas: [
@@ -514,7 +515,7 @@ const paradaGeneral = {
     { texto: 'Sin aperturas de la válvula de alivio', condicion: { no: { incidente: 'apertura_alivio' } }, puntos: 1 },
     { texto: 'Sin enclavamientos disparados', condicion: { no: { incidente: 'enclavamiento' } }, puntos: 1 },
   ],
-  respuestaIdeal: 'En orden: (1) bajar el ritmo al 60 % con RC-700 y rampa, para que el fondo y el lavado se adapten; (2) cortar astillas y transferencia juntas (WIC-101 en 0 y LIC-202 en manual con salida 0), con FIC-115 fuera de cascada para que el impregnador siga lleno de licor; (3) detener el soplado (LIC-302 en manual, salida 0); (4) cortar el vapor de los tres calentadores con las bombas andando; (5) enfriar desplazando con filtrado de lavado (FIC-601 en AUTO, ≈ 600 m³/h): el licor frío entra por el fondo y sale por las extracciones; tarda muchas horas; (6) recién con el digestor bajo 100 °C (TI-303, TI-304 y TI-305), detener el filtrado (un vaso lleno de líquido no baja su presión mientras le entra líquido), bajar las consignas de PIC-301 y PIC-201 y abrir los venteos. Despresurizar caliente hace hervir el licor dentro del digestor.',
+  respuestaIdeal: 'En orden: (1) bajar el ritmo al 60 % con RC-700 y rampa, para que el fondo y el lavado se adapten; (2) cortar astillas y transferencia juntas (WIC-101 en 0 y LIC-202 en manual con salida 0), con FIC-115 fuera de cascada para que el impregnador siga lleno de licor; (3) detener el soplado (LIC-302 en manual, salida 0); (4) cortar el vapor de los tres calentadores con las bombas andando; (5) enfriar desplazando con filtrado de lavado (FIC-601 en AUTO, ≈ 600 m³/h): el licor frío entra por el fondo y sale por las extracciones; sin soplado todo sale por ellas, así que la extracción final va fuera de cascada (FIC-503 en AUTO, ≈ 400 m³/h) para que la principal no se sature; tarda muchas horas; (6) recién con el digestor bajo 100 °C (TI-303, TI-304 y TI-305), detener el filtrado y la extracción final (FIC-601 y FIC-503 en 0; un vaso lleno de líquido no baja su presión mientras le entra líquido), bajar las consignas de PIC-301 y PIC-201 y abrir los venteos. Despresurizar caliente hace hervir el licor dentro del digestor.',
 }
 
 // ---------------------------------------------------------------------------
@@ -528,10 +529,10 @@ const PARADA_GENERAL = {
     // (Ritmo bajado con WIC-101 y no con RC-700: los caudales escalados quedan en su valor nominal.)
     { comandos: [lazo('WIC-101', 'consigna', 130)], horas: 1.5 },
     { comandos: [
-      lazo('WIC-101', 'consigna', 0), lazo('FIC-115', 'modo', 'AUTO'), lazo('FIC-601', 'modo', 'AUTO'),
+      lazo('WIC-101', 'consigna', 0), lazo('FIC-115', 'modo', 'AUTO'), lazo('FIC-601', 'modo', 'AUTO'), lazo('FIC-503', 'modo', 'AUTO'),
       ...['LIC-202', 'LIC-302', 'TIC-402', 'TIC-404', 'TIC-212'].map((id) => lazo(id, 'modo', 'MAN'))], horas: 0 },
-    { comandos: [...['LIC-202', 'LIC-302', 'TIC-402', 'TIC-404', 'TIC-212'].map((id) => lazo(id, 'salida', 0)), lazo('FIC-601', 'consigna', 600)], horas: 13.5 },
-    { comandos: [lazo('FIC-601', 'consigna', 0), lazo('PIC-301', 'consigna', 1), lazo('PIC-201', 'consigna', 1.5)], horas: 0.2 },
+    { comandos: [...['LIC-202', 'LIC-302', 'TIC-402', 'TIC-404', 'TIC-212'].map((id) => lazo(id, 'salida', 0)), lazo('FIC-601', 'consigna', 600), lazo('FIC-503', 'consigna', 400)], horas: 13.5 },
+    { comandos: [lazo('FIC-601', 'consigna', 0), lazo('FIC-503', 'consigna', 0), lazo('PIC-301', 'consigna', 1), lazo('PIC-201', 'consigna', 1.5)], horas: 0.2 },
     { comandos: [{ tipo: 'venteo', id: 'dig', accion: 'abrir' }, { tipo: 'venteo', id: 'imp', accion: 'abrir' }], horas: 2 },
   ],
 }
@@ -562,10 +563,10 @@ const puestaEnMarcha = {
       pistas: [pista(20 * MIN, 'TIC-402, TIC-404 y TIC-212 a AUTO con la consigna en la temperatura actual, y súbelas unos 15 °C cada media hora hasta 156, 155 y 140 °C.', 'TIC-402', 'ayuda')] },
     { id: 'ritmo', tipo: 'principal', texto: 'Llegar al ritmo nominal (WI-101 sobre 200 t/h) con soplado y lavado en proporción', desde: { objetivo: 'calentar' },
       condicion: { tag: 'WI-101', op: '>=', valor: 200 },
-      pistas: [pista(20 * MIN, 'Escalones de unas 25 t/h cada 15 minutos en WIC-101; la salida de LIC-302 y la consigna de FIC-601 en la misma proporción.', 'WIC-101', 'ayuda')] },
-    { id: 'modos', tipo: 'secundario', texto: 'Dejar los lazos en su modo normal (LIC-302, LIC-202 y TIC-604 en AUTO; FIC-601 y FIC-115 en CAS)', desde: { objetivo: 'ritmo' },
-      condicion: { y: [{ lazo: 'LIC-302', modo: 'AUTO' }, { lazo: 'LIC-202', modo: 'AUTO' }, { lazo: 'TIC-604', modo: 'AUTO' }, { lazo: 'FIC-601', modo: 'CAS' }, { lazo: 'FIC-115', modo: 'CAS' }] },
-      pistas: [pista(40 * MIN, 'Con el ritmo completo y estable, fija la consigna de LIC-302 en el nivel actual y pásalo a AUTO; FIC-601 y FIC-115 a CAS.', 'LIC-302', 'ayuda')] },
+      pistas: [pista(20 * MIN, 'Escalones de unas 25 t/h cada 15 minutos en WIC-101; la salida de LIC-302 y la consigna de FIC-601 en la misma proporción. Antes del primero, FIC-503 a CAS: la extracción final sigue al filtrado.', 'WIC-101', 'ayuda')] },
+    { id: 'modos', tipo: 'secundario', texto: 'Dejar los lazos en su modo normal (LIC-302, LIC-202 y TIC-604 en AUTO; FIC-601, FIC-503 y FIC-115 en CAS)', desde: { objetivo: 'ritmo' },
+      condicion: { y: [{ lazo: 'LIC-302', modo: 'AUTO' }, { lazo: 'LIC-202', modo: 'AUTO' }, { lazo: 'TIC-604', modo: 'AUTO' }, { lazo: 'FIC-601', modo: 'CAS' }, { lazo: 'FIC-503', modo: 'CAS' }, { lazo: 'FIC-115', modo: 'CAS' }] },
+      pistas: [pista(40 * MIN, 'Con el ritmo completo y estable, fija la consigna de LIC-302 en el nivel actual y pásalo a AUTO; FIC-601, FIC-503 y FIC-115 a CAS.', 'LIC-302', 'ayuda')] },
     { id: 'kappa_final', tipo: 'principal', final: true, texto: 'Terminar con kappa entre 16 y 18', condicion: { kpi: 'kappa', entre: [16, 18] } },
     { id: 'presion_final', tipo: 'principal', final: true, texto: 'Terminar con la presión del digestor entre 5 y 6 bar', condicion: { tag: 'PI-301', entre: [5, 6] } },
   ],
@@ -581,7 +582,7 @@ const puestaEnMarcha = {
     { texto: 'Menos de 10 horas de pulpa fuera de especificación', condicion: { indicador: 'tiempoFueraEspec', op: '<', valor: 10 * H }, puntos: 2 },
     { texto: 'Sin enclavamientos disparados', condicion: { no: { incidente: 'enclavamiento' } }, puntos: 1 },
   ],
-  respuestaIdeal: 'Partir es el camino inverso de la parada, en orden: (1) cerrar los venteos y llenar: filtrado de lavado al fondo (FIC-601, ≈ 300 m³/h) y licor negro al impregnador (FIC-115 en AUTO, ≈ 400 m³/h hasta que PI-201 suba): un vaso que no está lleno de líquido no toma presión y su circulación de tope no anda; (2) calentar en rampa con los tres TIC en AUTO, unos 15 °C cada media hora; (3) con la zona de cocción caliente, partir la transferencia (LIC-202 en AUTO) y madera, soplado manual y lavado juntos en escalones; (4) con el ritmo completo, LIC-302 a AUTO con la consigna en el nivel actual y FIC-601 y FIC-115 a CAS. Las astillas que estuvieron detenidas salen sobrecocidas y luego crudas: el kappa entra en banda recién unas 10 horas después de partir.',
+  respuestaIdeal: 'Partir es el camino inverso de la parada, en orden: (1) cerrar los venteos y llenar: filtrado de lavado al fondo (FIC-601, ≈ 300 m³/h) y licor negro al impregnador (FIC-115 en AUTO, ≈ 400 m³/h hasta que PI-201 suba): un vaso que no está lleno de líquido no toma presión y su circulación de tope no anda; (2) calentar en rampa con los tres TIC en AUTO, unos 15 °C cada media hora; (3) con la zona de cocción caliente, partir la transferencia (LIC-202 en AUTO), devolver la extracción final a cascada (FIC-503, en 0 desde la parada) y madera, soplado manual y lavado juntos en escalones; (4) al terminar los escalones, TIC-402 y TIC-404 1 °C sobre lo normal: el vaso viene frío y el kappa tarda en bajar; (5) con el ritmo completo, LIC-302 a AUTO con la consigna en el nivel actual y FIC-601 y FIC-115 a CAS. Las astillas que estuvieron detenidas salen sobrecocidas y luego crudas: el kappa entra en banda recién unas 10 horas después de partir.',
 }
 
 // ---------------------------------------------------------------------------

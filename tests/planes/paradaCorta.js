@@ -1,4 +1,5 @@
-// Jugador ideal de la parada corta (el aviso llega a los 10 min; el lavado vuelve a los 160).
+// Jugador ideal de la parada corta (el aviso llega a los 10 min; el lavado vuelve a los 160: filtrado
+// moderado y, dos minutos después, el primer escalón de madera y soplado).
 export function planParadaCorta() {
   let base = null
   return (m, e, j) => {
@@ -13,8 +14,8 @@ export function planParadaCorta() {
       c({ tipo: 'lazo', id: 'TIC-404', accion: 'consigna', valor: base.t404 - 10 })
     }
     if (m === 14) c({ tipo: 'lazo', id: 'LIC-302', accion: 'salida', valor: 0 })
-    if (m === 150) c({ tipo: 'lazo', id: 'FIC-601', accion: 'modo', valor: 'AUTO' })
-    if (m === 151) c({ tipo: 'lazo', id: 'FIC-601', accion: 'consigna', valor: 400 })
+    if (m === 160) c({ tipo: 'lazo', id: 'FIC-601', accion: 'modo', valor: 'AUTO' })
+    if (m === 160) c({ tipo: 'lazo', id: 'FIC-601', accion: 'consigna', valor: 250 })
     if (m === 162) {
       c({ tipo: 'lazo', id: 'TIC-402', accion: 'consigna', valor: base.t402 })
       c({ tipo: 'lazo', id: 'TIC-404', accion: 'consigna', valor: base.t404 })

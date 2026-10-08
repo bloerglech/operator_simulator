@@ -874,7 +874,7 @@ mínimas).
 | S-35 | Licor de impregnación desde la extracción principal (260 m³/h); por la válvula de extracción principal a flash pasan ≈ 100 m³/h. |
 | S-36 | Instrumentos, lazos, bloques, enclavamientos y alarmas: todos los valores son supuestos de un DCS típico (formato compacto en `config/instrumentos|lazos|enclavamientos|alarmas.json`). |
 | S-37 | Las salidas de caudal de los FIC fijan el caudal de la corriente a través de un actuador de primer orden (τ 4 s, carrera 30 s); no se modela la hidráulica de cada válvula de línea. |
-| S-38 | El licor de la lechada de soplado es un caudal fijado (CIC-605 lo manipula); la dilución lo sigue con el bloque FFC-602. Equivale a controlar la consistencia con la dilución a caudal total de soplado constante. |
+| S-38 | El licor de la lechada de soplado es un caudal fijado (CIC-605 lo manipula); la dilución lo sigue con el bloque FFC-602. Equivale a controlar la consistencia con la dilución a caudal total de soplado constante. Con la válvula de soplado cerrada (sin pulpa pedida) no sale licor (L-15). |
 | S-39 | El nivel de astillas del digestor se controla con el caudal de pulpa del soplado (LIC-302) y el del impregnador con la transferencia (LIC-202); el raspador no se manipula. |
 | S-40 | Factor H previsto del bloque HIC-703 con tiempos de zona fijos (1,0 h y 1,2 h) más una corrección tomada al activarse. |
 | S-41 | Astillas con sobre espesor: un factor de impregnabilidad del lote multiplica la velocidad de impregnación de todas las clases (no se cambia la distribución de tamaños por parcela). |
@@ -906,7 +906,7 @@ mínimas).
 | L-12 | Los enclavamientos y alarmas son un conjunto mínimo representativo, no una lista de una planta real. |
 | L-13 | El kappa es muy sensible al factor H (≈ −0,045 kappa por unidad de H cerca del caso base, unas dos veces lo habitual en eucalipto, por verificar con datos de planta): los cambios de ritmo o de temperatura mueven el kappa más que en la práctica. Consecuencia del calibrado a un solo punto (L-03, L-04). Por lo mismo, en una parada de 2,5 h las astillas detenidas en la zona de cocción salen con kappa 8–12 aunque se bajen 10–20 °C las temperaturas (en la práctica la caída es menor). |
 | L-14 | El control de factor H predice el H con las temperaturas de zona, que responden en 1–2 h: su ganancia es baja a propósito para no oscilar. |
-| L-15 | Con la válvula de soplado cerrada (LIC-302 en 0) sigue saliendo el licor de la lechada que fija CIC-605 (≈ 100 m³/h). En la planta real no saldría nada; las misiones de parada están calibradas con este comportamiento y corregirlo exige recalibrarlas. |
+| L-15 | *(Corregida.)* Antes, con la válvula de soplado cerrada (LIC-302 en 0) seguía saliendo el licor de la lechada (≈ 100 m³/h). Ahora el soplado sin pulpa pedida no saca licor, ni en el paso lento ni en el balance de volumen del paso rápido (la transferencia sí sigue moviendo licor sin astillas). Las paradas de los capítulos 7 y 8 se recalibraron: filtrado moderado al partir y extracción final fuera de cascada al enfriar. |
 | L-16 | Al detenerse o partir todas las bombas a la vez la presión de los vasos tiene un transitorio de segundos (puede abrir el alivio y la seguridad) porque las bombas no tienen inercia hidráulica coherente entre sí. |
 | L-10 | Resolución de la columna: una parcela ≈ 1/3 de celda (≈ 1,5 min de residencia en el impregnador, ≈ 2,5 min en el digestor). |
 

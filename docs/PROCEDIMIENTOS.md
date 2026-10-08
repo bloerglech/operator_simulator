@@ -75,7 +75,7 @@ antes de usarlos fuera del juego.
 1. Si lavado no puede recibir pulpa, pare **antes** que los enclavamientos: WIC-101 en 0 y LIC-302 en manual con salida 0 (el estanque de soplado deja de subir; a 95 % I-08 corta el soplado).
 2. Saque FIC-115 de cascada para que el impregnador siga lleno de licor (sin madera, FFC-117 lo lleva a cero y la transferencia lo vacía).
 3. Baje unos 10 °C las temperaturas de cocción: las astillas detenidas se siguen cociendo. Mantenga las circulaciones andando. Sin soplado, FDC-607, TIC-604 y CIC-605 quedan retenidos.
-4. Para volver: primero el filtrado de lavado al fondo (FIC-601 en AUTO, ≈ 400 m³/h) para enfriar el fondo (si no, I-06 corta el soplado por temperatura); después madera, soplado y lavado juntos en escalones de 25 t/h cada 10 min, con las temperaturas de vuelta.
+4. Para volver: primero el filtrado de lavado al fondo (FIC-601 en AUTO, ≈ 250 m³/h) para enfriar el fondo (si no, I-06 corta el soplado por temperatura) y, un par de minutos después, el primer escalón: sin soplado el filtrado solo sale por las extracciones y, si es mucho o espera mucho, la presión llega al alivio. Después madera, soplado y lavado juntos en escalones de 25 t/h cada 10 min, con las temperaturas de vuelta.
 5. Con el ritmo completo: LIC-302 a AUTO con la consigna en el nivel actual, FIC-115 y FIC-601 a CAS. La pulpa que estuvo detenida sale con kappa bajo unas horas.
 
 ## Parada general
@@ -84,16 +84,17 @@ antes de usarlos fuera del juego.
 2. Corte astillas y transferencia juntas: desactive RC-700, WIC-101 en 0 y LIC-202 en manual con salida 0 (si la transferencia sigue, el impregnador vacía sus astillas en el digestor y el nivel llega a I-02). FIC-115 fuera de cascada.
 3. Detenga el soplado (LIC-302 en manual, salida 0).
 4. Corte el vapor de los tres calentadores (TIC-402, TIC-404 y TIC-212 en manual, salida 0) con las bombas de circulación andando.
-5. Enfríe desplazando con filtrado de lavado (FIC-601 en AUTO, ≈ 600 m³/h): entra a unos 75 °C por el fondo y sale por las extracciones. Tarda muchas horas.
-6. Solo con el digestor bajo 100 °C (TI-303, TI-304 y TI-305): detenga el filtrado (un vaso lleno de líquido no baja su presión mientras le entra líquido), baje las consignas de PIC-301 y PIC-201 y abra los venteos (pantallas 1 y 2). Despresurizar caliente hace hervir el licor dentro del digestor.
+5. Enfríe desplazando con filtrado de lavado (FIC-601 en AUTO, ≈ 600 m³/h): entra a unos 75 °C por el fondo y sale por las extracciones. Sin soplado todo el filtrado sale por ellas: saque FIC-503 de cascada y lleve la extracción final a ≈ 400 m³/h para que la principal (PIC-301) no llegue al 100 %. Tarda muchas horas.
+6. Solo con el digestor bajo 100 °C (TI-303, TI-304 y TI-305): detenga el filtrado y la extracción final (FIC-601 y FIC-503 en 0; un vaso lleno de líquido no baja su presión mientras le entra líquido), baje las consignas de PIC-301 y PIC-201 y abra los venteos (pantallas 1 y 2). Despresurizar caliente hace hervir el licor dentro del digestor.
 
 ## Puesta en marcha desde frío
 
 1. Cierre los venteos y llene: filtrado de lavado al fondo (FIC-601 ≈ 300 m³/h) y licor negro al impregnador (FIC-115 en AUTO ≈ 400 m³/h hasta que PI-201 suba). Un vaso que no está lleno de líquido no toma presión y su circulación de tope no anda.
 2. Vuelva las consignas de PIC-301 (5,5 bar) y PIC-201 (6,1 bar); con presión, FIC-115 a ≈ 260 m³/h.
 3. Caliente en rampa: TIC-402, TIC-404 y TIC-212 en AUTO con la consigna en la temperatura actual, subiendo unos 15 °C cada media hora hasta 156, 155 y 140 °C.
-4. Con la zona de cocción caliente (TI-304 sobre 148 °C), LIC-202 en AUTO (≈ 21 m) y madera, soplado manual y lavado juntos en escalones de 25 t/h cada 15 min.
-5. Con el ritmo completo: LIC-302 a AUTO con la consigna en el nivel actual, TIC-604 a AUTO, FIC-601 y FIC-115 a CAS. El kappa entra en banda recién unas 10 horas después: lo que estuvo detenido sale sobrecocido y después crudo.
+4. Con la zona de cocción caliente (TI-304 sobre 148 °C), LIC-202 en AUTO (≈ 21 m), la extracción final (FIC-503, que quedó en 0 desde la parada) a CAS para que siga al filtrado, y madera, soplado manual y lavado juntos en escalones de 25 t/h cada 15 min.
+5. Al terminar los escalones, TIC-402 y TIC-404 1 °C sobre lo normal (el vaso viene frío y el kappa tarda en bajar; vuelva a lo normal cuando el kappa entre en banda).
+6. Con el ritmo completo: LIC-302 a AUTO con la consigna en el nivel actual, TIC-604 a AUTO, FIC-601 y FIC-115 a CAS. El kappa entra en banda recién unas 10 horas después: lo que estuvo detenido sale sobrecocido y después crudo.
 
 ## Apagón
 

@@ -19,16 +19,19 @@ export function planParadaGeneral() {
       c({ tipo: 'lazo', id: 'FIC-115', accion: 'modo', valor: 'AUTO' })
       for (const id of ['LIC-202', 'LIC-302', 'TIC-402', 'TIC-404', 'TIC-212']) c({ tipo: 'lazo', id, accion: 'modo', valor: 'MAN' })
       c({ tipo: 'lazo', id: 'FIC-601', accion: 'modo', valor: 'AUTO' })
+      c({ tipo: 'lazo', id: 'FIC-503', accion: 'modo', valor: 'AUTO' })
     }
     if (fase === 'astillas' && m === t + 1) {
       fase = 'enfriar'
       for (const id of ['LIC-202', 'LIC-302', 'TIC-402', 'TIC-404', 'TIC-212']) c({ tipo: 'lazo', id, accion: 'salida', valor: 0 })
       c({ tipo: 'lazo', id: 'FIC-601', accion: 'consigna', valor: 600 })
+      c({ tipo: 'lazo', id: 'FIC-503', accion: 'consigna', valor: 400 })
     }
     if (fase === 'enfriar' && objetivo('vapor') && ['TI-303', 'TI-304', 'TI-305'].every((k) => tx[k].valor < 98)) {
       fase = 'despresurizar'
       t = m
       c({ tipo: 'lazo', id: 'FIC-601', accion: 'consigna', valor: 0 })
+      c({ tipo: 'lazo', id: 'FIC-503', accion: 'consigna', valor: 0 })
       c({ tipo: 'lazo', id: 'PIC-301', accion: 'consigna', valor: 1 })
       c({ tipo: 'lazo', id: 'PIC-201', accion: 'consigna', valor: 1.5 })
     }

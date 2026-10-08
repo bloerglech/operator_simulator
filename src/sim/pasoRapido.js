@@ -82,6 +82,8 @@ function caudalFijo(modelo, estado, v) {
   let q = 0
   for (const { c, signo, astillas } of corrientesFijas(modelo, v)) {
     const a = estado.ajustes[c.id]
+    // Soplado cerrado (sin pulpa pedida): tampoco sale licor (igual que en el paso lento).
+    if (c.tipo === 'fondo' && c.destino.equipo && !(a.caudalMadera > 1e-3)) continue
     const vol = a.caudal + (astillas && a.caudalMadera !== undefined ? a.caudalMadera / rhoB : 0)
     if (vol !== 0) q += signo * vol * factorCorriente(modelo, estado, c)
   }

@@ -509,5 +509,9 @@ eventos instructor) pero no las implementa.
   antiguas, pila de eventos, transportador en apagón, base de RC-700,
   histéresis de habilitación, errores del motor, entre otros).
 - Manual: capítulo 7 «Operación y perturbaciones».
+- Corregida la fuga del soplado (L-15): con la válvula cerrada ya no sale
+  licor. Recalibradas las paradas: filtrado moderado al partir (capítulo 7) y
+  extracción final fuera de cascada al enfriar (capítulo 8). Manual en PDF
+  (`docs/manual/manual-digestor-lo-solids.pdf`).
 - Pendiente: medir los cuadros por segundo en un celular real (la prueba e2e
   usa render por software).

@@ -126,8 +126,24 @@ try {
   // Volver a operar: partir la bomba y poner TIC-402 en automático.
   await pag.click('#nav button[data-pantalla="circulaciones"]')
   await pag.waitForTimeout(600)
-  await pag.locator('svg g.clic').filter({ has: pag.locator('circle') }).nth(1).click()
-  await pag.getByRole('button', { name: 'Partir' }).click()
+  // Detener pide confirmación dentro del menú (confirm() no anda en la versión publicada,
+  // que corre en un iframe sin «allow-modals»): Cancelar no la detiene; confirmar sí.
+  const bombaSup = pag.locator('svg g.clic').filter({ has: pag.locator('circle') }).nth(1)
+  await bombaSup.click()
+  await pag.locator('.menu-contextual').getByRole('button', { name: 'Partir' }).click()
+  await pag.waitForTimeout(800)
+  await bombaSup.click()
+  await pag.locator('.menu-contextual').getByRole('button', { name: 'Detener' }).click()
+  await pag.locator('.menu-contextual').getByRole('button', { name: 'Cancelar' }).click()
+  await pag.waitForTimeout(800)
+  const sigue = await leer(() => window.__app.estado().bombas.bomba_circ_sup.marcha)
+  await bombaSup.click()
+  await pag.locator('.menu-contextual').getByRole('button', { name: 'Detener' }).click()
+  await pag.locator('.menu-contextual').getByRole('button', { name: 'Sí, detener' }).click()
+  await pag.waitForTimeout(1000)
+  verificar(sigue && !(await leer(() => window.__app.estado().bombas.bomba_circ_sup.marcha)), 'detener bomba con confirmación en el menú (Cancelar no la detiene)')
+  await bombaSup.click()
+  await pag.locator('.menu-contextual').getByRole('button', { name: 'Partir' }).click()
   await pag.waitForTimeout(1000)
   verificar(await leer(() => window.__app.estado().bombas.bomba_circ_sup.marcha), 'bomba de circulación superior partida desde el mímico')
   // Sonidos sintetizados (Web Audio): todos se generan sin errores.

@@ -203,10 +203,11 @@ export function crearApp(raiz, cliente, opciones = {}) {
       opciones.filter((o) => o.texto).map((o) => h('button', {
         disabled: o.deshabilitado,
         onclick: () => {
-          m.remove()
-          menuAbierto = null
-          if (o.confirmar && !confirm(o.confirmar)) return
-          Promise.resolve(o.accion?.()).catch((e) => { if (e?.message) avisar(e.message) })
+          // La confirmación va dentro del mismo menú: confirm() no funciona en
+          // páginas incrustadas sin «allow-modals» (el navegador lo ignora y
+          // devuelve falso), como la versión publicada.
+          if (o.confirmar) return confirmarEnMenu(m, o)
+          ejecutar(m, o)
         },
       }, o.texto)))
     document.body.append(m)
@@ -222,6 +223,25 @@ export function crearApp(raiz, cliente, opciones = {}) {
         document.removeEventListener('pointerdown', cerrar)
       }
     }), 0)
+  }
+
+  function ejecutar(m, o) {
+    m.remove()
+    if (menuAbierto === m) menuAbierto = null
+    Promise.resolve(o.accion?.()).catch((e) => { if (e?.message) avisar(e.message) })
+  }
+
+  function confirmarEnMenu(m, o) {
+    const cancelar = h('button', { onclick: () => { m.remove(); if (menuAbierto === m) menuAbierto = null } }, 'Cancelar')
+    m.replaceChildren(
+      h('div', { class: 'titulo' }, o.texto),
+      h('p', { class: 'confirmar' }, o.confirmar),
+      h('button', { class: 'peligro', onclick: () => ejecutar(m, o) }, `Sí, ${o.texto.toLowerCase()}`),
+      cancelar,
+    )
+    // El menú creció: que siga dentro de la ventana.
+    m.style.top = `${Math.max(4, Math.min(m.offsetTop, window.innerHeight - m.offsetHeight - 8))}px`
+    cancelar.focus()
   }
 
   function menuPartida(ev) {

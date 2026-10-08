@@ -18,9 +18,11 @@ marcado en `config/` (ver Anexo A): las constantes cinéticas de eucalipto son
 - Smook, G. A. (2002). *Handbook for Pulp & Paper Technologists*, 3.ª ed.
   Angus Wilde. — Introducción general; definiciones de álcali, kappa,
   rendimiento.
-- Marcoccia, B. S., Laakso, R. y McClain, G. (1996). Lo-Solids™ pulping:
-  principles and applications. *Tappi Journal* 79(6). *(por verificar)* —
-  Principio Lo-Solids.
+- Marcoccia, B. S., Laakso, R. y McClain, G. (1995). Lo-Solids™ pulping:
+  principles and applications. *TAPPI Pulping Conference*, 1995 (ponencia).
+  https://imisrise.tappi.org/TAPPI/Products/PUL/PULP95915.aspx — Principio
+  Lo-Solids. Una versión en *Tappi Journal* 79(6), 1996, está *por
+  verificar*.
 
 ## Cinética y factor H
 
@@ -36,15 +38,23 @@ marcado en `config/` (ver Anexo A): las constantes cinéticas de eucalipto son
 - Christensen, T., Albright, L. F. y Williams, T. J. (1982). A mathematical
   model of the kraft pulping process. Purdue University. *(por verificar)* —
   "Modelo Purdue": componentes que reaccionan en paralelo.
+- Härkönen, E. Modelos de compactación de la columna de astillas en
+  digestores continuos. *(citado de memoria: verificar la publicación y la
+  ecuación)* — Compactación hacia el fondo (limitación L-18).
 - Kubes, G. J., Fleming, B. I., MacLeod, J. M. y Bolker, H. I. (1983).
   Viscosities of unbleached alkaline pulps. II. The G-factor. *Journal of
   Wood Chemistry and Technology* 3(3). *(por verificar)* — Factor G y
   energía de activación ≈ 179 kJ/mol para la escisión de celulosa (dato de
   la especificación).
 - Li, J. y Gellerstedt, G. (1997). The contribution to kappa number from
-  hexeneuronic acid groups in pulp xylan. *Carbohydrate Research* 302.
-  *(por verificar)* — Aporte de los HexA al kappa (la especificación usa
-  11,6 mmol/kg por punto).
+  hexeneuronic acid groups in pulp xylan. *Carbohydrate Research* 302. —
+  Aporte de los HexA al kappa: 0,84–0,86 unidades de kappa por 10 µmol de
+  HexA, es decir 11,6–11,9 mmol/kg por punto (confirmado en la revisión del manual; la
+  especificación usa 11,6).
+- Lindgren, C. T. y Lindström, M. E. (1996), y Andersson, N. et al. (2003).
+  Modelos cinéticos de la cocción kraft con tres especies de lignina en
+  paralelo. *(citados de memoria: verificar título, revista y volumen antes
+  de usarlos)*.
 - Chalmers University of Technology. On the course of kraft cooking — The
   impact of ionic strength (tesis). https://research.chalmers.se/en/publication/251806
   *(por verificar autor y año)* — La fuerza iónica (sodio) frena la
@@ -111,6 +121,6 @@ verificados con las pruebas del capítulo 6.
 - Marquardt, D. W. (1963). An algorithm for least-squares estimation of
   nonlinear parameters. *Journal of the Society for Industrial and Applied
   Mathematics* 11(2). — Método de calibración.
-- Vigna, S. y Blackman, D. (2018). Scrambled linear pseudorandom number
+- Blackman, D. y Vigna, S. (2018). Scrambled linear pseudorandom number
   generators (xoshiro128**). *(por verificar)* — Generador aleatorio con
   semilla.

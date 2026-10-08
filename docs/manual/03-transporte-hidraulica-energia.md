@@ -156,10 +156,12 @@ impulsora lineal**:
 
 $$\frac{dc_r}{dt} = k_D\,(c_f - c_r), \qquad k_D = \frac{3\,D_{ef}}{L^2}$$
 
-donde L es el semiespesor de la astilla (2 mm). El factor 3 es el que hace
-que la aproximación lineal reproduzca la velocidad inicial de la solución
-exacta de difusión en una lámina (Glueckauf, 1955, para la esfera usa 15 —
-*por verificar*). La difusividad efectiva depende de la temperatura y de la
+donde L es el semiespesor de la astilla (2 mm). El factor 3 resulta de
+suponer un perfil parabólico de concentración dentro de la lámina; para la
+esfera, el mismo supuesto da 15 (Glueckauf, 1955, *por verificar*). No
+reproduce la velocidad inicial de la solución exacta, que es infinita: la
+aproximación es buena para tiempos del orden de la constante de tiempo, no
+para los primeros segundos. La difusividad efectiva depende de la temperatura y de la
 alcalinidad:
 
 $$D_{ef} = D_{ref}\,e^{-\frac{E_D}{R}\left(\frac1T-\frac1{T_{ref}}\right)}\cdot ECCSA([OH^-])$$
@@ -225,6 +227,12 @@ corriente a su temperatura de salida, con una potencia máxima. Las
 forma exacta:
 
 $$T_j^{n+1} = T_{amb} + (T_j^n - T_{amb})\,e^{-UA_j\Delta t / C_j}$$
+
+El balance **no incluye el calor de las reacciones de cocción**: son
+exotérmicas pero pequeñas frente al calor que entregan los calentadores, y
+no se encontró un valor confiable por kg de madera disuelta (limitación
+L-17). Si se agrega, sería un término por parcela proporcional a la madera
+disuelta en cada paso.
 
 ## 3.9 Contabilidad y verificación
 

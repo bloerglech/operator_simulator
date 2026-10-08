@@ -191,8 +191,13 @@ madera seca por m³ de vaso es
 
 $$\rho_{col} = s \cdot \rho_{básica} = 0{,}40 \times 480 = 192\ \mathrm{kg/m^3}$$
 
-(s = 0,40 es un supuesto; en la realidad la columna se compacta al
-cocinarse y s crece hacia abajo; se modela en la Fase 1c).
+(s = 0,40 es un supuesto de diseño. En el simulador la columna se compacta
+al cocinarse y s sube de ≈ 0,39 en el tope a ≈ 0,44 en el fondo, sección
+5.7.) El tiempo de residencia es proporcional a la fracción de astillas
+supuesta: con s un 10 % mayor, la residencia y el factor H son un 10 %
+mayores. Las correlaciones de compactación de la literatura (Härkönen,
+*por verificar*) sugieren que la columna se compacta más hacia el fondo que
+en el simulador (limitación L-18).
 
 El caudal volumétrico de columna es 58,4 / 192 = 0,304 m³/s. El volumen de
 columna necesario para un tiempo de residencia τ es V = 0,304 · τ:

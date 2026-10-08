@@ -169,7 +169,10 @@ $$\frac{d\sigma}{dz} = \gamma - \frac{\sigma}{\lambda},\qquad \lambda = \frac{D}
 con γ el peso sumergido de la columna por unidad de volumen más el arrastre
 del licor. Con D = 10 m y μK = 0,08, λ ≈ 31 m: en un digestor de 50 m el
 esfuerzo se satura cerca del fondo. La fracción de astillas sube de ≈ 0,39
-en el tope a ≈ 0,44 en el fondo.
+en el tope a ≈ 0,44 en el fondo. Es una compactación moderada: las
+correlaciones de la literatura (Härkönen, *por verificar*) sugieren más
+hacia el fondo, y la residencia es proporcional a la fracción de astillas
+(limitación L-18).
 
 El esfuerzo en el fondo empuja el **raspador**: su torque y su corriente
 son una medida indirecta de cómo se mueve la columna.

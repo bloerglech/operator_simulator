@@ -298,7 +298,7 @@
         "valor": 0,
         "unidad": "-",
         "origen": "supuesto",
-        "nota": "sobre todo térmica"
+        "nota": "sobre todo térmica. La literatura indica que las reacciones de los HexA dependen del medio (aumentan con la fuerza iónica); sin datos para identificarlo queda en 0 (revisión B-08)"
       }
     },
     "viscosidad": {

@@ -82,7 +82,10 @@ Las cocciones de laboratorio muestran tres etapas (Gustafson et al., 1983,
    demasiado, parte de la lignina principal se condensa y pasa a residual.
 
 El modelo las trata como **tres fracciones que reaccionan en paralelo**
-(estructura del modelo Purdue, Christensen et al., 1982, *por verificar*): la
+(componentes en paralelo como en el modelo Purdue, Christensen et al., 1982;
+la forma con tres especies de lignina en paralelo se asocia más bien a
+Lindgren y Lindström, 1996, y Andersson et al., 2003; todas *por
+verificar*): la
 "fase" que domina en cada momento resulta de las velocidades, sin umbrales
 artificiales.
 
@@ -174,8 +177,14 @@ $$r_{form} = k_{HF}(T)\,[OH^-]\,M, \qquad r_{deg} = k_{HD}(T)\,Hx$$
 Los últimos términos indican que cuando se disuelve xilano, se pierden con él
 sus MeGlcA y HexA.
 
+La degradación se modela solo con la temperatura, sin dependencia del álcali
+($a_{OH}$ = 0, supuesto). La literatura indica que las reacciones de los HexA
+dependen del medio (se aceleran con la fuerza iónica); con un solo punto de
+operación no se puede identificar ese efecto, así que queda como supuesto.
+
 Los HexA **consumen permanganato en la medición de kappa**, como la lignina,
-aunque no son lignina (Li y Gellerstedt, *por verificar*). En eucalipto
+aunque no son lignina: 0,84–0,86 unidades de kappa por cada 10 µmol de HexA,
+es decir 11,6–11,9 mmol/kg por punto (Li y Gellerstedt, 1997). En eucalipto
 aportan varios puntos de kappa y no se eliminan con más cocción, sino en el
 blanqueo (etapa ácida caliente o con ozono/dióxido de cloro). Por eso un
 kappa 17 de eucalipto tiene solo ≈ 12 de lignina.
@@ -237,7 +246,8 @@ $$\dot n_{OH} = \alpha_L\,r_{L} + \alpha_C\,r_{C} + \alpha_E\,r_E + \frac{r_{Ac}
 
 La **desacetilación** es rápida y ocurre en la impregnación. En eucalipto, con
 3 % de acetilos, consume 0,03/0,043 = 0,70 mol OH⁻ por kg de madera, es
-decir 28 g NaOH/kg: ¡casi un 3 % de la carga de 18 % se va solo en esto! Por
+decir 28 g NaOH/kg: ¡2,8 de los 18 puntos de carga, cerca del 15 % del
+álcali, se van solo en esto! Por
 eso la impregnación es crítica en eucalipto.
 
 El HS⁻ se consume poco ($\beta_{HS}$ = 0,5 mol/kg de lignina, supuesto).

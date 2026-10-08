@@ -918,6 +918,8 @@ mínimas).
 | L-14 | El control de factor H predice el H con las temperaturas de zona, que responden en 1–2 h: su ganancia es baja a propósito para no oscilar. |
 | L-15 | *(Corregida.)* Antes, con la válvula de soplado cerrada (LIC-302 en 0) seguía saliendo el licor de la lechada (≈ 100 m³/h). Ahora el soplado sin pulpa pedida no saca licor, ni en el paso lento ni en el balance de volumen del paso rápido (la transferencia sí sigue moviendo licor sin astillas). Las paradas de los capítulos 7 y 8 se recalibraron: filtrado moderado al partir y extracción final fuera de cascada al enfriar. |
 | L-16 | Al detenerse o partir todas las bombas a la vez la presión de los vasos tiene un transitorio de segundos (puede abrir el alivio y la seguridad) porque las bombas no tienen inercia hidráulica coherente entre sí. |
+| L-17 | El balance de energía no incluye el calor de las reacciones de cocción (exotérmico y pequeño frente a los calentadores). No se encontró un valor confiable por kg de madera disuelta; si se agrega, sería un término por parcela (`energia.calor_reaccion`). Revisión B-06. |
+| L-18 | Compactación moderada: la fracción de astillas sube solo de ≈ 0,39 a ≈ 0,44. Las correlaciones de la literatura (Härkönen, por verificar) sugieren más compactación hacia el fondo. La residencia y el factor H son proporcionales a la fracción de astillas supuesta. Revisión B-07. |
 | L-10 | Resolución de la columna: una parcela ≈ 1/3 de celda (≈ 1,5 min de residencia en el impregnador, ≈ 2,5 min en el digestor). |
 
 ## 17. Estado de implementación

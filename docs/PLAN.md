@@ -535,5 +535,10 @@ eventos instructor) pero no las implementa.
   rapidez de 7.1 generadas. El freno por sólidos disueltos queda como
   supuesto agregado (texto en 2.3, 4.3 y la nota del parámetro); pasarlo a
   depender del sodio queda pendiente.
+- P3 sin datos: factor 3 de la difusión (perfil parabólico, A-06),
+  desacetilación (2,8 de 18 puntos de carga, A-07), referencias (Blackman y
+  Vigna; Marcoccia 1995 como ponencia; Li y Gellerstedt confirmado; tres
+  especies de lignina, A-10), calor de reacción (L-17, B-06), compactación
+  (L-18, B-07) y degradación de HexA sin álcali (B-08).
 - Pendiente: medir los cuadros por segundo en un celular real (la prueba e2e
   usa render por software).

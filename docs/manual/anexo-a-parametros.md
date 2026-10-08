@@ -370,7 +370,7 @@ Orígenes (ver capítulo 1.5): `literatura` (publicación citada), `especificaci
 | `reacciones.hexa_formacion.a_OH` | 1 | - | supuesto |  |
 | `reacciones.hexa_degradacion.A` | 0.00003 | 1/s | supuesto |  |
 | `reacciones.hexa_degradacion.E` | 120 | kJ/mol | supuesto |  |
-| `reacciones.hexa_degradacion.a_OH` | 0 | - | supuesto | sobre todo térmica |
+| `reacciones.hexa_degradacion.a_OH` | 0 | - | supuesto | sobre todo térmica. La literatura indica que las reacciones de los HexA dependen del medio (aumentan con la fuerza iónica); sin datos para identificarlo queda en 0 (revisión B-08) |
 | `reacciones.viscosidad.A` | 6.344e-8 | 1/s | calibrado | calibrado 2026-10-08 (objetivo: viscosidad) |
 | `reacciones.viscosidad.E` | 179 | kJ/mol | especificacion | Kubes et al. (1983), factor G; verificar |
 | `reacciones.viscosidad.a_OH` | 1 | - | supuesto |  |
@@ -549,7 +549,7 @@ Analizadores: periodo de muestreo / tiempo de análisis (s) / error (desv. est.)
 | LIC-202 | Nivel de astillas del impregnador (transferencia) | LI-202 | madera transferencia | 4 | 1800 | directa | AUTO |
 | FIC-211 | Retorno de la circulación de transferencia | FI-211 | caudal retorno_transf | 0.3 | 4 | inversa | AUTO |
 | TIC-212 | Temperatura de salida del calentador de transferencia | TI-212 | vapor retorno_transf | 6 | 60 | inversa | AUTO |
-| PIC-301 | Presión del digestor (extracción principal) | PI-301 | valvula ext_principal | 3 | 30 | directa | AUTO |
+| PIC-301 | Presión del digestor (extracción principal) | PI-301 | valvula ext_principal | 6 | 30 | directa | AUTO |
 | LIC-302 | Nivel de astillas del digestor (soplado) | LI-302 | madera soplado | 6 | 1500 | directa | AUTO |
 | FIC-401 | Circulación de cocción superior | FI-401 | caudal circ_sup | 0.3 | 4 | inversa | AUTO |
 | TIC-402 | Temperatura de salida del calentador superior | TI-402 | vapor circ_sup | 4 | 60 | inversa | AUTO |

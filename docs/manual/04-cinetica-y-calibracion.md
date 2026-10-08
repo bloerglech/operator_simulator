@@ -102,9 +102,7 @@ Con álcali bajo, parte de la lignina principal se vuelve residual:
 
 $$r_c = k_c(T)\,g([OH^-])\,L_p, \qquad g = \frac{1}{1 + ([OH^-]/OH_c)^n}$$
 
-con $OH_c$ = 6 g/L y n = 4 (supuestos): g vale casi 0 con álcali normal y
-cerca de 1 bajo ≈ 5 g/L. Además, la lignina ya disuelta **reprecipita** sobre
-la fibra cuando el álcali cae bajo 4 g/L:
+con <!-- generado:umbrales -->$OH_c$ = 3 g/L y n = 4 (supuestos): g vale ≈ 0,06 con 6 g/L, 0,5 con 3 g/L y ≈ 0,94 con 1,5 g/L. Además, la lignina ya disuelta **reprecipita** sobre la fibra cuando el álcali cae bajo 3 g/L:<!-- /generado -->
 
 $$r_{rep} = k_{rep}\,\max(0,\,OH_{umbral} - [OH^-])\cdot LD_r V_r$$
 
@@ -289,62 +287,69 @@ parámetros en `config/cinetica.json` con `origen: "calibrado"`.
 
 ### Resultado
 
+<!-- generado:resultado -->
 | Objetivo | Caso base (especificación) | Modelo calibrado |
 |----------|----------------------------|------------------|
-| Kappa | 17 ± 1 | 17,0 |
+| Kappa | 17 ± 1 | 17,1 |
 | Aporte de HexA | 4–6 | 5,0 |
-| Rendimiento | 53–54 % | 53,5 % |
-| Viscosidad | 1 100–1 200 mL/g | 1 149 mL/g |
+| Rendimiento | 53–54 % | 53,6 % |
+| Viscosidad | 1 100–1 200 mL/g | 1 154 mL/g |
 | Álcali residual, extracción principal | 6–10 g/L | 8,0 g/L |
 | Rechazos | < 0,5 % | 0,30 % |
 
 Sin calibrar directamente, el modelo también queda dentro de los rangos en:
-factor H 431 (350–500), álcali residual en la extracción final 6,6 g/L
-(6–10), en el soplado 5,4 g/L (4–7), y xilano en la pulpa 17 %.
+factor H 461 (350–500), álcali residual en la extracción final 6,6 g/L
+(6–10), en el soplado 5,3 g/L (4–7), y xilano en la pulpa 17 %.
+<!-- /generado -->
 
 Valores calibrados (a 150 °C; detalle en `docs/CALIBRACION.md`):
 
+<!-- generado:constantes -->
 | Constante | Valor | Unidad |
 |-----------|-------|--------|
-| $A$ lignina rápida | 9,11·10⁻³ | 1/s |
-| $A$ lignina principal, término OH⁻ | 9,11·10⁻⁴ | 1/s·(mol/L)⁻¹ |
-| $A$ lignina principal, término OH⁻·HS⁻ | 1,22·10⁻³ | 1/s·(mol/L)⁻⁰·⁹ |
-| $A$ lignina residual | 4,25·10⁻⁴ | 1/s·(mol/L)⁻⁰·⁷ |
-| $\alpha_L$ | 5,40 | mol OH⁻/kg lignina |
-| $A$ peeling de celulosa | 4,13·10⁻⁴ | 1/s·(mol/L)⁻¹ |
-| $A$ hidrólisis de celulosa | 3,68·10⁻⁵ | 1/s·(mol/L)⁻¹ |
-| $A$ disolución de xilano | 6,47·10⁻⁴ | 1/s·(mol/L)⁻¹ |
-| $A$ formación de HexA | 3,76·10⁻⁴ | 1/s·(mol/L)⁻¹ |
-| $A$ escisión de celulosa | 6,77·10⁻⁸ | 1/s·(mol/L)⁻¹ |
-| $A$ impregnación | 6,44·10⁻³ | 1/s |
+| $A$ lignina rápida | 8,832·10⁻³ | 1/s |
+| $A$ lignina principal, término OH⁻ | 8,832·10⁻⁴ | 1/s·(mol/L)⁻¹ |
+| $A$ lignina principal, término OH⁻·HS⁻ | 1,178·10⁻³ | 1/s·(mol/L)⁻⁰·⁹ |
+| $A$ lignina residual | 4,122·10⁻⁴ | 1/s·(mol/L)⁻⁰·⁷ |
+| $\alpha_L$ | 3,83 | mol OH⁻/kg lignina |
+| $A$ peeling de celulosa | 3,975·10⁻⁴ | 1/s·(mol/L)⁻¹ |
+| $A$ hidrólisis de celulosa | 3,533·10⁻⁵ | 1/s·(mol/L)⁻¹ |
+| $A$ disolución de xilano | 6,223·10⁻⁴ | 1/s·(mol/L)⁻¹ |
+| $A$ formación de HexA | 3,594·10⁻⁴ | 1/s·(mol/L)⁻¹ |
+| $A$ escisión de celulosa | 6,269·10⁻⁸ | 1/s·(mol/L)⁻¹ |
+| $A$ impregnación | 7,791·10⁻³ | 1/s |
+<!-- /generado -->
 
-**Verificación de orden de magnitud.** Con [OH⁻] ≈ 0,5 mol/L y
-[HS⁻] ≈ 0,2 mol/L dentro de la astilla, la lignina principal decae a 150 °C con
+<!-- generado:orden_magnitud -->
+**Verificación de orden de magnitud.** Con [OH⁻] ≈ 0,28 mol/L (≈ 11 g/L, el álcali dentro de la astilla en las zonas de cocción del perfil de abajo) y
+[HS⁻] ≈ 0,2 mol/L, la lignina principal decae a 150 °C con
 
-$$k ≈ 9{,}1\times10^{-4}\times0{,}5 + 1{,}22\times10^{-3}\times0{,}5^{0,5}\times0{,}2^{0,4} ≈ 9{,}1\times10^{-4}\ \mathrm{s^{-1}}$$
+$$k ≈ 8{,}83\times10^{-4}\times0{,}28 + 1{,}18\times10^{-3}\times0{,}28^{0{,}5}\times0{,}2^{0{,}4} ≈ 5{,}75\times10^{-4}\ \mathrm{s^{-1}}$$
 
-y, con el freno por sólidos disueltos ($f_{DS}$ ≈ 0,8), τ ≈ 23 min. En
-≈ 2,5 h de cocción efectiva son ≈ 6 constantes de tiempo: la lignina
-principal casi desaparece y el kappa final queda dominado por la lignina
-residual y los HexA, que es lo que se observa en eucalipto.
+y, con el freno por sólidos disueltos ($f_{DS}$ ≈ 0,81 con 120 g/L), τ ≈ 36 min. En
+≈ 2,5 h de cocción efectiva son ≈ 4 constantes de tiempo: la lignina principal baja a ≈ 2 % de la inicial
+y el kappa final queda dominado por la lignina residual y los HexA, que es lo que se observa en eucalipto.
+<!-- /generado -->
 
 ### Perfil de la cocción a lo largo del digestor
 
-Así avanza la cocción en el caso base calibrado (extracto de
-`npm run caso-base`; z desde el tope del digestor, valores promedio de las
+Así avanza la cocción en el caso base calibrado (en estado estacionario,
+generado por `npm run tablas-manual`; z desde el tope del digestor, valores promedio de las
 astillas en cada altura):
 
+<!-- generado:perfil -->
 | z (m) | Zona | T (°C) | EA libre (g/L) | EA dentro de la astilla (g/L) | Sólidos org. (g/L) | H | Kappa | Rend. % |
 |-------|------|--------|----------------|-------------------------------|--------------------|---|-------|---------|
-| 2,4 | Tope | 129 | 25,6 | 15,4 | 64 | 5 | 158 | 89,0 |
-| 8,1 | Calentamiento | 134 | 14,8 | 13,5 | 89 | 13 | 148 | 85,1 |
-| 10,0 | Circ. superior | 148 | 24,2 | 14,4 | 55 | 25 | 134 | 81,8 |
-| 17,6 | Cocción sup. | 148 | 12,9 | 10,4 | 100 | 86 | 86 | 71,0 |
-| 25,2 | Cocción sup. | 148 | 8,5 | 7,3 | 125 | 145 | 63 | 66,0 |
-| 30,9 | Circ. inferior | 153 | 26,3 | 11,3 | 38 | 196 | 49 | 63,2 |
-| 38,5 | Cocción inf. | 153 | 11,9 | 11,2 | 118 | 316 | 25 | 56,5 |
-| 46,1 | Fin cocción | 146 | 8,7 | 8,4 | 136 | 425 | 17,3 | 53,6 |
-| 55,6 | Lavado / fondo | 76 | 5,0 | 6,2 | 25 | 431 | 17,0 | 53,5 |
+| 2,4 | Tope | 130 | 25,4 | 11,6 | 66 | 6 | 158 | 89,5 |
+| 8,1 | Calentamiento | 135 | 14,7 | 13,3 | 79 | 37 | 127 | 81,1 |
+| 10,0 | Circ. superior | 148 | 24,0 | 12,4 | 50 | 53 | 114 | 77,9 |
+| 17,6 | Cocción sup. | 148 | 12,8 | 8,7 | 95 | 115 | 79 | 70,1 |
+| 25,2 | Cocción sup. | 148 | 8,6 | 6,8 | 123 | 176 | 60 | 66,0 |
+| 30,9 | Circ. inferior | 153 | 26,0 | 14,4 | 39 | 245 | 41 | 61,3 |
+| 38,5 | Cocción inf. | 153 | 11,8 | 10,3 | 123 | 364 | 23 | 55,9 |
+| 46,1 | Fin cocción | 146 | 8,5 | 7,9 | 141 | 460 | 17,1 | 53,6 |
+| 55,6 | Lavado / fondo | 76 | 5,0 | 6,0 | 25 | 461 | 17,1 | 53,6 |
+<!-- /generado -->
 
 Observe: (1) en cada circulación el álcali sube de golpe (licor blanco) y
 los sólidos disueltos bajan (extracción + filtrado): ese es el perfil
@@ -388,38 +393,43 @@ modelar digestores.
 
 Efecto de cambios típicos aplicados desde el estado estacionario, medido a
 las 8 h (más que la residencia total de 4,4 h). Se reproduce con
-`npm run sensibilidades`.
+`npm run sensibilidades` (y el manual se actualiza con `npm run tablas-manual`).
 
-| Caso | Kappa | κ HexA | Rend. % | Visc. mL/g | EA extr. g/L | EA sopl. g/L | Rech. % | H |
+<!-- generado:sensibilidades -->
+| Caso (efecto a las 8 h) | Kappa | κ HexA | Rend. % | Visc. mL/g | EA extr. g/L | EA sopl. g/L | Rech. % | H |
 |------|-------|--------|---------|------------|--------------|--------------|---------|---|
-| Caso base | 17,0 | 5,0 | 53,5 | 1 149 | 8,0 | 5,4 | 0,30 | 431 |
-| +3 °C en ambas circulaciones de cocción | 14,2 | 5,1 | 52,2 | 1 026 | 7,2 | 5,3 | 0,31 | 536 |
-| +10 % de licor blanco (carga 19,8 %) | 15,2 | 5,2 | 52,0 | 1 080 | 9,3 | 5,6 | 0,31 | 430 |
-| −10 % de licor blanco (carga 16,2 %) | 19,6 | 4,7 | 55,2 | 1 229 | 6,7 | 5,2 | 0,28 | 431 |
-| +10 % de ritmo sin compensar | 21,9 | 4,6 | 55,9 | 1 264 | 7,6 | 5,3 | 0,39 | 380 |
-| Doble filtrado a las circulaciones | 18,7 | 4,7 | 54,8 | 1 221 | 9,3 | 5,1 | 0,29 | 463 |
-| Humedad de astillas 47,5 → 52,5 % | 19,9 | 4,7 | 55,3 | 1 236 | 6,7 | 5,2 | 0,35 | 424 |
-| Madera 15 % menos reactiva | 21,6 | 5,0 | 53,7 | 1 144 | 8,3 | 5,4 | 0,29 | 431 |
-| Sulfidez 32 → 28 % | 17,5 | 5,0 | 53,5 | 1 149 | 8,0 | 5,4 | 0,30 | 431 |
-| Vaporización 95 → 70 % | 17,0 | 5,0 | 53,5 | 1 150 | 8,0 | 5,4 | 0,68 | 431 |
+| Caso base | 17,1 | 5,0 | 53,6 | 1 154 | 8,0 | 5,3 | 0,30 | 461 |
+| +3 °C en ambas circulaciones de cocción | 14,0 | 5,1 | 52,2 | 1 025 | 7,1 | 5,2 | 0,31 | 578 |
+| +10 % de licor blanco (carga 18 → 19,8 %) | 15,1 | 5,2 | 52,0 | 1 081 | 9,3 | 5,5 | 0,31 | 462 |
+| −10 % de licor blanco (carga 18 → 16,2 %) | 19,9 | 4,7 | 55,3 | 1 232 | 6,7 | 5,2 | 0,28 | 460 |
+| +10 % de ritmo sin compensar | 22,4 | 4,6 | 56,1 | 1 270 | 7,4 | 5,2 | 0,64 | 405 |
+| Doble filtrado a las circulaciones (y más extracción) | 22,8 | 4,6 | 56,1 | 1 339 | 9,6 | 5,2 | 0,28 | 404 |
+| Humedad de astillas 47,5 → 52,5 % | 19,7 | 4,7 | 55,3 | 1 231 | 6,5 | 5,2 | 0,35 | 458 |
+| Madera 15 % menos reactiva | 21,8 | 5,0 | 53,7 | 1 147 | 8,3 | 5,3 | 0,28 | 459 |
+| Sulfidez 32 → 28 % | 17,6 | 5,0 | 53,6 | 1 151 | 8,0 | 5,3 | 0,30 | 461 |
+| Silo con poco vapor (30 % del flash, sin vapor fresco) | 19,0 | 4,9 | 54,3 | 1 193 | 9,4 | 5,3 | 6,92 | 415 |
+<!-- /generado -->
 
 Cómo leerla:
 
-- **Temperatura:** −2,8 puntos de kappa por +3 °C, pero −123 mL/g de
-  viscosidad y −1,3 puntos de rendimiento. La celulosa sufre más que la
+<!-- generado:lectura_sensibilidades -->
+- **Temperatura:** −3,1 puntos de kappa por +3 °C (H de 461 a 578), pero −129 mL/g de
+  viscosidad y −1,4 puntos de rendimiento. La celulosa sufre más que la
   lignina (mayor energía de activación).
-- **Álcali:** ±10 % de carga mueve el kappa ≈ ±2,2 puntos. La relación
-  kappa–rendimiento (≈ 0,6 puntos de rendimiento por punto de kappa) es la
-  típica de eucalipto: bajar kappa cuesta rendimiento.
-- **Ritmo:** +10 % de producción sin compensar sube el kappa casi 5 puntos:
-  menos tiempo (H baja de 431 a 380) y menos álcali por tonelada.
+- **Álcali:** +10 % de carga baja el kappa 2,0 puntos y −10 % lo sube 2,8. En el modelo,
+  cada punto de kappa vale ≈ 0,7 puntos de rendimiento: bajar kappa cuesta rendimiento. La
+  magnitud es un resultado del modelo, por validar con datos de planta.
+- **Ritmo:** +10 % de producción sin compensar sube el kappa 5,3 puntos:
+  menos tiempo (H baja de 461 a 405) y menos álcali por tonelada.
 - **Dilución con filtrado:** baja los sólidos disueltos y sube la
-  viscosidad (efecto Lo-Solids), pero también diluye el álcali y sube el
-  kappa. Hay que compensar.
-- **Humedad:** 5 puntos más de humedad equivalen a ≈ 10 % menos de carga.
-- **Vaporización:** no cambia el kappa promedio, pero duplica los rechazos.
+  viscosidad (efecto Lo-Solids), pero el filtrado entra a 75 °C: enfría las zonas de cocción (H de 461 a 404),
+  diluye el álcali y sube el kappa 5,7 puntos. Hay que compensar.
+- **Humedad:** 5 puntos más de humedad suben el kappa 2,6 puntos, casi lo mismo que 10 % menos de carga (+2,8).
+- **Silo con poco vapor:** las astillas llegan con aire y menos calientes: la impregnación empeora, los rechazos pasan de 0,30 a 6,92 %
+  y el kappa sube 1,9 puntos.
 - Todos estos efectos aparecen en el soplado **4 a 5 horas después** del
   cambio: ese es el tiempo muerto que el operador tiene que anticipar.
+<!-- /generado -->
 
 Advertencia: las magnitudes dependen de las energías de activación y órdenes
 supuestos (S-10). Las direcciones son robustas; los valores exactos deben

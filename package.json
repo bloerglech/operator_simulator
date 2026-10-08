@@ -13,6 +13,7 @@
     "calibrar": "node herramientas/calibrar.js",
     "tabla-parametros": "node herramientas/tabla-parametros.js",
     "sensibilidades": "node herramientas/sensibilidades.js",
+    "tablas-manual": "node herramientas/tablas-manual.js",
     "sintonia": "node herramientas/sintonia.js",
     "e2e": "node herramientas/e2e.js",
     "documentar": "node herramientas/documentar.js"

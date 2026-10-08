@@ -1,43 +1,10 @@
 // Tabla de sensibilidades del caso base: aplica cambios típicos de operación
 // desde el estado estacionario y muestra el efecto después de 8 h.
 //   npm run sensibilidades
+// Los casos y el cálculo son los de herramientas/tablas-manual.js, que pone la
+// misma tabla en el manual (sección 4.11).
 import { cargarConfig } from './cargarConfig.js'
-import { crearPlanta } from '../src/sim/planta.js'
-import { correrHastaEstacionario, indicadoresCalidad } from './estacionario.js'
+import { casoBase, sensibilidades, tablaSensibilidades } from './tablas-manual.js'
 
-const LB = ['lb_alim', 'lb_transf', 'lb_sup', 'lb_inf']
-const AST = ['astillas', 'transferencia', 'soplado']
-const esc = (ids, campo, f) => ids.map((id) => ({ tipo: 'ajustar', id, campo, f }))
-
-const CASOS = [
-  ['+3 °C en ambas circulaciones de cocción', [{ tipo: 'ajustar', id: 'circ_sup', campo: 'T_salida', s: 3 }, { tipo: 'ajustar', id: 'circ_inf', campo: 'T_salida', s: 3 }]],
-  ['+10 % de licor blanco (carga 18 → 19,8 %)', esc(LB, 'caudal', 1.1)],
-  ['−10 % de licor blanco (carga 18 → 16,2 %)', esc(LB, 'caudal', 0.9)],
-  ['+10 % de ritmo sin compensar', esc(AST, 'caudalMadera', 1.1)],
-  ['Doble filtrado a las circulaciones (y más extracción)', [...esc(['fil_sup', 'fil_inf'], 'caudal', 2), { tipo: 'valvula', id: 'ext_principal', valor: 0.96 }]],
-  ['Humedad de astillas 47,5 → 52,5 %', [{ tipo: 'fuente', id: 'astillas', campo: 'humedad', s: 0.05 }]],
-  ['Madera 15 % menos reactiva', [{ tipo: 'fuente', id: 'astillas', campo: 'reactividad', f: 0.85 }]],
-  ['Sulfidez 32 → 28 %', [{ tipo: 'fuente', id: 'licor_blanco', campo: 'HS', f: (0.28 / 1.72) / (0.32 / 1.68) }]],
-  ['Silo con poco vapor (30 % del flash, sin vapor fresco)', [{ tipo: 'servicio', id: 'vaporFlashSilo', valor: 0.3 }, { tipo: 'servicio', id: 'vaporBPMax', valor: 0 }]],
-]
-
-const base = crearPlanta(cargarConfig())
-correrHastaEstacionario(base, { minHoras: 12 })
-const guardado = base.guardar()
-const ref = indicadoresCalidad(base)
-const fila = (n, k) => `| ${n} | ${k.kappa.toFixed(1)} | ${k.kappaHexA.toFixed(1)} | ${k.rendimiento.toFixed(1)} | ${k.viscosidad.toFixed(0)} | ${k.alcaliExtraccion.toFixed(1)} | ${k.alcaliSoplado.toFixed(1)} | ${k.rechazos.toFixed(2)} | ${k.H.toFixed(0)} |`
-console.log('| Caso (efecto a las 8 h) | Kappa | κ HexA | Rend. % | Visc. mL/g | EA extr. g/L | EA sopl. g/L | Rech. % | H |')
-console.log('|---|---|---|---|---|---|---|---|---|')
-console.log(fila('Caso base', ref))
-for (const [nombre, cambios] of CASOS) {
-  const p = crearPlanta(cargarConfig())
-  p.cargar(guardado)
-  const e = p.estadoInterno()
-  for (const c of cambios) {
-    if (c.tipo === 'valvula' || c.tipo === 'servicio') { p.enviarComando(c); continue }
-    const act = c.tipo === 'ajustar' ? e.ajustes[c.id][c.campo] : c.campo === 'HS' ? e.fuentes[c.id].c[p.modelo().idx.HS] : e.fuentes[c.id][c.campo]
-    p.enviarComando({ tipo: c.tipo, id: c.id, campo: c.campo, valor: c.f !== undefined ? act * c.f : act + c.s })
-  }
-  p.avanzar(8 * 3600)
-  console.log(fila(nombre, indicadoresCalidad(p)))
-}
+const config = cargarConfig()
+console.log(tablaSensibilidades(sensibilidades(config, casoBase(config))))

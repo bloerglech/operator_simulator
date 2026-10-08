@@ -240,7 +240,7 @@ k_rel vale ≈ 1 a 100 °C y se duplica cada ≈ 8 °C cerca de 150 °C:
 
 Estimación del caso base: cocción superior 1,0 h × 137 ≈ 137; cocción
 inferior (≈ 152–153 °C) 1,1 h × 210 ≈ 230; transiciones, tope y lavado ≈ 60;
-impregnación ≈ 4. Total ≈ **430**. El simulador da 434.
+impregnación ≈ 4. Total ≈ **430**. El simulador da <!-- generado:factor_h -->461<!-- /generado -->: la diferencia está sobre todo en los tiempos por zona, algo mayores en el simulador que en el paso 5.
 
 Nota sobre el rango de la especificación: si los 180–240 min de cocción
 fueran todos a 148–152 °C, H sería de 420 a 800. El rango 350–500 implica que
@@ -251,17 +251,24 @@ esos minutos incluyen el calentamiento y la zona de lavado (supuesto S-07).
 En un vaso hidráulico lleno, el licor que entra tiene que salir. El caudal de
 licor libre que cruza cada sección horizontal (positivo hacia abajo) se
 obtiene sumando desde el tope todo lo que entra y restando todo lo que sale.
-El caso base da:
+El caso base da (tabla generada desde el simulador con `npm run tablas-manual`):
 
-| Tramo (m desde el tope) | Caudal de licor libre | Sentido |
+<!-- generado:hidraulica -->
+| Tramo (m desde el tope) | Caudal de licor libre (m³/h) | Sentido |
 |------------------------|-----------------------|---------|
 | Entrada por el tope (transferencia) | +1 080 m³/h | ↓ |
 | Bajo el separador (sale el retorno, 900 m³/h) | +180 | ↓ |
 | Bajo la extracción superior (sale 72) | +108 | ↓ |
-| Cocción superior (entran licor blanco y filtrado por la circulación) | ≈ +290 | ↓ cocorriente |
-| Entre la circulación inferior y las mallas de extracción principal | ≈ −80 | ↑ |
-| Cocción inferior | ≈ +155 | ↓ cocorriente |
-| Zona de lavado (sube el filtrado del fondo) | ≈ −640 | ↑ contracorriente |
+| Cocción superior (entran 64 de licor blanco y 144 de filtrado por la circulación: +316) | +309 → +285 | ↓ cocorriente |
+| Entre las mallas de extracción principal y la circulación inferior (sube licor hacia las mallas) | −76 | ↑ |
+| Cocción inferior (entran 64 de licor blanco y 180 de filtrado: +167) | +165 → +150 | ↓ cocorriente |
+| Zona de lavado (sube el filtrado del fondo) | −640 | ↑ contracorriente |
+<!-- /generado -->
+
+Dentro de cada zona de cocción el caudal disminuye hacia abajo (compare lo
+que entra con el caudal al final del tramo):
+la madera que se disuelve deja poros que se llenan con licor, y ese licor
+deja de ser libre (penetración en las astillas).
 
 Dos rasgos del Lo-Solids aparecen solos en el balance: la extracción
 principal aspira licor **desde arriba y desde abajo**, y la zona de lavado

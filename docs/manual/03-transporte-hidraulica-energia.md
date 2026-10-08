@@ -266,7 +266,7 @@ exactamente la continuación. Ambas cosas tienen prueba automática.
    dispersión numérica de un escalón que recorre el digestor en 3,5 h.
    Compárela con la resolución de las parcelas (≈ 2,5 min).
 2. Demuestre que la solución "en estrella" conserva $C_f x_f + \sum_p C_p x_p$.
-3. Si la extracción final sube de 720 a 900 m³/h sin cambiar nada más, ¿qué
+3. Si la extracción final sube de <!-- generado:ext_final -->790<!-- /generado --> (caso base) a 900 m³/h sin cambiar nada más, ¿qué
    le pasa al caudal en la zona de lavado y en la cocción inferior? Verifique
    con el simulador (`enviarComando` con `ajustar ext_final caudal`).
 4. ¿Por qué el esquema implícito no necesita cumplir la condición de Courant?

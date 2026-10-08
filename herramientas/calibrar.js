@@ -199,5 +199,6 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   } else if (!seco) {
     escribir(base, res)
     console.log('Escritos config/cinetica.json, docs/CALIBRACION.md y docs/manual/anexo-a-parametros.md')
+    console.log('Actualice las cifras del manual con: npm run tablas-manual')
   }
 }

@@ -513,5 +513,12 @@ eventos instructor) pero no las implementa.
   licor. Recalibradas las paradas: filtrado moderado al partir (capítulo 7) y
   extracción final fuera de cascada al enfriar (capítulo 8). Manual en PDF
   (`docs/manual/manual-digestor-lo-solids.pdf`).
+- Revisión teórica del manual, bloque 1 (A-01 a A-04 y D-01): las tablas del
+  capítulo 4 (constantes calibradas, resultado, perfil, sensibilidades y su
+  lectura), la hidráulica del paso 7, el factor H del paso 6 y los umbrales de
+  condensación se generan desde `config/` y el caso base
+  (`npm run tablas-manual`); `tests/manual.test.js` falla si el manual se
+  desactualiza. Corregidos la extracción final del ejercicio 3.12 y la
+  rapidez de la presión en 7.1.
 - Pendiente: medir los cuadros por segundo en un celular real (la prueba e2e
   usa render por software).

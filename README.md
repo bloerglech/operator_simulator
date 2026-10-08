@@ -19,6 +19,7 @@ npm run caso-base -- 48   # otra duración en horas
 npm run calibrar       # recalibra la cinética al caso base (escribe config/cinetica.json)
 npm run sensibilidades # efecto de cambios típicos de operación
 npm run tabla-parametros  # regenera el Anexo A del manual
+npm run tablas-manual     # actualiza las cifras del manual que salen del caso base (tests/manual.test.js lo vigila)
 npm run sintonia       # pruebas de escalón de los 29 lazos (escribe docs/SINTONIA.md)
 npm run documentar     # regenera docs/EVENTOS.md y docs/MISIONES.md
 ```

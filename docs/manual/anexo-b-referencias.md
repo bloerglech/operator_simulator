@@ -45,6 +45,10 @@ marcado en `config/` (ver Anexo A): las constantes cinéticas de eucalipto son
   hexeneuronic acid groups in pulp xylan. *Carbohydrate Research* 302.
   *(por verificar)* — Aporte de los HexA al kappa (la especificación usa
   11,6 mmol/kg por punto).
+- Chalmers University of Technology. On the course of kraft cooking — The
+  impact of ionic strength (tesis). https://research.chalmers.se/en/publication/251806
+  *(por verificar autor y año)* — La fuerza iónica (sodio) frena la
+  deslignificación (sección 4.3).
 - Foelkel, C. (2019). Revisitando o número kappa. *Eucalyptus Online Book
   & Newsletter*. https://www.eucalyptus.com.br/artigos/2019_Revisitando+Numero+Kappa.pdf
   *(por verificar)* — Relación lignina Klason / kappa total por tipo de

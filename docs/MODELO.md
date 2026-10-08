@@ -601,16 +601,23 @@ E sobre la capacidad geométrica (E > 0: lleno y comprimido; E < 0: falta
 líquido):
 
 ```
-lleno y cerrado:      P = P_ref + E / C,      C = V_líquido · (β_licor + β_vaso)
+lleno y cerrado:      P = P_ref + E / C,      C = V_líquido · (β_licor + β_vaso) + V_gas / P_abs
 falta líquido:        P = max(P_ebullición, P_atm)     (vapor o rompedor de vacío)
 venteo abierto:       P = P_atm (el exceso rebalsa)
 P_ebullición = max_j (P_sat(T_j) − ρ·g·z_j)            (piso: el licor hierve si P cae bajo él)
 ```
 
-- β_licor = 4,6·10⁻¹⁰ 1/Pa, β_vaso = 5·10⁻¹⁰ 1/Pa (supuesto). En el
-  digestor C ≈ 3,4·10⁻⁶ m³/Pa: un desbalance de 50 m³/h cambia la presión
-  ≈ 0,4 bar/min. **La presión responde en segundos**, como pide la
-  especificación.
+- β_licor = 4,6·10⁻¹⁰ 1/Pa, β_vaso = 5·10⁻¹⁰ 1/Pa (supuesto), V_gas = 0,1 %
+  del licor (gas arrastrado con las astillas, supuesto; revisión B-04). C se
+  recalcula en cada paso lento con la presión del momento, así que
+  C(P)·(P − P_atm) es la compresión isotérmica del gas desde la atmósfera.
+  En el digestor a 6,5 bar(a): 3,4·10⁻⁶ (líquido) + 5,4·10⁻⁶ (gas)
+  ≈ 8,7·10⁻⁶ m³/Pa; un desbalance de 50 m³/h cambia la presión
+  ≈ 1 bar/min (con el líquido solo eran ≈ 2,5 bar/min). **La presión responde en segundos a minutos**, como pide
+  la especificación. Por verificar: β_licor a 150 °C es más cercana a
+  6·10⁻¹⁰ y β_vaso por la fórmula de pared delgada da del orden de 10⁻⁹
+  (depende del espesor del manto); con el gas dominando, ninguna de las dos
+  cambia mucho C.
 - Paso rápido (0,2 s): `dE/dt = Q_fijo − Q_válvulas(P) − Q_alivio(P) − Q_seguridad(P)`,
   integrado con Euler implícito (regula falsi; la función es monótona).
   Q_fijo suma las corrientes con bomba (con su factor de marcha y su curva)
@@ -870,7 +877,7 @@ mínimas).
 | S-28 | Caso base: filtrado de lavado al fondo 1 180 m³/h con extracción final 790 m³/h (ambos +70 respecto de la Fase 1a) para un factor de dilución de 2,2 m³/ADt sin que el filtrado frío suba a la zona de cocción. |
 | S-29 | Difusión libre ↔ retenido con τ ≈ 9 min a 150 °C (D_ref = 2,5·10⁻⁹ m²/s); condensación (OH_c) y reprecipitación de lignina centradas en 3 g/L de álcali dentro de la astilla. Con valores más lentos o umbrales más altos, el interior de la astilla quedaba sin álcali y la temperatura dejaba de bajar el kappa. |
 | S-30 | Estado inicial de operación sintético: parcelas precocinadas según su edad esperada en la columna, con un licor de cocción típico; tasa de penetración inicial estimada. |
-| S-31 | Presión: compresibilidad del vaso 5·10⁻¹⁰ 1/Pa; válvulas con presión solo en la extracción principal y el exceso del impregnador; el resto de las corrientes con caudal fijado (desde la Fase 2 lo fija el control a través de actuadores, S-37). |
+| S-31 | Presión: compresibilidad del vaso 5·10⁻¹⁰ 1/Pa y gas libre arrastrado 0,1 % del licor (`hidraulica.fraccion_gas`), que se comprime en forma isotérmica y domina la capacidad (C = V·(β_licor + β_vaso) + V_gas/P_abs; revisión B-04); válvulas con presión solo en la extracción principal y el exceso del impregnador; el resto de las corrientes con caudal fijado (desde la Fase 2 lo fija el control a través de actuadores, S-37). |
 | S-32 | Ciclones flash a presión constante y nivel con control proporcional ideal (desde la Fase 2, LIC-510/511 fijan la salida); el vapor de ambos va al silo; el condensado de la vaporización queda como humedad de las astillas. |
 | S-33 | Compactación tipo Janssen con μK = 0,08 y constante de tiempo de 10 min; hueco máximo de colgamiento 600 m³. |
 | S-34 | Mallas: ΔP limpia 0,15–0,3 bar, taponamiento ≈ 1 R0 cada 6 h sin conmutación, equilibrio ≈ 0,25 R0 con conmutación. |

@@ -346,7 +346,7 @@
       "valor": 0.002,
       "unidad": "L/g",
       "origen": "supuesto",
-      "nota": "freno de la deslignificación: f = 1/(1 + kappa_DS·DS_org)"
+      "nota": "freno de la deslignificación: f = 1/(1 + kappa_DS·DS_org). Supuesto agregado: representa el efecto de un licor cargado; la dirección está respaldada para la fuerza iónica (sodio), no para los orgánicos disueltos (revisión B-02)"
     }
   },
   "consumo_alcali": {

@@ -116,8 +116,19 @@ $$f_{DS} = \frac{1}{1 + \kappa_{DS}\,DS_{org}}$$
 
 con $DS_{org}$ en g/L (lignina, carbohidratos y extraíbles disueltos en el
 licor retenido). Con 80 g/L, $f_{DS}$ = 0,86: la deslignificación se frena un
-14 %. Es un supuesto que representa cualitativamente el principio Lo-Solids;
-su valor debe ajustarse con datos de planta.
+14 %.
+
+Este término es un **supuesto agregado**: representa de forma conjunta el
+efecto de un licor "cargado" sobre la velocidad. Lo que está documentado es
+que la deslignificación se frena con la **fuerza iónica** del licor (la
+concentración de sodio); que la frenen los sólidos **orgánicos** disueltos
+no lo encontramos respaldado (ver "On the Course of Kraft Cooking – The
+impact of ionic strength", Chalmers, *por verificar*). Los beneficios
+publicados de Lo-Solids son otros: viscosidad, resistencia de la pulpa y
+menor consumo de químicos en el blanqueo. En el simulador la dirección del
+efecto es razonable, porque donde hay más sólidos orgánicos también hay más
+sodio, pero el valor de $\kappa_{DS}$ debe ajustarse con datos de planta y
+el término podría pasar a depender del sodio total del licor retenido.
 
 ### Reactividad de la madera
 
@@ -438,7 +449,7 @@ las 8 h (más que la residencia total de 4,4 h). Se reproduce con
 | Humedad de astillas 47,5 → 52,5 % | 19,7 | 4,8 | 55,2 | 1 227 | 6,5 | 5,2 | 0,35 | 457 |
 | Madera 15 % menos reactiva | 21,8 | 5,0 | 53,7 | 1 144 | 8,3 | 5,3 | 0,28 | 458 |
 | Sulfidez 32 → 28 % | 17,7 | 5,0 | 53,5 | 1 148 | 8,1 | 5,3 | 0,30 | 460 |
-| Silo con poco vapor (30 % del flash, sin vapor fresco) | 19,1 | 4,9 | 54,2 | 1 190 | 9,4 | 5,3 | 6,96 | 413 |
+| Silo con poco vapor (30 % del flash, sin vapor fresco) | 19,1 | 4,9 | 54,2 | 1 190 | 9,4 | 5,3 | 6,95 | 414 |
 <!-- /generado -->
 
 Cómo leerla:
@@ -456,7 +467,7 @@ Cómo leerla:
   viscosidad (efecto Lo-Solids), pero el filtrado entra a 75 °C: enfría las zonas de cocción (H de 460 a 403),
   diluye el álcali y sube el kappa 5,5 puntos. Hay que compensar.
 - **Humedad:** 5 puntos más de humedad suben el kappa 2,5 puntos, casi lo mismo que 10 % menos de carga (+2,7).
-- **Silo con poco vapor:** las astillas llegan con aire y menos calientes: la impregnación empeora, los rechazos pasan de 0,30 a 6,96 %
+- **Silo con poco vapor:** las astillas llegan con aire y menos calientes: la impregnación empeora, los rechazos pasan de 0,30 a 6,95 %
   y el kappa sube 1,9 puntos.
 - Todos estos efectos aparecen en el soplado **4 a 5 horas después** del
   cambio: ese es el tiempo muerto que el operador tiene que anticipar.

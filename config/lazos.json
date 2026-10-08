@@ -312,7 +312,7 @@
     "min": 0,
     "max": 100
    },
-   "Kc": 3,
+   "Kc": 6,
    "Ti": 30,
    "Td": 0,
    "accion": "directa",

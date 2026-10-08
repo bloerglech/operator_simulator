@@ -9,7 +9,7 @@ Orígenes (ver capítulo 1.5): `literatura` (publicación citada), `especificaci
 
 | Origen | Cantidad de parámetros |
 |--------|------------------------|
-| supuesto | 348 |
+| supuesto | 349 |
 | especificacion | 19 |
 | literatura | 3 |
 | calibrado | 14 |
@@ -281,6 +281,7 @@ Orígenes (ver capítulo 1.5): `literatura` (publicación citada), `especificaci
 | `difusion.K_e` | 0.1 | mol/L | supuesto |  |
 | `k_calor` | 0.09 | 1/s | supuesto | calentamiento de astillas de 4 mm, ≈ 11 s |
 | `compresibilidad_licor` | 4.6e-10 | 1/Pa | literatura | agua a 25-150 °C, orden de magnitud |
+| `fraccion_gas` | 0.1 | % | supuesto | gas libre arrastrado (aire o incondensables con las astillas) como fracción del licor del vaso. Domina la capacidad: 0,1 % de 3 500 m³ a 6,6 bar(a) da ≈ 5·10⁻⁶ m³/Pa, más que todo el término líquido. Revisión B-04 |
 | `compresibilidad_vaso` | 5e-10 | 1/Pa | supuesto | elasticidad del manto; ajusta la rapidez de las presurizaciones |
 | `margen_ebullicion` | 0 | bar | supuesto | margen sobre la presión de saturación para declarar vaporización súbita |
 | `compactacion.s0` | 36 | % | supuesto | astillas frescas sin carga |
@@ -376,7 +377,7 @@ Orígenes (ver capítulo 1.5): `literatura` (publicación citada), `especificaci
 | `reacciones.viscosidad.beta_DS` | 0.005 | L/g | supuesto | daño extra por sólidos orgánicos disueltos (efecto Lo-Solids) |
 | `reacciones.redeposito_xilano.k` | 0.0001 | 1/s | supuesto | por mol/L bajo el umbral |
 | `reacciones.redeposito_xilano.OH_umbral` | 10 | g/L NaOH | supuesto |  |
-| `solidos_disueltos.kappa_DS` | 0.002 | L/g | supuesto | freno de la deslignificación: f = 1/(1 + kappa_DS·DS_org) |
+| `solidos_disueltos.kappa_DS` | 0.002 | L/g | supuesto | freno de la deslignificación: f = 1/(1 + kappa_DS·DS_org). Supuesto agregado: representa el efecto de un licor cargado; la dirección está respaldada para la fuerza iónica (sodio), no para los orgánicos disueltos (revisión B-02) |
 | `consumo_alcali.alfa_lignina` | 3.831 | mol/kg | calibrado | calibrado 2026-10-08 (objetivo: alcaliExtraccion) |
 | `consumo_alcali.alfa_carbohidratos` | 6 | mol/kg | supuesto | OH⁻ por kg de carbohidrato degradado (ácidos) |
 | `consumo_alcali.alfa_extraibles` | 3 | mol/kg | supuesto |  |

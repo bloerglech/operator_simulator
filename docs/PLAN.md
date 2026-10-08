@@ -528,5 +528,12 @@ eventos instructor) pero no las implementa.
   condensación casi no participan. Explicación corregida en 2.4, 4.10 y 6.5
   con una tabla generada. Lignina por kappa 0,13 → 0,15 (supuesto
   provisional) y recalibración (deslignificación ×0,94).
+- Bloque 3 (B-04 y B-02): gas libre arrastrado (0,1 % del licor) en la
+  capacidad de los vasos, C = V·(β_licor + β_vaso) + V_gas/P_abs: el
+  digestor cede ≈ 2,6 veces más y PIC-301 pasó de Kc 3 a 6 (con el Kc
+  anterior la parada corta llegaba al alivio). Sección 5.1, tabla 6.1 y la
+  rapidez de 7.1 generadas. El freno por sólidos disueltos queda como
+  supuesto agregado (texto en 2.3, 4.3 y la nota del parámetro); pasarlo a
+  depender del sodio queda pendiente.
 - Pendiente: medir los cuadros por segundo en un celular real (la prueba e2e
   usa render por software).

@@ -14,7 +14,7 @@ import { camposCineticos, reaccionarParcela } from './cinetica.js'
 import { incrementoH } from './factorH.js'
 import { P_ATM, G } from './agua.js'
 import { caracteristica, aperturaPara } from './valvulas.js'
-import { pisoEbullicion } from './presion.js'
+import { pisoEbullicion, capacidad } from './presion.js'
 import { estadoEquiposInicial, kgPorRevolucion } from './equipos.js'
 import { estadoMallasInicial } from './mallas.js'
 import { clonarParcela } from './materia.js'
@@ -259,7 +259,8 @@ function llenarColumna(modelo, v, ev, nivel, T, c) {
  */
 function inicializarPresion(modelo, v, ev, modo) {
   const volLiq = ev.vf.reduce((a, x) => a + x, 0) + ev.parcelas.reduce((a, q) => a + q.vr, 0)
-  const C = Math.max(volLiq, 1e-6) * v.presion.beta
+  // Con gas arrastrado, C(P)·(P − P_atm) es la compresión isotérmica desde la atmósfera.
+  const C = capacidad(v, volLiq, modo === 'operacion' ? v.presion.Pdis : P_ATM)
   const piso = pisoEbullicion(v, ev, modelo.fis.densidadLicor)
   const pr = {
     venteo: modo !== 'operacion',

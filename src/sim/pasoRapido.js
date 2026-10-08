@@ -3,7 +3,7 @@
 // aplicar los factores de las bombas y cerrar el balance de presión.
 
 import { moverValvula, moverBomba, factorPresionBomba, caracteristica } from './valvulas.js'
-import { integrarPresion, presionDesdeExceso, pisoEbullicion } from './presion.js'
+import { integrarPresion, presionDesdeExceso, pisoEbullicion, capacidad } from './presion.js'
 import { P_ATM } from './agua.js'
 import { destinoBloqueado } from './equipos.js'
 import { factorMalla, resistencia } from './mallas.js'
@@ -138,7 +138,7 @@ export function pasoRapidoEquipos(modelo, estado, dt) {
 export function cerrarPresion(modelo, estado, v, res) {
   const est = estado.vasos[v.id]
   const pr = est.presion
-  pr.C = Math.max(res.volumenLiquido, 1e-6) * v.presion.beta
+  pr.C = capacidad(v, res.volumenLiquido, pr.P)
   const piso = pisoEbullicion(v, est, modelo.fis.densidadLicor)
   pr.Ppiso = piso.piso
   pr.celdaPiso = piso.celda

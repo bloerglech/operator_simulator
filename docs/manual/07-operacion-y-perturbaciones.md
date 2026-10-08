@@ -19,9 +19,9 @@ se midieron al calibrar las misiones con jugadores simulados
    de las extracciones (AI-504, AI-505), la relación licor/madera (LW-117) y
    el factor H previsto (HI-703).
 
-2. **El digestor está lleno de líquido.** Su compresibilidad efectiva es del
-   orden de 10⁻⁹ 1/Pa (S-31): un desbalance de 300 m³/h entre lo que entra y
-   lo que sale mueve la presión 2 bar en unos 8 segundos (sección 5.1). Si
+2. **El digestor está lleno de líquido.** Su capacidad para acumular
+   líquido es pequeña (sección 5.1): un desbalance de 300 m³/h entre lo que entra y
+   lo que sale mueve la presión 2 bar en unos <!-- generado:presion_300 -->21<!-- /generado --> segundos (sección 5.1). Si
    en las misiones el alivio tarda minutos en abrir es porque los lazos de
    presión absorben el desbalance mientras su válvula tiene recorrido. La regla de operación
    es de balance, no de control: si una salida se limita, hay que bajar **en

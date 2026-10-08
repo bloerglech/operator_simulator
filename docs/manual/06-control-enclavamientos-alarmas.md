@@ -169,9 +169,14 @@ otro lazo puede quedar 4 veces corto.
 ### Presión del digestor: muy rápida
 
 Como se vio en el capítulo 5, la presión del vaso lleno de líquido cambia
-1 bar en ≈ 12 s si se desbalancea la extracción. El lazo PIC-301 (válvula de
-la extracción principal, acción directa, Kc = 3, Ti = 30 s) corrige en
-segundos. En operación normal la presión se mantiene en ±0,05 bar; sin
+1 bar en ≈ <!-- generado:t1bar -->31<!-- /generado --> s si se desbalancea la extracción. El lazo PIC-301 (válvula de
+la extracción principal, acción directa, Kc = 6, Ti = 30 s) corrige en
+segundos. Su Kc se duplicó (de 3 a 6) al incluir el gas arrastrado en la
+capacidad del vaso: la ganancia del proceso bajó a menos de la mitad y, con
+el Kc anterior, el lazo no alcanzaba a abrir la extracción cuando se cierra
+el soplado de golpe (la presión llegaba al alivio). Es el mismo principio de
+la sección anterior: si cambia la ganancia del proceso, hay que volver a
+sintonizar. En operación normal la presión se mantiene en ±0,05 bar; sin
 el lazo, cualquier desbalance de caudales termina en la válvula de alivio.
 
 ### Niveles de astillas: integradores lentos y ruidosos
@@ -181,9 +186,10 @@ distinta de la que entra, el nivel sube o baja sin detenerse. Además la
 medición fluctúa (la columna se mueve en parcelas y el transmisor tiene
 ruido). Con un integrador, un PI siempre produce algún sobrepaso; para
 limitarlo se usa un Ti largo. LIC-302 (nivel del digestor, descarga del
-soplado): Kc = 6, Ti = 1 500 s; sobrepaso 29 % y asentamiento ≈ 26 min ante
-un escalón de 1 m. Un Kc mayor asienta antes pero mueve más el caudal de
-soplado (en la prueba, la salida recorrió 43–73 %): cada movimiento del
+soplado): Kc = 6, Ti = 1 500 s; ante un escalón de 1 m, sobrepaso cercano al
+30 % y asentamiento de más de 20 minutos (tabla 6.1). Un Kc mayor asienta
+antes pero mueve más el caudal de soplado (en la prueba, la salida recorre
+≈ 30 puntos): cada movimiento del
 soplado es un cambio de producción. Es el compromiso clásico de un lazo de
 nivel.
 
@@ -191,13 +197,13 @@ nivel.
 
 - **CIC-605** (consistencia de soplado) actúa sobre el licor de la lechada
   de soplado; la dilución lo sigue (bloque FFC-602), de modo que el lavado
-  no cambia. Asienta en ≈ 23 min.
+  no cambia. Asienta en más de 10 minutos (tabla 6.1).
 - **FDC-607** (factor de dilución) mueve la consigna de FIC-601 (filtrado de
   lavado).
 - **TIC-604** (temperatura de soplado) es un maestro alternativo de
   FIC-601. En el caso base el soplado está a ≈ 75 °C, la temperatura del
   filtrado: no se puede enfriar más con filtrado. El lazo sirve cuando el
-  lavado es escaso y el soplado se calienta. Es lento (asienta en ≈ 70 min):
+  lavado es escaso y el soplado se calienta. Es lento (asienta en más de una hora, tabla 6.1):
   menos filtrado no se nota hasta que la zona de lavado se calienta.
 
 ### Tabla 6.1 — Resultado de las pruebas de escalón
@@ -206,16 +212,18 @@ Generada por `npm run sintonia` (ver `docs/SINTONIA.md` para la tabla
 completa). Se mide sobre la medición filtrada (sin ruido blanco),
 promediada.
 
+<!-- generado:sintonia -->
 | Lazo | Kc | Ti (s) | Escalón | Sobrepaso | Asentamiento |
 |------|----|--------|---------|-----------|--------------|
 | FIC-401 | 0,3 | 4 | +50 m³/h | 3 % | 40 s |
-| PIC-301 | 3 | 30 | +0,3 bar | 11 % | 20 s |
-| TIC-402 | 4 | 60 | +2 °C | 5 % | 200 s |
+| PIC-301 | 6 | 30 | +0,3 bar | 7 % | 20 s |
+| TIC-402 | 4 | 60 | +2 °C | 6 % | 200 s |
 | TIC-212 | 6 | 60 | −2 °C | 7 % | 295 s |
-| LIC-202 | 4 | 1 800 | −0,5 m | 0 % | 36 min |
-| LIC-302 | 6 | 1 500 | −1 m | 29 % | 26 min |
-| CIC-605 | 1 | 300 | −0,5 % | 3 % | 23 min |
-| TIC-604 | 4 | 1 200 | +2 °C | 26 % | 70 min |
+| LIC-202 | 4 | 1 800 | −0,5 m | 15 % | 11 min |
+| LIC-302 | 6 | 1 500 | −1 m | 28 % | 23 min |
+| CIC-605 | 1 | 300 | −0,5 % | 0 % | 13 min |
+| TIC-604 | 4 | 1 200 | +2 °C | 29 % | 72 min |
+<!-- /generado -->
 
 Criterios (supuestos de diseño, en `config/lazos.json`): sin oscilación
 sostenida, sobrepaso y asentamiento bajo un máximo por lazo. Asentado

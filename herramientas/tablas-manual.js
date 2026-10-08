@@ -16,7 +16,8 @@ import { crearPlanta } from '../src/sim/planta.js'
 import { correrHastaEstacionario, indicadoresCalidad } from './estacionario.js'
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), '..')
-export const ARCHIVOS_MANUAL = ['02-proceso-y-diseno.md', '03-transporte-hidraulica-energia.md', '04-cinetica-y-calibracion.md']
+export const ARCHIVOS_MANUAL = ['02-proceso-y-diseno.md', '03-transporte-hidraulica-energia.md', '04-cinetica-y-calibracion.md',
+  '05-presion-equipos-estados.md', '06-control-enclavamientos-alarmas.md', '07-operacion-y-perturbaciones.md']
 
 // ---------------------------------------------------------------------------
 // Formato (coma decimal y espacio de miles, como el resto del manual)
@@ -109,6 +110,87 @@ function ordenMagnitud(config) {
     `y, con el freno por sólidos disueltos ($f_{DS}$ ≈ ${num(fDS, 2)} con ${num(DS)} g/L), τ ≈ ${num(tau)} min. En\n` +
     `≈ 2,5 h de cocción efectiva son ≈ ${num(n)} constantes de tiempo: la lignina principal baja a ≈ ${num(100 * Math.exp(-n))} % de la inicial\n` +
     `y el kappa final queda dominado por la lignina residual y los HexA, que es lo que se observa en eucalipto.`
+}
+
+// ---------------------------------------------------------------------------
+// Capacidad hidráulica del digestor (sección 5.1, revisión B-04 y A-05)
+
+const V_LIQ = 3500 // m³ de licor en el digestor lleno (orden de magnitud del caso base)
+const P_ATM = 101325
+
+function capacidadDigestor(config) {
+  const h = config.hidraulica
+  const bl = h.compresibilidad_licor.valor
+  const bv = h.compresibilidad_vaso.valor
+  const fg = h.fraccion_gas.valor / 100
+  const P = config.equipos.presion.dig.P_diseno.valor * 1e5 + P_ATM // Pa abs
+  const Cl = V_LIQ * (bl + bv)
+  const Cg = (V_LIQ * fg) / P
+  return { Cl, Cg, C: Cl + Cg, P, fg, bl, bv }
+}
+/** 8.74e-6 → «8,7·10⁻⁶» (2 cifras significativas). */
+function cort(x) {
+  const [m, e] = x.toExponential(1).split('e')
+  return `${m.replace('.', ',')}·10${sup(Number(e))}`
+}
+
+function capacidad(config) {
+  const { Cl, Cg, C, P, fg, bl, bv } = capacidadDigestor(config)
+  const q = 100 / 3600 // ejemplo: se cierra la extracción principal (≈ 100 m³/h)
+  const dPdt = q / C
+  const t1bar = 1e5 / dPdt
+  const Ccolchon = 100 / (6e5 + P_ATM) // 100 m³ de gas a 6 bar(g)
+  return `$$C = V_{líquido}\\,(\\beta_{licor} + \\beta_{vaso}) + \\frac{V_{gas}}{P_{abs}}$$
+
+con $\\beta_{licor}$ ≈ ${cort(bl)} Pa⁻¹ (compresibilidad del agua), $\\beta_{vaso}$ ≈ ${cort(bv)} Pa⁻¹
+(elasticidad del manto, supuesto) y un poco de **gas arrastrado**: aire e
+incondensables que entran con las astillas, ${num(fg * 100, 1)} % del volumen de licor
+(supuesto). Para ≈ ${num(V_LIQ)} m³ de licor a ${num(P / 1e5, 1)} bar(a), el término líquido es
+${cort(Cl)} m³/Pa y el del gas ${cort(Cg)} m³/Pa: **una fracción mínima de gas
+domina la capacidad**, que suma C ≈ ${cort(C)} m³/Pa. El término del gas usa la
+presión absoluta (compresión isotérmica): cerca de la atmósfera el vaso es
+mucho más "blando" que a presión de operación. Entonces
+
+$$\\frac{dP}{dt} = \\frac{Q_{entra} - Q_{sale}}{C}$$
+
+**Ejemplo 5.1.** Si se cierra la extracción principal (≈ 100 m³/h =
+${num(q, 3)} m³/s) sin cambiar nada más: dP/dt = ${num(q, 3)} / ${cort(C)} ≈ ${num(Math.round(dPdt / 100) * 100)} Pa/s,
+es decir **${num(dPdt / 1e5, 3)} bar/s: 1 bar en ≈ ${num(t1bar)} s**. Por eso la presión del digestor se
+controla con un lazo rápido y existen la válvula de alivio y la de
+seguridad. Compare con un vaso que tiene un colchón de gas de 100 m³ a
+6 bar(g) = ${num((6e5 + P_ATM) / 1e5, 1)} bar(a): C = V/P ≈ ${cort(Ccolchon)} m³/Pa, ${num(Ccolchon / C)} veces más lento.`
+}
+
+/** Segundos para 1 bar si se cierra la extracción principal (≈ 100 m³/h). */
+function t1bar(config) {
+  return num(1e5 / ((100 / 3600) / capacidadDigestor(config).C))
+}
+
+// ---------------------------------------------------------------------------
+// Tabla 6.1: resultado de las pruebas de escalón (desde docs/SINTONIA.md)
+
+const LAZOS_TABLA_61 = ['FIC-401', 'PIC-301', 'TIC-402', 'TIC-212', 'LIC-202', 'LIC-302', 'CIC-605', 'TIC-604']
+
+export function tablaSintonia(textoSintonia) {
+  const filas = Object.fromEntries(textoSintonia.split('\n').filter((l) => /^\| [A-Z]{2,4}-\d+ \|/.test(l))
+    .map((l) => l.split('|').slice(1, -1).map((c) => c.trim())).map((c) => [c[0], c]))
+  const unidad = (u) => ({ 'm3/h': 'm³/h', 'bar(g)': 'bar' })[u] ?? u
+  return '| Lazo | Kc | Ti (s) | Escalón | Sobrepaso | Asentamiento |\n|------|----|--------|---------|-----------|--------------|\n' +
+    LAZOS_TABLA_61.map((id) => {
+      const c = filas[id]
+      if (!c) throw new Error(`docs/SINTONIA.md no tiene el lazo ${id}`)
+      const [v, u] = c[3].split(' ')
+      const esc = Number(v)
+      const t = Number(c[5].split(' ')[0])
+      return `| ${id} | ${num(Number(c[1]), c[1].includes('.') ? 1 : 0)} | ${num(Number(c[2]))} | ${esc > 0 ? '+' : ''}${num(esc, v.includes('.') ? 1 : 0)} ${unidad(u)} | ` +
+        `${num(Number(c[4].split(' ')[0]))} % | ${t < 600 ? `${num(t)} s` : `${num(t / 60)} min`} |`
+    }).join('\n')
+}
+
+/** Frase de la sección 7.1: cuánto mueve la presión un desbalance de 300 m³/h. */
+function presion300(config) {
+  const { C } = capacidadDigestor(config)
+  return num((2e5 * C) / (300 / 3600))
 }
 
 // ---------------------------------------------------------------------------
@@ -293,7 +375,7 @@ export function filtradoFondo(config, base) {
  * config/ (sin simular).
  */
 export function generarBloques(config = cargarConfig(), { rapido = false } = {}) {
-  const b = { constantes: constantes(config), umbrales: umbrales(config), ext_final: extFinal(config), fil_fondo: filFondo(config), lignina_por_kappa: ligPorKappa(config), orden_magnitud: ordenMagnitud(config) }
+  const b = { constantes: constantes(config), umbrales: umbrales(config), ext_final: extFinal(config), fil_fondo: filFondo(config), lignina_por_kappa: ligPorKappa(config), capacidad: capacidad(config), presion_300: presion300(config), t1bar: t1bar(config), sintonia: tablaSintonia(readFileSync(join(raiz, 'docs', 'SINTONIA.md'), 'utf8')), orden_magnitud: ordenMagnitud(config) }
   if (rapido) return b
   const planta = casoBase(config)
   const s = planta.leerEstado({ perfiles: true })

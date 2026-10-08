@@ -69,6 +69,12 @@
     "origen": "literatura",
     "nota": "agua a 25-150 °C, orden de magnitud"
   },
+  "fraccion_gas": {
+    "valor": 0.1,
+    "unidad": "%",
+    "origen": "supuesto",
+    "nota": "gas libre arrastrado (aire o incondensables con las astillas) como fracción del licor del vaso. Domina la capacidad: 0,1 % de 3 500 m³ a 6,6 bar(a) da ≈ 5·10⁻⁶ m³/Pa, más que todo el término líquido. Revisión B-04"
+  },
   "compresibilidad_vaso": {
     "valor": 5e-10,
     "unidad": "1/Pa",

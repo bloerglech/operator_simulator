@@ -253,6 +253,7 @@ function leerPresion(cp, id, hidraulica) {
     Pdis: p(cp, 'P_diseno', `${r}.P_diseno`),
     beta: p(hidraulica, 'compresibilidad_licor', 'hidraulica.compresibilidad_licor') +
       p(hidraulica, 'compresibilidad_vaso', 'hidraulica.compresibilidad_vaso'),
+    fraccionGas: p(hidraulica, 'fraccion_gas', 'hidraulica.fraccion_gas'),
     margenEbullicion: p(hidraulica, 'margen_ebullicion', 'hidraulica.margen_ebullicion'),
     alivio: {
       Pset: p(cp.alivio, 'P_ajuste', `${r}.alivio.P_ajuste`),

@@ -10,25 +10,32 @@ columna y los estados de operación. Corresponde a la Fase 1c. Código:
 ## 5.1 Por qué la presión de un digestor hidráulico es tan rápida
 
 Un digestor hidráulico está **completamente lleno de líquido**. El líquido
-es casi incompresible: si entra más de lo que sale, no hay un espacio de gas
-que amortigüe, y lo único que cede es la compresión del licor y la
-elasticidad del manto del vaso. La "capacidad" del vaso para acumular
-líquido es
+es casi incompresible: si entra más de lo que sale, no hay un colchón de gas
+que amortigüe, y lo único que cede es la compresión del licor, la
+elasticidad del manto del vaso y el poco gas que entra arrastrado con las
+astillas. La "capacidad" del vaso para acumular líquido es
 
-$$C = V_{líquido}\,(\beta_{licor} + \beta_{vaso})$$
+<!-- generado:capacidad -->
+$$C = V_{líquido}\,(\beta_{licor} + \beta_{vaso}) + \frac{V_{gas}}{P_{abs}}$$
 
-con $\beta_{licor}$ ≈ 4,6·10⁻¹⁰ Pa⁻¹ (compresibilidad del agua) y
-$\beta_{vaso}$ ≈ 5·10⁻¹⁰ Pa⁻¹ (supuesto). Para ≈ 3 500 m³ de líquido,
-C ≈ 3,4·10⁻⁶ m³/Pa. Entonces
+con $\beta_{licor}$ ≈ 4,6·10⁻¹⁰ Pa⁻¹ (compresibilidad del agua), $\beta_{vaso}$ ≈ 5,0·10⁻¹⁰ Pa⁻¹
+(elasticidad del manto, supuesto) y un poco de **gas arrastrado**: aire e
+incondensables que entran con las astillas, 0,1 % del volumen de licor
+(supuesto). Para ≈ 3 500 m³ de licor a 6,5 bar(a), el término líquido es
+3,4·10⁻⁶ m³/Pa y el del gas 5,4·10⁻⁶ m³/Pa: **una fracción mínima de gas
+domina la capacidad**, que suma C ≈ 8,7·10⁻⁶ m³/Pa. El término del gas usa la
+presión absoluta (compresión isotérmica): cerca de la atmósfera el vaso es
+mucho más "blando" que a presión de operación. Entonces
 
 $$\frac{dP}{dt} = \frac{Q_{entra} - Q_{sale}}{C}$$
 
 **Ejemplo 5.1.** Si se cierra la extracción principal (≈ 100 m³/h =
-0,028 m³/s) sin cambiar nada más: dP/dt = 0,028 / 3,4·10⁻⁶ ≈ 8 200 Pa/s,
-es decir **0,08 bar/s: 1 bar en 12 s**. Por eso la presión del digestor se
+0,028 m³/s) sin cambiar nada más: dP/dt = 0,028 / 8,7·10⁻⁶ ≈ 3 200 Pa/s,
+es decir **0,032 bar/s: 1 bar en ≈ 31 s**. Por eso la presión del digestor se
 controla con un lazo rápido y existen la válvula de alivio y la de
 seguridad. Compare con un vaso que tiene un colchón de gas de 100 m³ a
-6 bar: C = V/P ≈ 1,7·10⁻⁴ m³/Pa, 50 veces más lento.
+6 bar(g) = 7,0 bar(a): C = V/P ≈ 1,4·10⁻⁴ m³/Pa, 16 veces más lento.
+<!-- /generado -->
 
 ### El modelo
 
@@ -191,7 +198,7 @@ también en el código.
 | Vacío | venteo abierto, bombas detenidas, silo vacío |
 | Llenado | venteo abierto: presión atmosférica; al llenarse rebalsa por el venteo |
 | Lleno y frío | venteo abierto o cerrado, sin vapor |
-| Presurizado | venteo cerrado y bombeo: la presión sube en segundos |
+| Presurizado | venteo cerrado y bombeo: la presión sube en minutos cerca de la atmósfera (el gas arrastrado cede más) y en segundos a presión de operación |
 | Calentamiento | circulaciones con vapor |
 | Operación | todo en marcha |
 | Detenido en caliente | columna detenida; la cocción sigue |

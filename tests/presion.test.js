@@ -85,10 +85,11 @@ describe('venteo y llenado', () => {
     expect(planta.leerEstado().vasos.dig.lleno).toBe(true)
     expect(presion(planta, 'dig')).toBeCloseTo(0, 6)
     expect(planta.estadoInterno().contabilidad.sumideros.rebalse_dig).toBeGreaterThan(0)
-    // Cerrar el venteo: con la bomba entregando, la presión sube rápido.
+    // Cerrar el venteo: con la bomba entregando 36 m³/h, la presión sube en minutos
+    // (cerca de la atmósfera manda el gas arrastrado: 3 m³ comprimen 4,5 m³ de gas a ≈ 3 bar abs).
     planta.enviarComando({ tipo: 'venteo', id: 'dig', accion: 'cerrar' })
     planta.enviarComando({ tipo: 'ajustar', id: 'fil_fondo', campo: 'caudal', valor: 0.01 })
-    planta.avanzar(30)
+    planta.avanzar(300)
     expect(presion(planta, 'dig')).toBeGreaterThan(0.5)
     expect(est.presion.venteo).toBe(false)
     expect(tieneNoFinitos(planta.leerEstado({ perfiles: true, balances: true }))).toBe(false)

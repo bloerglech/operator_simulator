@@ -112,7 +112,9 @@ blanco y filtrado de lavado**, para mantener baja la concentración de sólidos
 disueltos en las fases principal y residual de la deslignificación. Se
 obtiene un perfil de álcali más parejo, se puede cocer a menor temperatura y
 mejoran la viscosidad, el rendimiento, la blanqueabilidad y el movimiento de
-la columna. (Referencias: Marcoccia et al. sobre Lo-Solids, y el capítulo de
+la columna. Que los sólidos disueltos **frenen la deslignificación** no es
+parte del principio publicado: en el simulador es un supuesto agregado
+(sección 4.3). (Referencias: Marcoccia et al. sobre Lo-Solids, y el capítulo de
 cocción continua de Sixta, *Handbook of Pulp*, 2006 — *por verificar*.)
 
 ### Recorrido de las astillas y del licor

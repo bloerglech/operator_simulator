@@ -6,7 +6,8 @@
 //   Pref   presión a la que el vaso quedó justo lleno (Pa)
 //   venteo true si el venteo del tope está abierto (presión atmosférica)
 //
-// Con el vaso lleno y cerrado:  P = Pref + E / C,   C = V_líquido·(β_licor + β_vaso)
+// Con el vaso lleno y cerrado:  P = Pref + E / C,
+//   C = V_líquido·(β_licor + β_vaso) + V_gas / P_abs   (gas arrastrado, isotérmico)
 // Con el vaso lleno, un desbalance de pocos m³/h cambia la presión en segundos.
 // Si P cae bajo la presión de saturación de alguna celda (corregida por la
 // columna hidrostática), el licor hierve: la presión queda sostenida en ese
@@ -20,6 +21,16 @@
 
 import { P_ATM, G, presionSaturacion } from './agua.js'
 import { caudalValvula } from './valvulas.js'
+
+/**
+ * Capacidad hidráulica del vaso lleno (m³/Pa): compresión del licor y
+ * elasticidad del manto, más el gas libre arrastrado (V_gas = fracción·V_líquido),
+ * que a la presión del vaso domina el total (revisión B-04).
+ */
+export function capacidad(v, volumenLiquido, P) {
+  const V = Math.max(volumenLiquido, 1e-6)
+  return V * v.presion.beta + (V * (v.presion.fraccionGas ?? 0)) / Math.max(P, P_ATM)
+}
 
 /** Presión del tope (Pa abs) para un exceso E. */
 export function presionDesdeExceso(pr, E) {
